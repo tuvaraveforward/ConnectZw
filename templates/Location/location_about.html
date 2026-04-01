@@ -1,0 +1,127 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>About</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 220px;
+            background-color: #fff;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            padding-top: 1rem;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .sidebar a {
+            color: #333;
+            padding: 1rem 1.5rem;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .content {
+            flex-grow: 1;
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .logout-link {
+            margin-top: auto;
+            padding: 1rem 1.5rem;
+            background-color: #dc3545;
+            color: white !important;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .logout-link:hover {
+            background-color: #c82333;
+        }
+
+        .about-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .about-content h3 {
+            margin-bottom: 1rem;
+        }
+
+        .about-content p {
+            line-height: 1.6;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <img src="{% static 'images/icon.png' %}" alt="System Logo"
+            style="width: 200px; height: auto; align-self: center; margin-bottom: 20px;">
+        <a href="{% url 'location_dashboard' %}">DASHBOARD</a>
+        <a href="{% url 'location_sales' %}">SALES</a>
+        <a href="{% url 'location_reports' %}">REPORTS</a>
+        <a href="{% url 'location_feedback' %}">FEEDBACK</a>
+        <a href="{% url 'location_settings' %}">SETTINGS</a>
+        <a href="{% url 'location_about' %}" class="active">ABOUT</a>
+        <a href="{% url 'location_login' %}" class="logout-link">LOGOUT</a>
+    </div>
+    <div class="content">
+        <div class="header">
+            <h1>About</h1>
+        </div>
+
+        <div class="about-content">
+            <h3>About the Location Management System</h3>
+            <p>This system is designed to manage locations, sales, reports, and feedback for dealers and clients. It
+                provides a user-friendly interface for location terminals to handle daily operations efficiently.</p>
+            <p><strong>Version:</strong> 1.0.0</p>
+            <p><strong>Developed by:</strong> Your Company Name</p>
+            <p>For more information, contact support at support@example.com.</p>
+        </div>
+    </div>
+</body>
+
+</html>

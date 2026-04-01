@@ -1,0 +1,156 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Redeem Coupon</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .form-container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="tel"] {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.7rem;
+            background-color: #007bff;
+            border: none;
+            color: white;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <img src="{% static 'images/icon.png' %}" alt="System Logo"
+        style="position: absolute; top: 10px; left: 10px; width: 200px; height: auto; z-index: 1000;">
+    <div class="form-container">
+        <h2>Redeem Coupon</h2>
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message.message }}</li>
+                {% endfor %}
+        </ul>
+        {% endif %}
+        <form method="POST" action="">
+            {% csrf_token %}
+            <label for="coupon_id">Coupon ID</label>
+            <input type="text" id="coupon_id" name="coupon_id" value="{{ request.POST.coupon_id }}" required />
+
+            <label for="serial_number">Serial Number</label>
+            <input type="text" id="Serial_number" name="Serial_number" value="{{ request.POST.Serial_number }}"
+                required />
+
+            <!-- Only show these if not just verifying? The user didn't say when to show these. 
+                 The prompt implies: "check ... if verified ... display products". 
+                 The form fields for name/phone seem to be for the ACT of redeeming? 
+                 I will leave them but maybe pre-fill or only require them for the final step?
+                 The user just said "redeem coupon form to verify...".
+                 I will keep the fields as they were part of the original form. 
+            -->
+
+            <label for="redeemer_name">Name of the Redeemer</label>
+            <input type="text" id="redeemer_name" name="redeemer_name" value="{{ request.POST.redeemer_name }}"
+                required />
+
+            <label for="account_holder_name">Name of the Account Holder</label>
+            <input type="text" id="account_holder_name" name="account_holder_name"
+                value="{{ request.POST.account_holder_name }}" required />
+
+            <label for="redeemer_phone">Phone Number of the Redeemer</label>
+            <input type="tel" id="redeemer_phone" name="redeemer_phone" value="{{ request.POST.redeemer_phone }}"
+                required />
+
+            <label for="account_holder_phone">Phone Number of the Account Holder</label>
+            <input type="tel" id="account_holder_phone" name="account_holder_phone"
+                value="{{ request.POST.account_holder_phone }}" required />
+
+            <label for="redeemer_id">ID of the Redeemer</label>
+            <input type="text" id="redeemer_id" name="redeemer_id" value="{{ request.POST.redeemer_id }}" required />
+
+            <button type="submit" class="submit-button">Verify Coupon</button>
+        </form>
+
+        {% if verified and basket_items %}
+        <div style="margin-top: 2rem; border-top: 1px solid #ccc; padding-top: 1rem;">
+            <h3>Basket Contents</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background-color: #f8f9fa;">
+                        <th style="padding: 10px; border: 1px solid #dee2e6;">Description (Product & Qty)</th>
+                        <th style="padding: 10px; border: 1px solid #dee2e6;">Category</th>
+                        <th style="padding: 10px; border: 1px solid #dee2e6;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in basket_items %}
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #dee2e6;">{{ item.description }}</td>
+                        <td style="padding: 10px; border: 1px solid #dee2e6;">{{ item.category }}</td>
+                        <td style="padding: 10px; border: 1px solid #dee2e6;">${{ item.amount }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div style="margin-top: 20px; display: flex; gap: 10px;">
+                <form method="POST" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="redeem_confirm">
+                    <input type="hidden" name="coupon_id" value="{{ redeemed_coupon_id }}">
+                    <button type="submit" class="submit-button" style="background-color: #28a745;">Redeem
+                        Coupon</button>
+                </form>
+
+                <a href="{% url 'redeem_coupon' %}" style="text-decoration: none;">
+                    <button type="button" class="submit-button" style="background-color: #dc3545;">Cancel</button>
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+
+</html>

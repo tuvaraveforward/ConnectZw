@@ -1,0 +1,233 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Feedback</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 220px;
+            background-color: #fff;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            padding-top: 1rem;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .sidebar a {
+            color: #333;
+            padding: 1rem 1.5rem;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .content {
+            flex-grow: 1;
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .logout-link {
+            margin-top: auto;
+            padding: 1rem 1.5rem;
+            background-color: #dc3545;
+            color: white !important;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .logout-link:hover {
+            background-color: #c82333;
+        }
+
+        .feedback-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .feedback-content h3 {
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            resize: vertical;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-start;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+
+        .messages {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+
+        .messages li {
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+
+        .messages .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .messages .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <img src="{% static 'images/icon.png' %}" alt="System Logo"
+            style="width: 200px; height: auto; align-self: center; margin-bottom: 20px;">
+
+        <a href="{% url 'location_dashboard' %}" class="active"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
+        <a href="{% url 'location_sales' %}"><i class="fa-solid fa-chart-line"></i> SALES</a>
+        <a href="{% url 'location_reports' %}"><i class="fa-solid fa-file-invoice-dollar"></i> REPORTS</a>
+        <a href="{% url 'location_feedback' %}"><i class="fa-solid fa-comment-dots"></i> FEEDBACK</a>
+        <a href="{% url 'location_settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
+        <a href="{% url 'location_about' %}"><i class="fa-solid fa-circle-info"></i> ABOUT</a>
+        <a href="{% url 'location_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i>
+            LOGOUT</a>
+    </div>
+    <div class="content">
+        <div class="header">
+            <h1>FEEDBACK</h1>
+        </div>
+
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message.message }}</li>
+                {% endfor %}
+        </ul>
+        {% endif %}
+
+        <div class="feedback-content">
+            <h3>Submit Your Feedback</h3>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="{{ form.feedback_type.id_for_label }}">Feedback Type:</label>
+                    {{ form.feedback_type }}
+                    {% if form.feedback_type.errors %}
+                    <div class="error">{{ form.feedback_type.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.subject.id_for_label }}">Subject:</label>
+                    {{ form.subject }}
+                    {% if form.subject.errors %}
+                    <div class="error">{{ form.subject.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.message.id_for_label }}">Feedback:</label>
+                    {{ form.message }}
+                    {% if form.message.errors %}
+                    <div class="error">{{ form.message.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <a href="{% url 'location_dashboard' %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

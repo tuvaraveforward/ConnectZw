@@ -1,0 +1,431 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dealer Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: hsla(80, 27%, 98%, 1.00);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 220px;
+            background-color: hsla(80, 27%, 98%, 1.00);
+            color: hsla(80, 27%, 98%, 1.00);
+            display: flex;
+            flex-direction: column;
+            padding-top: 1rem;
+            position: fixed;
+            height: 100vh;
+            color: #333;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            font-family: Algerian;
+        }
+
+        .sidebar a {
+            color: #333;
+            padding: 1rem 1.5rem;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+
+        .sidebar a.active {
+            background-color: #007bff;
+        }
+
+        .content {
+            margin-left: 220px;
+            padding: 2rem;
+            flex-grow: 1;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 900px;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .circles {
+            display: grid;
+            grid-template-columns: repeat(2, 100px);
+            grid-template-rows: repeat(2, 100px);
+            gap: 10px;
+            justify-content: center;
+            margin: 2rem 0;
+            position: relative;
+            width: 220px;
+        }
+
+        .circle {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .circle:nth-child(1) {
+            background-color: red;
+            z-index: 3;
+            grid-column: 1;
+            grid-row: 1;
+        }
+
+        .circle:nth-child(2) {
+            background-color: blue;
+            z-index: 2;
+            grid-column: 2;
+            grid-row: 1;
+            margin-left: -30px;
+        }
+
+        .circle:nth-child(3) {
+            background-color: green;
+            z-index: 2;
+            grid-column: 1;
+            grid-row: 2;
+            margin-top: -30px;
+        }
+
+        .circle:nth-child(4) {
+            background-color: yellow;
+            z-index: 1;
+            grid-column: 2;
+            grid-row: 2;
+            margin-left: -30px;
+            margin-top: -30px;
+        }
+
+        .logout-link {
+            margin-top: auto;
+            padding: 1rem 1.5rem;
+            background-color: #dc3545;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+            border-top: 1px solid #495057;
+        }
+
+        .logout-link:hover {
+            background-color: #c82333;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 2rem;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-container input {
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 0.5rem;
+        }
+
+        .search-container button {
+            padding: 0.5rem 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .search-container button:hover {
+            background-color: #0056b3;
+        }
+
+        .reset-password {
+            padding: 0.5rem 1rem;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .reset-password:hover {
+            background-color: #218838;
+        }
+
+        h2.content-title {
+            margin-bottom: 1.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        .charts-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-section {
+            flex: 1;
+            text-align: center;
+        }
+
+        .chart-section svg {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <img src="{% static 'images/icon.png' %}" alt="System Logo"
+            style="width: 200px; height: auto; align-self: center; margin-bottom: 20px;">
+
+        <a href="{% url 'dealer_dashboard' %}" class="active"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
+        <a href="{% url 'dealer_locations' %}"><i class="fa-solid fa-map-location-dot"></i> LOCATIONS</a>
+        <a href="{% url 'dealer_sales' %}"><i class="fa-solid fa-chart-line"></i> SALES</a>
+        <a href="{% url 'dealer_settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
+        <a href="{% url 'dealer_reports' %}"><i class="fa-solid fa-file-invoice-dollar"></i> REPORTS</a>
+        <a href="{% url 'dealer_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </div>
+    <div class="content">
+        <div class="header">
+            <div class="search-container">
+                <input type="text" placeholder="Search...">
+                <button type="submit">Search</button>
+            </div>
+            <a href="{% url 'dealer_reset_password' %}" class="reset-password">Reset Password</a>
+        </div>
+
+        <div class="charts-container">
+            <div class="pie-row" style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
+                <div style="flex:1 1 320px; min-width:260px; max-width:420px; height:260px;">
+                    <h2 style="text-align:center; margin-top:0;">Location Sales (By Province)</h2>
+                    <canvas id="locationSalesChart" style="width:100%; height:100%; display:block;"></canvas>
+                </div>
+                <div style="flex:1 1 320px; min-width:260px; max-width:420px; height:260px;">
+                    <h2 style="text-align:center; margin-top:0;">Product Sales</h2>
+                    <canvas id="productSalesChart" style="width:100%; height:100%; display:block;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div id="datetime" style="position: fixed; bottom: 10px; right: 10px; font-size: 1em; color: #333;"></div>
+        <div style="position: fixed; top: 10px; left: 10px; font-size: 1.5em; color: #333;">
+            Welcome, {{ dealer.firstname }} {{ dealer.lastname }}
+        </div>
+        <script>
+            (function initDealerDashboard() {
+                // -- Location Sales Chart (Source) --
+                const canvas = document.getElementById('locationSalesChart');
+                const ctx = canvas ? canvas.getContext('2d') : null;
+
+                // -- Product Sales Chart (Target) --
+                const pCanvas = document.getElementById('productSalesChart');
+                const pCtx = pCanvas ? pCanvas.getContext('2d') : null;
+
+                if (!ctx || !pCtx) return;
+
+                if (typeof Chart === 'undefined') {
+                    console.error('Chart.js library is not loaded');
+                    // Optional: Display text error in canvas parent
+                    return;
+                }
+
+                // -- Data from Django (with defaults to prevent JS syntax/cleanup errors) --
+                const provinceLabels = {{ province_labels|default:"[]"|safe }};
+            const provinceValues = {{ province_sales|default:"[]"|safe }};
+
+            const initialProductLabels = {{ product_labels|default:"[]"|safe }};
+            const initialProductValues = {{ product_sales|default:"[]"|safe }};
+            const salesByProvince = {{ sales_by_province_json|default:"{}"|safe }};
+
+            const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#E7E9ED', '#71B37C', '#EC932F', '#8CCCF9'];
+
+            // -- Helper: Prepare Data for Display --
+            // Handles cases with no data (show dummy data for representation)
+            function prepareData(labels, values, titleText, isProduct = false) {
+                const sum = Array.isArray(values) ? values.reduce((s, v) => s + (Number(v) || 0), 0) : 0;
+                let displayValues = Array.isArray(values) ? values.slice() : [];
+                let displayLabels = labels ? labels.slice() : [];
+                let displayColors = colors.slice(0, displayLabels.length);
+                let finalTitle = titleText;
+
+                // If empty or zero sum, use DUMMY representation
+                if (!displayValues.length || sum === 0) {
+                    if (isProduct) {
+                        // Dummy Products
+                        displayLabels = ['Petrol', 'Diesel', 'L.P Gas', 'Engine Oil', 'Brake Fluid'];
+                        displayValues = [5000, 3200, 1500, 800, 450]; // Realistic dummy spread
+                    } else {
+                        // Dummy Provinces (use existing labels if available, else standard)
+                        if (!displayLabels.length) {
+                            displayLabels = ['Harare', 'Bulawayo', 'Manicaland', 'Midlands', 'Masvingo'];
+                        }
+                        // Generate somewhat random but realistic dummy values for provinces
+                        displayValues = displayLabels.map(() => Math.floor(Math.random() * 5000) + 500);
+                    }
+
+                    // Ensure colors match new length
+                    displayColors = colors.slice(0, displayLabels.length);
+                    // If standard colors ran out, reuse or generate
+                    while (displayColors.length < displayLabels.length) {
+                        displayColors = displayColors.concat(colors);
+                    }
+                    displayColors = displayColors.slice(0, displayLabels.length);
+
+                    finalTitle += ' (Dummy Data)';
+                }
+
+                return {
+                    labels: displayLabels,
+                    values: displayValues,
+                    colors: displayColors,
+                    title: finalTitle
+                };
+            }
+
+            // -- Initialize Product Chart first (so we have the instance) --
+            const pData = prepareData(initialProductLabels, initialProductValues, 'Product Sales (All Provinces)', true);
+
+            const productChart = new Chart(pCtx, {
+                type: 'pie',
+                data: {
+                    labels: pData.labels,
+                    datasets: [{
+                        label: 'Sales ($)',
+                        data: pData.values,
+                        backgroundColor: pData.colors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        title: { display: true, text: pData.title }
+                    }
+                }
+            });
+
+            // -- Function to Update Product Chart --
+            function updateProductChart(provinceName) {
+                let labels, values, title;
+
+                if (provinceName) {
+                    // Specific Province
+                    const data = salesByProvince[provinceName] || {};
+                    labels = Object.keys(data);
+                    values = Object.values(data);
+                    title = `Product Sales (${provinceName})`;
+                } else {
+                    // Reset to All
+                    labels = initialProductLabels;
+                    values = initialProductValues;
+                    title = 'Product Sales (All Provinces)';
+                }
+
+                const newData = prepareData(labels, values, title, true);
+
+                productChart.data.labels = newData.labels;
+                productChart.data.datasets[0].data = newData.values;
+                productChart.data.datasets[0].backgroundColor = newData.colors;
+                productChart.options.plugins.title.text = newData.title;
+                productChart.update();
+            }
+
+            // -- Initialize Location Chart with Click Listener --
+            const lData = prepareData(provinceLabels, provinceValues, 'Sales by Province');
+
+            const locationChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: lData.labels,
+                    datasets: [{
+                        label: 'Sales ($)',
+                        data: lData.values,
+                        backgroundColor: lData.colors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        title: { display: true, text: lData.title }
+                    },
+                    onClick: (evt, elements) => {
+                        if (elements.length > 0) {
+                            // Clicked on a slice
+                            const index = elements[0].index;
+                            const provinceName = locationChart.data.labels[index];
+                            updateProductChart(provinceName);
+                        } else {
+                            // Clicked on background -> Reset
+                            updateProductChart(null);
+                        }
+                    }
+                }
+            });
+
+
+            // Date Time Update
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+            function updateDateTime() {
+                const now = new Date();
+                const day = days[now.getDay()];
+                const date = now.getDate();
+                const month = months[now.getMonth()];
+                const year = now.getFullYear();
+                const time = now.toLocaleTimeString('en-GB');
+                const el = document.getElementById('datetime');
+                if (el) el.textContent = `${day}, ${date} ${month} ${year} ${time}`;
+            }
+
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+        })();
+        </script>
+</body>
+
+</html>

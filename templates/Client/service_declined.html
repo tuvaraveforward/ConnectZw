@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Request Declined</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f0f4f8;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      max-width: 480px;
+      width: 90%;
+      overflow: hidden;
+      text-align: center;
+    }
+    .card-header {
+      background: linear-gradient(135deg, #c0392b, #922b21);
+      padding: 36px 40px 28px;
+    }
+    .card-header .icon { font-size: 48px; margin-bottom: 10px; }
+    .card-header h1 { color: #fff; font-size: 22px; font-weight: 700; }
+    .card-header p { color: rgba(255,255,255,0.8); font-size: 13px; margin-top: 6px; }
+    .card-body { padding: 32px 40px; }
+    .card-body p {
+      color: #555;
+      font-size: 14.5px;
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+    .detail {
+      background: #fdf2f2;
+      border: 1px solid #f5c6cb;
+      border-radius: 8px;
+      padding: 14px 20px;
+      margin-bottom: 24px;
+      text-align: left;
+      font-size: 13.5px;
+      color: #555;
+    }
+    .detail strong { color: #922b21; }
+    .btn-home {
+      display: inline-block;
+      background: linear-gradient(135deg, #1a1a2e, #0f3460);
+      color: #fff;
+      text-decoration: none;
+      padding: 13px 32px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .card-footer {
+      background: #f7f9fc;
+      border-top: 1px solid #e0e8f0;
+      padding: 16px;
+      font-size: 12px;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="card-header">
+      <div class="icon">✖</div>
+      <h1>Request Declined</h1>
+      <p>Your service payment request has been cancelled</p>
+    </div>
+    <div class="card-body">
+      <p>You have successfully declined the following service request. No payment has been taken from your account.</p>
+      <div class="detail">
+        <strong>Service Provider:</strong> {{ service_request.service_provider }}<br>
+        <strong>Amount:</strong> ${{ service_request.amount }}<br>
+        <strong>Beneficiaries:</strong> {{ service_request.beneficiaries }}
+      </div>
+      <p>If you believe this was a mistake or have any questions, please contact our support team.</p>
+      <a href="/Client/dashboard/" class="btn-home">Go to Dashboard</a>
+    </div>
+    <div class="card-footer">Project1 &mdash; Secure Payments</div>
+  </div>
+</body>
+</html>

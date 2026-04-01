@@ -1,0 +1,309 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Topup Account</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: hsla(80, 27%, 98%, 1.00);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 220px;
+            background-color: hsla(80, 27%, 98%, 1.00);
+            color: hsla(80, 27%, 98%, 1.00);
+            display: flex;
+            flex-direction: column;
+            padding-top: 1rem;
+            position: fixed;
+            height: 100vh;
+            color: #333;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            font-family: Algerian;
+        }
+
+        .sidebar a {
+            color: #333;
+            padding: 1rem 1.5rem;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+
+        .sidebar a.active {
+            background-color: #007bff;
+        }
+
+        .content {
+            margin-left: 220px;
+            padding: 2rem;
+            flex-grow: 1;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .logout-link {
+            margin-top: auto;
+            padding: 1rem 1.5rem;
+            background-color: #dc3545;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+            border-top: 1px solid #495057;
+        }
+
+        .logout-link:hover {
+            background-color: #c82333;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 2rem;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-container input {
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 0.5rem;
+        }
+
+        .search-container button {
+            padding: 0.5rem 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .search-container button:hover {
+            background-color: #0056b3;
+        }
+
+        .topup-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .payment-method {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+
+        .payment-method:hover {
+            border-color: #007bff;
+        }
+
+        .payment-method.selected {
+            border-color: #007bff;
+            background-color: #f8f9fa;
+        }
+
+        .payment-method input[type="radio"] {
+            margin-right: 0.5rem;
+        }
+
+        .submit-btn {
+            padding: 1rem;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        .submit-btn:hover {
+            background-color: #218838;
+        }
+
+        .messages {
+            margin-bottom: 1rem;
+        }
+
+        .alert {
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <img src="{% static 'images/icon.png' %}" alt="System Logo"
+            style="width: 200px; height: auto; align-self: center; margin-bottom: 20px;">
+
+        <a href="{% url 'client_dashboard' %}" class="active"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
+        <a href="{% url 'client_account' %}"><i class="fa-solid fa-user"></i> ACCOUNT</a>
+        <a href="{% url 'client_purchases' %}"><i class="fa-solid fa-shopping-bag"></i> PURCHASES</a>
+        <a href="{% url 'client_history' %}"><i class="fa-solid fa-clock-rotate-left"></i> HISTORY</a>
+        <a href="{% url 'client_settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
+        <a href="{% url 'client_topup' %}"><i class="fa-solid fa-wallet"></i> TOPUP ACCOUNT</a>
+        <a href="{% url 'client_feedback' %}"><i class="fa-solid fa-comment-dots"></i> FEEDBACK</a> 
+        <a href="{% url 'client_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </div>
+    <div class="content">
+        <div class="header">
+            <div class="search-container">
+                <input type="text" placeholder="Search...">
+                <button type="submit">Search</button>
+            </div>
+            <a href="#" class="reset-password">Reset Password</a>
+        </div>
+        <div id="datetime" style="position: fixed; bottom: 10px; right: 10px; font-size: 1em; color: #333;"></div>
+
+        <h2>Topup Your Account</h2>
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <form method="post" class="topup-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="amount">Amount ($)</label>
+                <input type="number" id="amount" name="amount" min="1" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label>Payment Method</label>
+                <div class="payment-methods">
+                    <label class="payment-method">
+                        <input type="radio" name="payment_method" value="ECOCASH" required>
+                        <span>ECOCASH</span>
+                    </label>
+                    <label class="payment-method">
+                        <input type="radio" name="payment_method" value="INBUCKS" required>
+                        <span>INBUCKS</span>
+                    </label>
+                    <label class="payment-method">
+                        <input type="radio" name="payment_method" value="PAYPAL" required>
+                        <span>PAYPAL</span>
+                    </label>
+                    <label class="payment-method">
+                        <input type="radio" name="payment_method" value="VISA/MASTERCARD" required>
+                        <span>VISA/MASTERCARD</span>
+                    </label>
+                </div>
+            </div>
+            <button type="submit" class="submit-btn">Topup Account</button>
+        </form>
+    </div>
+    <div style="position: fixed; top: 10px; left: 10px; font-size: 1.5em; color: #333;">
+        Welcome, {{ username }}
+    </div>
+    <script>
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+        function updateDateTime() {
+            const now = new Date();
+            const day = days[now.getDay()];
+            const date = now.getDate();
+            const month = months[now.getMonth()];
+            const year = now.getFullYear();
+            const time = now.toLocaleTimeString('en-GB');
+            document.getElementById('datetime').textContent = `${day}, ${date} ${month} ${year} ${time}`;
+        }
+
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+
+        // Add selected class to payment method
+        document.querySelectorAll('.payment-method input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                document.querySelectorAll('.payment-method').forEach(method => {
+                    method.classList.remove('selected');
+                });
+                if (this.checked) {
+                    this.parentElement.classList.add('selected');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

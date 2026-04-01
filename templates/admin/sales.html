@@ -1,0 +1,354 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sales</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: hsla(80, 27%, 98%, 1.00);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 220px;
+            background-color: hsla(80, 27%, 98%, 1.00);
+            color: hsla(80, 27%, 98%, 1.00);
+            display: flex;
+            flex-direction: column;
+            padding-top: 1rem;
+            position: fixed;
+            height: 100vh;
+            color: #333;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            font-family: Algerian;
+        }
+
+        .sidebar a {
+            color: #333;
+            padding: 1rem 1.5rem;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+
+        .sidebar a.active {
+            background-color: #007bff;
+        }
+
+        .content {
+            margin-left: 220px;
+            padding: 2rem;
+            flex-grow: 1;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 1200px;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 2rem;
+        }
+
+        .filters {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filters label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filters input[type="text"] {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .filters select {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .filters button {
+            padding: 0.5rem 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .filters button:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2rem;
+        }
+
+        th,
+        td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .transaction-type-deposit {
+            color: green;
+        }
+
+        .transaction-type-purchase {
+            color: blue;
+        }
+
+        .transaction-type-redemption {
+            color: red;
+        }
+
+        .logout-link {
+            margin-top: auto;
+            padding: 1rem 1.5rem;
+            background-color: #dc3545;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+            border-top: 1px solid #495057;
+        }
+
+        .logout-link:hover {
+            background-color: #c82333;
+        }
+
+        .form-section {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .form-section h3 {
+            margin-top: 0;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .form-group button {
+            padding: 0.5rem 1rem;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .form-group button:hover {
+            background-color: #218838;
+        }
+
+        .toggle-btn {
+            padding: 0.75rem 1.5rem;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .toggle-btn:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <img src="{% static 'images/icon.png' %}" alt="System Logo"
+            style="width: 200px; height: auto; align-self: center; margin-bottom: 20px;">
+
+        <a href="{% url 'admin_dashboard' %}" class="active"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
+        <a href="{% url 'locations' %}"><i class="fa-solid fa-map-location-dot"></i> LOCATIONS</a>
+        <a href="{% url 'accounts' %}"><i class="fa-solid fa-users"></i> ACCOUNTS</a>
+        <a href="{% url 'sales' %}"><i class="fa-solid fa-chart-line"></i> SALES</a>
+        <a href="{% url 'settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
+        <a href="{% url 'reports' %}"><i class="fa-solid fa-file-invoice-dollar"></i> REPORTS</a>
+        <a href="{% url 'admin_feedbacks' %}"><i class="fa-solid fa-comment-dots"></i> FEEDBACKS</a>
+        <a href="{% url 'admin_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </div>
+    <div class="content">
+        <div class="header">
+            <h2>Transaction Records</h2>
+        </div>
+
+        <button id="toggle-form-btn" class="toggle-btn">Add New Transaction</button>
+
+        <div class="form-section" id="transaction-form" style="display: none;">
+            <h3>Record New Transaction</h3>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="{{ form.transaction_type.id_for_label }}">Transaction Type</label>
+                    {{ form.transaction_type }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.amount.id_for_label }}">Amount</label>
+                    {{ form.amount }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.client.id_for_label }}">Client</label>
+                    {{ form.client }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.dealer.id_for_label }}">Dealer (Optional)</label>
+                    {{ form.dealer }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.location.id_for_label }}">Location (Optional)</label>
+                    {{ form.location }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.pos.id_for_label }}">POS (Optional)</label>
+                    {{ form.pos }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.category.id_for_label }}">Category (Optional)</label>
+                    {{ form.category }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.description.id_for_label }}">Description (Optional)</label>
+                    {{ form.description }}
+                </div>
+                <button type="submit">Record Transaction</button>
+            </form>
+        </div>
+
+        <form method="get" class="filters">
+            <select name="type">
+                <option value="">All Types</option>
+                <option value="deposit" {% if transaction_type_filter == 'deposit' %}selected{% endif %}>Deposit</option>
+                <option value="purchase" {% if transaction_type_filter == 'purchase' %}selected{% endif %}>Purchase
+                </option>
+                <option value="redemption" {% if transaction_type_filter == 'redemption' %}selected{% endif %}>Redemption
+                </option>
+            </select>
+            <input type="text" name="client" placeholder="Filter by client..." value="{{ client_filter }}">
+            <input type="text" name="dealer" placeholder="Filter by dealer..." value="{{ dealer_filter }}">
+            <input type="text" name="location" placeholder="Filter by location..." value="{{ location_filter }}">
+            <button type="submit">Filter</button>
+        </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Client</th>
+                    <th>Dealer</th>
+                    <th>Location</th>
+                    <th>POS</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in transactions %}
+                <tr>
+                    <td class="transaction-type-{{ transaction.transaction_type }}">
+                        {{ transaction.get_transaction_type_display }}
+                    </td>
+                    <td>${{ transaction.amount }}</td>
+                    <td>{{ transaction.client.username }}</td>
+                    <td>{{ transaction.dealer.username|default:"-" }}</td>
+                    <td>
+                        {{ transaction.location.location_name|default:"-" }}
+                        {% if transaction.is_redeemed and transaction.redemption_pos %}
+                        <br><small style="color: #666;">Redeemed at: {{ transaction.redemption_pos.pos_name }} â€” {{
+                            transaction.redemption_pos.location.location_name }}</small>
+                        {% endif %}
+                    </td>
+                    <td>{{ transaction.pos.pos_name|default:"-" }}</td>
+                    <td>{{ transaction.category|default:"-" }}</td>
+                    <td>{{ transaction.description|default:"-" }}</td>
+                    <td>{{ transaction.timestamp|date:"M d, Y H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9">No transactions found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script>
+        document.getElementById('toggle-form-btn').addEventListener('click', function () {
+            const form = document.getElementById('transaction-form');
+            if (form.style.display === 'none') {
+                form.style.display = 'block';
+                this.textContent = 'Hide Form';
+            } else {
+                form.style.display = 'none';
+                this.textContent = 'Add New Transaction';
+            }
+        });
+    </script>
+</body>
+
+</html>

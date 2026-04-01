@@ -1,0 +1,353 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dealer Settings</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: hsla(80, 27%, 98%, 1.00);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 220px;
+            background-color: hsla(80, 27%, 98%, 1.00);
+            color: hsla(80, 27%, 98%, 1.00);
+            display: flex;
+            flex-direction: column;
+            padding-top: 1rem;
+            position: fixed;
+            height: 100vh;
+            color: #333;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            font-family: Algerian;
+        }
+
+        .sidebar a {
+            color: #333;
+            padding: 1rem 1.5rem;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+
+        .sidebar a.active {
+            background-color: #007bff;
+        }
+
+        .content {
+            margin-left: 220px;
+            padding: 2rem;
+            flex-grow: 1;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 900px;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .logout-link {
+            margin-top: auto;
+            padding: 1rem 1.5rem;
+            background-color: #dc3545;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+            border-top: 1px solid #495057;
+        }
+
+        .logout-link:hover {
+            background-color: #c82333;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 2rem;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-container input {
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 0.5rem;
+        }
+
+        .search-container button {
+            padding: 0.5rem 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .search-container button:hover {
+            background-color: #0056b3;
+        }
+
+        .reset-password {
+            padding: 0.5rem 1rem;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .reset-password:hover {
+            background-color: #218838;
+        }
+
+        h2.content-title {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-container {
+            background-color: #f8f9fa;
+            padding: 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .form-container h3 {
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group input[type="file"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .welcome-message {
+            position: fixed;
+            top: 10px;
+            left: 250px;
+            font-size: 1.2em;
+            color: #333;
+            font-weight: bold;
+            z-index: 10;
+        }
+
+        .btn-submit {
+            padding: 0.75rem 1.5rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-submit:hover {
+            background-color: #0056b3;
+        }
+
+        .products-list {
+            margin-top: 2rem;
+        }
+
+        .products-list h3 {
+            margin-bottom: 1rem;
+        }
+
+        .product-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            background-color: #fff;
+        }
+
+        .product-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-right: 1rem;
+        }
+
+        .product-details {
+            flex-grow: 1;
+        }
+
+        .product-details h4 {
+            margin: 0 0 0.5rem 0;
+        }
+
+        .product-details p {
+            margin: 0;
+            color: #666;
+        }
+        .product-actions { margin-left: 10px; position: relative; }
+        .action-btn { background: transparent; border: none; cursor: pointer; font-size: 1.1rem; }
+        .dropdown-content { display: none; position: absolute; right: 0; background: #e0e0e0; border: 1px solid #bbb; padding: 5px; border-radius: 4px; z-index: 50; min-width: 140px; }
+        .dropdown-content a, .dropdown-content button { display: block; padding: 6px 10px; text-decoration: none; color: #333; background: transparent; border: none; text-align: left; width: 100%; cursor: pointer; }
+        .dropdown-content a:hover, .dropdown-content button:hover { background: #cfcfcf; }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <img src="{% static 'images/icon.png' %}" alt="System Logo"
+            style="width: 200px; height: auto; align-self: center; margin-bottom: 20px;">
+
+        <a href="{% url 'dealer_dashboard' %}" class="active"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
+        <a href="{% url 'dealer_locations' %}"><i class="fa-solid fa-map-location-dot"></i> LOCATIONS</a>
+        <a href="{% url 'dealer_sales' %}"><i class="fa-solid fa-chart-line"></i> SALES</a>
+        <a href="{% url 'dealer_settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
+        <a href="{% url 'dealer_reports' %}"><i class="fa-solid fa-file-invoice-dollar"></i> REPORTS</a>
+        <a href="{% url 'dealer_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </div>
+    <div class="content">
+        <div class="header">
+            <div class="search-container">
+                <input type="text" placeholder="Search...">
+                <button type="submit">Search</button>
+            </div>
+            <a href="{% url 'dealer_reset_password' %}" class="reset-password">Reset Password</a>
+        </div>
+
+        <h2 class="content-title">Dealer Settings</h2>
+
+        <div class="form-container">
+            <h3>Add New Product</h3>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_name">Product Name</label>
+                    <input type="text" id="id_name" name="name" placeholder="Enter product name" required>
+                </div>
+                <div class="form-group">
+                    <label for="id_price">Price</label>
+                    <input type="number" id="id_price" name="price" step="0.01" placeholder="Enter price" required>
+                </div>
+                <div class="form-group">
+                    <label for="id_image">Product Image</label>
+                    <input type="file" id="id_image" name="image" accept="image/*">
+                </div>
+                <button type="submit" class="btn-submit">Add Product</button>
+            </form>
+        </div>
+
+        <div class="products-list">
+            <h3>Your Products</h3>
+            {% if products %}
+            {% for product in products %}
+            <div class="product-item">
+                {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
+                {% else %}
+                <div class="product-image"
+                    style="background-color: #ccc; display: flex; align-items: center; justify-content: center;">No
+                    Image</div>
+                {% endif %}
+                <div class="product-details">
+                    <h4>{{ product.name }}</h4>
+                    <p>Price: ${{ product.price }}</p>
+                    <p>Category: {{ product.category }}</p>
+                </div>
+                <div class="product-actions">
+                    <div class="dropdown">
+                        <button class="action-btn" onclick="toggleDropdown('dropdown-{{ product.id }}')">
+                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                        </button>
+                        <div id="dropdown-{{ product.id }}" class="dropdown-content">
+                            <a href="{% url 'dealer_product_edit' product.id %}">Edit</a>
+                            <form method="post" action="{% url 'dealer_product_delete' product.id %}" style="margin:0;">
+                                {% csrf_token %}
+                                <button type="submit">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p>No products added yet.</p>
+            {% endif %}
+        </div>
+
+        <div id="datetime" style="position: fixed; bottom: 10px; right: 10px; font-size: 1em; color: #333;"></div>
+    </div>
+    <div class="welcome-message">
+        Welcome, {{ dealer.firstname }} {{ dealer.lastname }}
+    </div>
+    <script>
+        function toggleDropdown(id){
+            var el = document.getElementById(id);
+            if(!el) return;
+            el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'block' : 'none';
+        }
+        // Close all dropdowns when clicking outside
+        document.addEventListener('click', function(e){
+            var isButton = e.target.closest('.action-btn');
+            if(!isButton){
+                var dropdowns = document.querySelectorAll('.dropdown-content');
+                dropdowns.forEach(function(d){ d.style.display = 'none'; });
+            }
+        });
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+        function updateDateTime() {
+            const now = new Date();
+            const day = days[now.getDay()];
+            const date = now.getDate();
+            const month = months[now.getMonth()];
+            const year = now.getFullYear();
+            const time = now.toLocaleTimeString('en-GB');
+            document.getElementById('datetime').textContent = `${day}, ${date} ${month} ${year} ${time}`;
+        }
+
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+    </script>
+</body>
+
+</html>

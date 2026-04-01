@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>New Service Request Alert</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: #f4f6f9;
+      color: #333;
+    }
+    .wrapper {
+      max-width: 600px;
+      margin: 40px auto;
+      background: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    .header {
+      background: linear-gradient(135deg, #0d47a1, #1976d2);
+      padding: 30px 40px;
+      text-align: center;
+      color: #fff;
+    }
+    .header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    .header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    .body {
+      padding: 40px;
+    }
+    .greeting {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: #1a1a2e;
+    }
+    .info-text {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #555;
+      margin-bottom: 25px;
+    }
+    .details-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-left: 4px solid #1976d2;
+      border-radius: 6px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #edf2f7;
+      font-size: 14px;
+    }
+    .detail-row:last-child {
+      border-bottom: none;
+    }
+    .label {
+      color: #718096;
+      font-weight: 500;
+    }
+    .value {
+      color: #2d3748;
+      font-weight: 600;
+      text-align: right;
+    }
+    .highlight {
+      color: #0d47a1;
+      font-size: 15px;
+    }
+    .footer {
+      background: #f8fafc;
+      padding: 20px;
+      text-align: center;
+      font-size: 12px;
+      color: #a0aec0;
+      border-top: 1px solid #e2e8f0;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <h1>New Service Request Received</h1>
+      <p>A client has successfully paid for a service</p>
+    </div>
+    
+    <div class="body">
+      <p class="greeting">Hello {{ dealer.firstname }},</p>
+      
+      <p class="info-text">
+        Good news! A client has just processed a successful payment for one of your services.
+        Here are the details of the request:
+      </p>
+
+      <div class="details-box">
+        <div class="detail-row">
+          <span class="label">Service Provider</span>
+          <span class="value">{{ service_request.service_provider }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Amount Paid</span>
+          <span class="value highlight">${{ service_request.amount }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Beneficiaries</span>
+          <span class="value">{{ service_request.beneficiaries }}</span>
+        </div>
+        {% if service_request.provider_contact %}
+        <div class="detail-row">
+          <span class="label">Provider Contact</span>
+          <span class="value">{{ service_request.provider_contact }}</span>
+        </div>
+        {% endif %}
+        <div class="detail-row">
+          <span class="label">Coupon Code</span>
+          <span class="value">{{ transaction.coupon_code }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Client Name</span>
+          <span class="value">{{ service_request.client.firstname }} {{ service_request.client.lastname }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Date</span>
+          <span class="value">{{ transaction.timestamp|date:"N j, Y, g:i a" }}</span>
+        </div>
+      </div>
+
+      <p class="info-text">
+        You can view this transaction and further details by logging into your dealer dashboard.
+      </p>
+    </div>
+
+    <div class="footer">
+      <strong>ConnectZw &mdash; Secure Payments</strong><br>
+      This is an automated notification. Please do not reply directly to this email.
+    </div>
+  </div>
+</body>
+</html>

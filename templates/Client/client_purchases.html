@@ -1,0 +1,616 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Client Purchases</title>
+    <link rel="icon" href="{% static 'images/icon.png' %}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: hsla(80, 27%, 98%, 1.00);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 220px;
+            background-color: hsla(80, 27%, 98%, 1.00);
+            color: hsla(80, 27%, 98%, 1.00);
+            display: flex;
+            flex-direction: column;
+            padding-top: 1rem;
+            position: fixed;
+            height: 100vh;
+            color: #333;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            font-family: Algerian;
+        }
+
+        .sidebar a {
+            color: #333;
+            padding: 1rem 1.5rem;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+
+        .sidebar a.active {
+            background-color: #007bff;
+        }
+
+        .content {
+            margin-left: 220px;
+            padding: 2rem;
+            flex-grow: 1;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 900px;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .logout-link {
+            margin-top: auto;
+            padding: 1rem 1.5rem;
+            background-color: #dc3545;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+            border-top: 1px solid #495057;
+        }
+
+        .logout-link:hover {
+            background-color: #c82333;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 2rem;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-container input {
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 0.5rem;
+        }
+
+        .search-container button {
+            padding: 0.5rem 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .search-container button:hover {
+            background-color: #0056b3;
+        }
+
+        .purchases-section {
+            margin-bottom: 2rem;
+        }
+
+        .purchases-section h3 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .transactions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .transactions-table th,
+        .transactions-table td {
+            border: 1px solid #ddd;
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .transactions-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .transactions-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .transactions-table tr:hover {
+            background-color: #e9ecef;
+        }
+
+        .no-purchases {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+
+        /* Dropdown styles */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-toggle {
+            padding: 0.5rem 1rem;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .dropdown-toggle:hover {
+            background-color: #0056b3;
+        }
+
+        .dropdown-toggle::after {
+            content: '▼';
+            font-size: 0.7em;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-radius: 4px;
+            margin-top: 0.5rem;
+            display: none;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.2s ease;
+            cursor: pointer;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .dropdown-item i {
+            font-size: 1.2em;
+            width: 20px;
+        }
+
+        .whatsapp-icon {
+            color: #25D366;
+        }
+
+        .sms-icon {
+            color: #0084FF;
+        }
+
+        .email-icon {
+            color: #EA4335;
+        }
+
+        /* Email Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .modal-btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .modal-btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .modal-btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .modal-btn-secondary:hover {
+            background-color: #545b62;
+        }
+
+        /* Success Popup */
+        #successPopup {
+            display: none;
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: #28a745;
+            color: #fff;
+            padding: 18px 32px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            font-size: 1.1em;
+            z-index: 3000;
+        }
+        /* Error Popup */
+        #errorPopup {
+            display: none;
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: #dc3545;
+            color: #fff;
+            padding: 18px 32px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            font-size: 1.1em;
+            z-index: 3000;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <img src="{% static 'images/icon.png' %}" alt="System Logo"
+            style="width: 200px; height: auto; align-self: center; margin-bottom: 20px;">
+
+        <a href="{% url 'client_dashboard' %}" class="active"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
+        <a href="{% url 'client_account' %}"><i class="fa-solid fa-user"></i> ACCOUNT</a>
+        <a href="{% url 'client_purchases' %}"><i class="fa-solid fa-shopping-bag"></i> PURCHASES</a>
+        <a href="{% url 'client_history' %}"><i class="fa-solid fa-clock-rotate-left"></i> HISTORY</a>
+        <a href="{% url 'client_settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
+        <a href="{% url 'client_topup' %}"><i class="fa-solid fa-wallet"></i> TOPUP ACCOUNT</a>
+        <a href="{% url 'client_feedback' %}"><i class="fa-solid fa-comment-dots"></i> FEEDBACK</a>
+        <a href="{% url 'client_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </div>
+    <div class="content">
+        <div class="header">
+            <div class="search-container">
+                <input type="text" placeholder="Search...">
+                <button type="submit">Search</button>
+            </div>
+            <div class="dropdown">
+                <button class="dropdown-toggle" id="shareDropdown">Share Coupon</button>
+                <div class="dropdown-menu" id="shareMenu">
+                    <button class="dropdown-item" onclick="shareViaWhatsApp(event)" style="border: none; background: none; cursor: pointer; width: 100%; text-align: left; padding: 0.75rem 1.5rem;">
+                        <i class="fab fa-whatsapp whatsapp-icon"></i>
+                        <span>WhatsApp</span>
+                    </button>
+                    <button class="dropdown-item" onclick="shareViaSMS(event)" style="border: none; background: none; cursor: pointer; width: 100%; text-align: left; padding: 0.75rem 1.5rem;">
+                        <i class="fas fa-sms sms-icon"></i>
+                        <span>SMS</span>
+                    </button>
+                    <button class="dropdown-item" onclick="shareViaEmail(event)" style="border: none; background: none; cursor: pointer; width: 100%; text-align: left; padding: 0.75rem 1.5rem;">
+                        <i class="fas fa-envelope email-icon"></i>
+                        <span>Email</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="datetime" style="position: fixed; bottom: 10px; right: 10px; font-size: 1em; color: #333;"></div>
+
+        <div class="purchases-section">
+            <h3>Current Purchases (Last 30 Days)</h3>
+            {% if current_purchases %}
+            <table class="transactions-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Coupon ID</th>
+                        <th>Serial Number</th>
+                        <th>Date</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for purchase in current_purchases %}
+                    <tr>
+                        <td>{{ purchase.category }}</td>
+                        <td>${{ purchase.amount }}</td>
+                        <td>{{ purchase.coupon_code|default:"-" }}</td>
+                        <td>{{ purchase.serial_number|default:"-" }}</td>
+                        <td>{{ purchase.timestamp|date:"M d, Y H:i" }}</td>
+                        <td>{{ purchase.description }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="no-purchases">No current purchases found.</p>
+            {% endif %}
+        </div>
+
+        <div class="purchases-section">
+            <h3>Previously Purchased Products</h3>
+            {% if previous_purchases %}
+            <table class="transactions-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Coupon ID</th>
+                        <th>Serial Number</th>
+                        <th>Date</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for purchase in previous_purchases %}
+                    <tr>
+                        <td>{{ purchase.category }}</td>
+                        <td>${{ purchase.amount }}</td>
+                        <td>{{ purchase.coupon_code|default:"-" }}</td>
+                        <td>{{ purchase.serial_number|default:"-" }}</td>
+                        <td>{{ purchase.timestamp|date:"M d, Y H:i" }}</td>
+                        <td>{{ purchase.description }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="no-purchases">No previous purchases found.</p>
+            {% endif %}
+        </div>
+    </div>
+    <div style="position: fixed; top: 10px; left: 10px; font-size: 1.5em; color: #333;">
+        Welcome, {{ username }}
+    </div>
+    <script>
+        (function() {
+            // Helper to read CSRF token from cookies
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            // Dropdown
+            const dropdownToggle = document.getElementById('shareDropdown');
+            const dropdownMenu = document.getElementById('shareMenu');
+            if (dropdownToggle && dropdownMenu) {
+                dropdownToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    dropdownMenu.classList.toggle('show');
+                });
+                document.addEventListener('click', function(e) {
+                    if (!dropdownToggle.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                        dropdownMenu.classList.remove('show');
+                    }
+                });
+            }
+
+            // Modal and popups
+            function openEmailModal() { const m = document.getElementById('emailModal'); if (m) m.classList.add('show'); }
+            function closeEmailModal() { const m = document.getElementById('emailModal'); if (m) m.classList.remove('show'); }
+            function showPopup(id, msg, timeout) { const p = document.getElementById(id); if (!p) return; p.querySelector('span').textContent = msg; p.style.display = 'block'; setTimeout(()=> p.style.display = 'none', timeout || 3000); }
+
+            window.shareViaEmail = function(e) { e && e.preventDefault(); openEmailModal(); };
+            window.closeEmailModal = closeEmailModal;
+
+            window.shareViaWhatsApp = function(e) {
+                e && e.preventDefault();
+                const info = getCouponInfo();
+                if (!info) return;
+                const message = encodeURIComponent(`Here's my coupon:\nCoupon ID: ${info.couponId}\nSerial Number: ${info.serialNumber}\nAmount: $${info.amount}`);
+                window.open(`https://wa.me/?text=${message}`, '_blank');
+                if (dropdownMenu) dropdownMenu.classList.remove('show');
+            };
+
+            window.shareViaSMS = function(e) {
+                e && e.preventDefault();
+                const info = getCouponInfo();
+                if (!info) return;
+                const message = encodeURIComponent(`Here's my coupon:\nCoupon ID: ${info.couponId}\nSerial Number: ${info.serialNumber}\nAmount: $${info.amount}`);
+                window.location.href = `sms:?body=${message}`;
+                if (dropdownMenu) dropdownMenu.classList.remove('show');
+            };
+
+            function getCouponInfo() {
+                const firstRow = document.querySelector('.transactions-table tbody tr');
+                if (!firstRow) { showPopup('errorPopup','No coupons available to share. Please make a purchase first.', 4000); return null; }
+                const cells = firstRow.querySelectorAll('td');
+                return { category: cells[0].textContent, amount: cells[1].textContent.replace('$',''), couponId: cells[2].textContent, serialNumber: cells[3].textContent };
+            }
+
+            // Form submit
+            const shareForm = document.getElementById('shareCouponForm');
+            if (shareForm) {
+                shareForm.addEventListener('submit', function(ev) {
+                    ev.preventDefault();
+                    const couponCode = document.getElementById('couponSelect') ? document.getElementById('couponSelect').value : '';
+                    const recipientEmail = document.getElementById('recipientEmail') ? document.getElementById('recipientEmail').value : '';
+                    if (!couponCode || !recipientEmail) { showPopup('errorPopup','Please select a coupon and enter a recipient email.',4000); return; }
+
+                    fetch('{% url "share_coupon" %}', {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCookie('csrftoken') },
+                        body: `coupon_code=${encodeURIComponent(couponCode)}&recipient_email=${encodeURIComponent(recipientEmail)}`
+                    })
+                    .then(r => r.json().catch(()=>({status: r.status, ok: r.ok})))
+                    .then(data => {
+                        const ok = data && (data.success === true || data.status === 'success' || data.status === 'ok' || data.ok === true);
+                        const msg = (data && (data.message || data.msg || data.detail)) || 'Email sent successfully.';
+                        if (ok) { showPopup('successPopup', msg, 3000); closeEmailModal(); shareForm.reset(); }
+                        else { showPopup('errorPopup', 'Error: ' + msg, 4000); }
+                    })
+                    .catch(err => { console.error('share error', err); showPopup('errorPopup', 'Error sending coupon: ' + err, 5000); });
+                });
+            }
+
+            // Date/time
+            const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+            const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+            function updateDateTime(){ const now = new Date(); const day = days[now.getDay()]; const date = now.getDate(); const month = months[now.getMonth()]; const year = now.getFullYear(); const time = now.toLocaleTimeString('en-GB'); const el = document.getElementById('datetime'); if (el) el.textContent = `${day}, ${date} ${month} ${year} ${time}`; }
+            setInterval(updateDateTime, 1000); updateDateTime();
+        })();
+    </script>
+
+    <!-- Email Modal for Sharing Coupon -->
+    <div class="modal-overlay" id="emailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Share Coupon via Email</h3>
+            </div>
+            <div class="modal-body">
+                <form id="shareCouponForm">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="couponSelect">Select Coupon:</label>
+                        <select id="couponSelect" name="coupon_code" required>
+                            {% for purchase in current_purchases %}
+                                {% if purchase.coupon_code %}
+                                    <option value="{{ purchase.coupon_code }}">
+                                        {{ purchase.coupon_code }} (Serial: {{ purchase.serial_number }}, Amount: ${{ purchase.amount }})
+                                    </option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="recipientEmail">Recipient Email:</label>
+                        <input type="email" id="recipientEmail" name="recipient_email" required />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="modal-btn modal-btn-secondary" onclick="closeEmailModal()">Cancel</button>
+                        <button type="submit" class="modal-btn modal-btn-primary">Send Coupon</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Popup -->
+    <div id="successPopup" style="display:none; position:fixed; top:30px; right:30px; background:#28a745; color:#fff; padding:18px 32px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.15); font-size:1.1em; z-index:3000;">
+        <span id="successPopupMsg"></span>
+    </div>
+</body>
+
+</html>

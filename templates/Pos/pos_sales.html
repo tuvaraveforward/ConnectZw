@@ -1,0 +1,68 @@
+{% extends 'Pos/pos_dashboard.html' %}
+
+{% block content %}
+<div class="main-content">
+    <div class="header">
+        <h1>Location Sales Report</h1>
+    </div>
+
+    <div class="recent-orders">
+        <h2>Redeemed Coupons</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Coupon ID</th>
+                    <th>Serial Number</th>
+                    <th>Redemption Time</th>
+                    <th>Products</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sale in sales %}
+                <tr>
+                    <td>{{ sale.coupon_id }}</td>
+                    <td>{{ sale.serial_number }}</td>
+                    <td>{{ sale.time|date:"Y-m-d H:i" }}</td>
+                    <td>
+                        <ul style="list-style-type: none; padding: 0; margin: 0;">
+                            {% for product in sale.products %}
+                            <li>{{ product }}</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">No redemptions found for this location.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    /* Reuse styles from dashboard if possible, or define minimal table styles here */
+    .main-content {
+        margin-top: 2rem;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+    th,
+    td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #f8f9fa;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
