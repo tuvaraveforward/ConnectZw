@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "C:\Users\Forward Tuvarave\Desktop\Django\Project1\verify_emails.py", line 61, in <module>
+    test_emails()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Forward Tuvarave\Desktop\Django\Project1\verify_emails.py", line 36, in test_emails
+    assert mocked_send_mail.called
+           ^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
