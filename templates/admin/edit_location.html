@@ -1,0 +1,947 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin - Edit Location</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: hsla(80, 27%, 98%, 1.00);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 220px;
+            background-color: hsla(80, 27%, 98%, 1.00);
+            color: hsla(80, 27%, 98%, 1.00);
+            display: flex;
+            flex-direction: column;
+            padding-top: 1rem;
+            position: fixed;
+            height: 100vh;
+            color: #333;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            font-family: Algerian;
+        }
+
+        .sidebar a {
+            color: #333;
+            padding: 1rem 1.5rem;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+
+        .sidebar a.active {
+            background-color: #007bff;
+        }
+
+        .content {
+            margin-left: 220px;
+            padding: 2rem;
+            flex-grow: 1;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 900px;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .logout-link {
+            margin-top: auto;
+            padding: 1rem 1.5rem;
+            background-color: #dc3545;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+            border-top: 1px solid #495057;
+        }
+
+        .logout-link:hover {
+            background-color: #c82333;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 2rem;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* Dropdown Form Styles */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: white;
+            min-width: 500px;
+            max-height: 600px;
+            overflow-y: auto;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            z-index: 1000;
+            padding: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .dropdown-content.show {
+            display: block;
+        }
+
+        .dropdown-content h4 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: #333;
+            font-size: 1.1rem;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 0.5rem;
+        }
+
+        .dropdown-form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .dropdown-form-group {
+            flex: 1;
+        }
+
+        .dropdown-form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #333;
+            font-size: 0.875rem;
+        }
+
+        .dropdown-form-group input,
+        .dropdown-form-group select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            box-sizing: border-box;
+        }
+
+        .dropdown-form-group input:focus,
+        .dropdown-form-group select:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+
+        .dropdown-form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .btn-dropdown {
+            padding: 0.5rem 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.875rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-dropdown:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-dropdown-cancel {
+            padding: 0.5rem 1rem;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .btn-dropdown-cancel:hover {
+            background-color: #5a6268;
+        }
+
+        .btn-dropdown-submit {
+            padding: 0.5rem 1rem;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.875rem;
+        }
+
+        .btn-dropdown-submit:hover {
+            background-color: #218838;
+        }
+
+        .form-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            border: 1px solid #bee5eb;
+            font-size: 0.8rem;
+        }
+
+        .btn-back {
+            padding: 0.5rem 1rem;
+            background-color: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-back:hover {
+            background-color: #5a6268;
+        }
+
+        /* Form Styles */
+        .form-container {
+            background-color: #f8f9fa;
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+
+        .form-container h3 {
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            color: #333;
+            font-size: 1.3rem;
+            text-align: center;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            flex: 1;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+
+        .form-group input[readonly] {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .btn-save {
+            padding: 0.75rem 1.5rem;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .btn-save:hover {
+            background-color: #218838;
+            color: white;
+        }
+
+        .btn-cancel {
+            padding: 0.75rem 1.5rem;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-cancel:hover {
+            background-color: #5a6268;
+            color: white;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: block;
+        }
+
+        .success-message {
+            color: #28a745;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: block;
+        }
+
+        .info-message {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            border: 1px solid #bee5eb;
+            font-size: 0.875rem;
+        }
+
+        .form-group small {
+            color: #666;
+            font-size: 0.75rem;
+            display: block;
+            margin-top: 0.25rem;
+        }
+
+        .status-section {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+
+        .status-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .status-row label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #333;
+            margin-bottom: 0;
+        }
+
+        .status-row input[type="checkbox"] {
+            margin-right: 0.5rem;
+            width: 16px;
+            height: 16px;
+        }
+
+        .btn-delete {
+            padding: 0.75rem 1.5rem;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            margin-left: 0.5rem;
+        }
+
+        .btn-delete:hover {
+            background-color: #c82333;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <img src="{% static 'images/icon.png' %}" alt="System Logo"
+            style="width: 200px; height: auto; align-self: center; margin-bottom: 20px;">
+
+        <a href="{% url 'admin_dashboard' %}">DASHBOARD</a>
+        <a href="{% url 'locations' %}">LOCATIONS</a>
+        <a href="{% url 'accounts' %}">ACCOUNTS</a>
+        <a href="{% url 'sales' %}">SALES</a>
+        <a href="{% url 'settings' %}">SETTINGS</a>
+        <a href="{% url 'reports' %}">REPORTS</a>
+        <a href="{% url 'admin_login' %}" class="logout-link">Logout</a>
+    </div>
+    <div class="content">
+        <div class="header">
+            <h2>Edit Location</h2>
+            <div class="header-actions">
+                <div class="dropdown">
+                    <button onclick="toggleUserDropdown()" class="btn-dropdown" style="background-color: #17a2b8;">Add
+                        User</button>
+                    <div id="userForm" class="dropdown-content">
+                        <h4>Add New User</h4>
+                        <div class="form-info">
+                            <strong>Role:</strong> dealer (automatically set)<br>
+                            <strong>Password:</strong> Zimconnect (automatically set)
+                        </div>
+                        <form method="post" action="{% url 'add_user' location.id %}">
+                            {% csrf_token %}
+                            <div class="dropdown-form-row">
+                                <div class="dropdown-form-group">
+                                    <label for="user_username">Username:</label>
+                                    <input type="text" name="username" id="user_username" required>
+                                </div>
+                                <div class="dropdown-form-group">
+                                    <label for="user_firstname">First Name:</label>
+                                    <input type="text" name="firstname" id="user_firstname" required>
+                                </div>
+                            </div>
+                            <div class="dropdown-form-row">
+                                <div class="dropdown-form-group">
+                                    <label for="user_lastname">Last Name:</label>
+                                    <input type="text" name="lastname" id="user_lastname" required>
+                                </div>
+                                <div class="dropdown-form-group">
+                                    <label for="user_phone">Phone Number:</label>
+                                    <input type="text" name="phone_number" id="user_phone" required>
+                                </div>
+                            </div>
+                            <div class="dropdown-form-row">
+                                <div class="dropdown-form-group">
+                                    <label for="user_email">Email Address:</label>
+                                    <input type="email" name="email_address" id="user_email" required>
+                                </div>
+                                <div class="dropdown-form-group">
+                                    <label for="user_location">Location:</label>
+                                    <input type="text" value="{{ location.location_name }}" readonly>
+                                    <input type="hidden" name="location" value="{{ location.id }}">
+                                </div>
+                            </div>
+                            <div class="dropdown-form-actions">
+                                <button type="button" class="btn-dropdown-cancel"
+                                    onclick="closeUserDropdown()">Cancel</button>
+                                <button type="submit" class="btn-dropdown-submit">Add User</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="dropdown">
+                    <button onclick="togglePosDropdown()" class="btn-dropdown" style="background-color: #28a745;">Add
+                        POS</button>
+                    <div id="posForm" class="dropdown-content">
+                        <h4>Add New POS Device</h4>
+                        <div class="form-info">
+                            <strong>Status:</strong> Active (automatically set)
+                        </div>
+                        <form method="post" action="{% url 'add_pos' location.id %}">
+                            {% csrf_token %}
+                            <div class="dropdown-form-row">
+                                <div class="dropdown-form-group">
+                                    <label for="pos_name">POS Name:</label>
+                                    <input type="text" name="pos_name" id="pos_name" required>
+                                </div>
+                                <div class="dropdown-form-group">
+                                    <label for="pos_code">POS Code:</label>
+                                    <input type="text" name="pos_code" id="pos_code" required>
+                                </div>
+                            </div>
+                            <div class="dropdown-form-row">
+                                <div class="dropdown-form-group">
+                                    <label for="pos_location">Location:</label>
+                                    <input type="text" value="{{ location.location_name }}" readonly>
+                                    <input type="hidden" name="location" value="{{ location.id }}">
+                                </div>
+                                <div class="dropdown-form-group">
+                                    <label for="pos_dealer">Assign to User:</label>
+                                    <select name="dealer" id="pos_dealer" required>
+                                        <option value="">Select User</option>
+                                        <!-- This would be populated with existing dealers for this location -->
+                                        <option value="">No users available - create a user first</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="dropdown-form-actions">
+                                <button type="button" class="btn-dropdown-cancel"
+                                    onclick="closePosDropdown()">Cancel</button>
+                                <button type="submit" class="btn-dropdown-submit">Add POS</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <a href="{% url 'locations' %}" class="btn-back">← Back to Locations</a>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <h3>Update Location Information</h3>
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="info-message">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <!-- Buttons for Activity, Staff, Users -->
+            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                <button type="button" id="activity-btn" class="btn-table"
+                    style="padding: 0.5rem 1rem; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Activity</button>
+                <button type="button" id="staff-btn" class="btn-table"
+                    style="padding: 0.5rem 1rem; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Staff</button>
+                <button type="button" id="users-btn" class="btn-table"
+                    style="padding: 0.5rem 1rem; background-color: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">Users</button>
+            </div>
+
+            <!-- Tables -->
+            <div id="activity-table" class="table-container" style="display: none; margin-bottom: 2rem;">
+                <h4>Activity at {{ location.location_name }}</h4>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background-color: #f8f9fa;">
+                            <th style="border: 1px solid #ddd; padding: 0.5rem;">POS Name</th>
+                            <th style="border: 1px solid #ddd; padding: 0.5rem;">POS Code</th>
+                            <th style="border: 1px solid #ddd; padding: 0.5rem;">Actions</th>
+                            <th style="border: 1px solid #ddd; padding: 0.5rem;">Dealer</th>
+                            <th style="border: 1px solid #ddd; padding: 0.5rem;">Status</th>
+                            <th style="border: 1px solid #ddd; padding: 0.5rem;">Created At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pos in pos_devices %}
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 0.5rem;">{{ pos.pos_name }}</td>
+                            <td style="border: 1px solid #ddd; padding: 0.5rem;">{{ pos.pos_code }}</td>
+                            <td style="border: 1px solid #ddd; padding: 0.5rem;">
+                                {% if pos.user %}
+                                    {{ pos.user.firstname }} {{ pos.user.lastname }} ({{ pos.user.username }})
+                                {% else %}
+                                    <em style="color: #999;">Not assigned</em>
+                                {% endif %}
+                            </td>
+                            <td style="border: 1px solid #ddd; padding: 0.5rem;">{% if pos.is_active %}Active{% else %}Inactive{% endif %}</td>
+                            <td style="border: 1px solid #ddd; padding: 0.5rem;">{{ pos.created_at|date:"Y-m-d H:i" }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" style="border: 1px solid #ddd; padding: 0.5rem; text-align: center;">No POS
+                                devices found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="staff-table" class="table-container" style="display: none; margin-bottom: 2rem;">
+                <h4>Staff at {{ location.location_name }}</h4>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background-color: #f8f9fa;">
+                            <th style="border: 1px solid #ddd; padding: 0.5rem;">Username</th>
+                            <th style="border: 1px solid #ddd; padding: 0.5rem;">First Name</th>
+                            <th style="border: 1px solid #ddd; padding: 0.5rem;">Last Name</th>
+                            <th style="border: 1px solid #ddd; padding: 0.5rem;">Phone</th>
+                            <th style="border: 1px solid #ddd; padding: 0.5rem;">Email</th>
+                            <th style="border: 1px solid #ddd; padding: 0.5rem;">Status</th>
+                            <th style="border: 1px solid #ddd; padding: 0.5rem;">Created At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for dealer in dealers %}
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 0.5rem;">{{ dealer.username }}</td>
+                            <td style="border: 1px solid #ddd; padding: 0.5rem;">{{ dealer.firstname }}</td>
+                            <td style="border: 1px solid #ddd; padding: 0.5rem;">{{ dealer.lastname }}</td>
+                            <td style="border: 1px solid #ddd; padding: 0.5rem;">{{ dealer.phone_number }}</td>
+                            <td style="border: 1px solid #ddd; padding: 0.5rem;">{{ dealer.email_address }}</td>
+                            <td style="border: 1px solid #ddd; padding: 0.5rem;">{% if dealer.is_active %}Active{% else %}Inactive{% endif %}</td>
+                            <td style="border: 1px solid #ddd; padding: 0.5rem;">{{ dealer.created_at|date:"Y-m-d H:i"
+                                }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" style="border: 1px solid #ddd; padding: 0.5rem; text-align: center;">No
+                                staff found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="users-table" class="table-container" style="display: none; margin-bottom: 2rem;">
+                <!-- Location Users Table -->
+                <h4 style="margin-bottom: 1rem;">Location Users for {{ location.location_name }}</h4>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 2rem;">
+                    <thead>
+                        <tr style="background-color: #f8f9fa;">
+                            <th style="border: 1px solid #ddd; padding: 0.5rem;">Username</th>
+                            <th style="border: 1px solid #ddd; padding: 0.5rem;">First Name</th>
+                            <th style="border: 1px solid #ddd; padding: 0.5rem;">Last Name</th>
+                            <th style="border: 1px solid #ddd; padding: 0.5rem;">Phone</th>
+                            <th style="border: 1px solid #ddd; padding: 0.5rem;">Email</th>
+                            <th style="border: 1px solid #ddd; padding: 0.5rem;">Status</th>
+                            <th style="border: 1px solid #ddd; padding: 0.5rem;">Created At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 0.5rem;">{{ user.username }}</td>
+                            <td style="border: 1px solid #ddd; padding: 0.5rem;">{{ user.firstname }}</td>
+                            <td style="border: 1px solid #ddd; padding: 0.5rem;">{{ user.lastname }}</td>
+                            <td style="border: 1px solid #ddd; padding: 0.5rem;">{{ user.phone_number }}</td>
+                            <td style="border: 1px solid #ddd; padding: 0.5rem;">{{ user.email_address }}</td>
+                            <td style="border: 1px solid #ddd; padding: 0.5rem;">{% if user.is_active %}Active{% else %}Inactive{% endif %}</td>
+                            <td style="border: 1px solid #ddd; padding: 0.5rem;">{{ user.created_at|date:"Y-m-d H:i" }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" style="border: 1px solid #ddd; padding: 0.5rem; text-align: center;">No
+                                users found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- Location POS Devices Table -->
+                <h4 style="margin-bottom: 1rem; margin-top: 1.5rem;">Location POS Devices for {{ location.location_name }}</h4>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background-color: #f8f9fa;">
+                            <th style="border: 1px solid #ddd; padding: 0.5rem;">POS Name</th>
+                            <th style="border: 1px solid #ddd; padding: 0.5rem;">POS Code</th>
+                            <th style="border: 1px solid #ddd; padding: 0.5rem;">Assigned User</th>
+                            <th style="border: 1px solid #ddd; padding: 0.5rem;">Status</th>
+                            <th style="border: 1px solid #ddd; padding: 0.5rem;">Created At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pos in pos_devices %}
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 0.5rem;">{{ pos.pos_name }}</td>
+                            <td style="border: 1px solid #ddd; padding: 0.5rem;">{{ pos.pos_code }}</td>
+                            <td style="border: 1px solid #ddd; padding: 0.5rem;">
+                                {% if pos.user %}
+                                {{ pos.user.firstname }} {{ pos.user.lastname }} ({{ pos.user.username }})
+                                {% else %}
+                                <em style="color: #999;">Not assigned</em>
+                                {% endif %}
+                            </td>
+                            <td style="border: 1px solid #ddd; padding: 0.5rem;">{% if pos.is_active %}Active{% else %}Inactive{% endif %}</td>
+                            <td style="border: 1px solid #ddd; padding: 0.5rem;">{{ pos.created_at|date:"Y-m-d H:i" }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" style="border: 1px solid #ddd; padding: 0.5rem; text-align: center;">No POS
+                                devices found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <form method="post" action="{% url 'edit_location' location.id %}">
+                {% csrf_token %}
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_location_name">Location Name:</label>
+                        <input type="text" name="location_name" id="id_location_name"
+                            value="{{ location.location_name|default:'' }}" required>
+                        {% if form.location_name.errors %}
+                        {% for error in form.location_name.errors %}
+                        <span class="error-message">{{ error }}</span>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_username">Username:</label>
+                        <input type="text" name="username" id="id_username" value="{{ location.username|default:'' }}"
+                            required>
+                        {% if form.username.errors %}
+                        {% for error in form.username.errors %}
+                        <span class="error-message">{{ error }}</span>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_email_address">Email Address:</label>
+                        <input type="email" name="email_address" id="id_email_address"
+                            value="{{ location.email_address|default:'' }}" required>
+                        {% if form.email_address.errors %}
+                        {% for error in form.email_address.errors %}
+                        <span class="error-message">{{ error }}</span>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_category">Category:</label>
+                        <select name="category" id="id_category" required>
+                            <option value="">Select Category</option>
+                            <option value="Restaurant" selected>Restaurant</option>
+                            <option value="Retail" selected>Retail</option>
+                            <option value="Service" selected>Service</option>
+                            <option value="Healthcare" selected>Healthcare</option>
+                            <option value="Education" selected>Education</option>
+                            <option value="Other" selected>Other</option>
+                        </select>
+                        {% if form.category.errors %}
+                        {% for error in form.category.errors %}
+                        <span class="error-message">{{ error }}</span>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_city">City:</label>
+                        <input type="text" name="city" id="id_city" value="{{ location.city|default:'' }}" required>
+                        {% if form.city.errors %}
+                        {% for error in form.city.errors %}
+                        <span class="error-message">{{ error }}</span>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_province">Province:</label>
+                        <input type="text" name="province" id="id_province" value="{{ location.province|default:'' }}"
+                            required>
+                        {% if form.province.errors %}
+                        {% for error in form.province.errors %}
+                        <span class="error-message">{{ error }}</span>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="status-section">
+                    <div class="status-row">
+                        <label>
+                            <input type="checkbox" name="is_active" id="id_is_active" checked>
+                            Active Location
+                        </label>
+                        <small style="color: #666; margin-left: 1rem;">
+                            Uncheck to block this location from accessing the system
+                        </small>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_password">New Password (leave blank to keep current):</label>
+                        <input type="password" name="password" id="id_password">
+                        <small>Only enter a password if you want to change it</small>
+                        {% if form.password.errors %}
+                        {% for error in form.password.errors %}
+                        <span class="error-message">{{ error }}</span>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_confirm_password">Confirm New Password:</label>
+                        <input type="password" name="confirm_password" id="id_confirm_password">
+                        {% if form.confirm_password.errors %}
+                        {% for error in form.confirm_password.errors %}
+                        <span class="error-message">{{ error }}</span>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="window.history.back()">Cancel</button>
+                    <button type="button" class="btn-delete" id="btn-delete-location">Delete Location</button>
+                    <button type="submit" class="btn-save">Save Changes</button>
+                </div>
+            </form>
+
+            <!-- Hidden delete form to avoid nested forms (submitted via JS) -->
+            <form method="post" action="{% url 'delete_location' location.id %}" id="delete-location-form" style="display:none;">
+                {% csrf_token %}
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Dropdown toggle functions
+        function toggleUserDropdown() {
+            const userForm = document.getElementById('userForm');
+            const posForm = document.getElementById('posForm');
+
+            if (userForm.classList.contains('show')) {
+                userForm.classList.remove('show');
+            } else {
+                userForm.classList.add('show');
+                posForm.classList.remove('show'); // Close other dropdown
+            }
+        }
+
+        function togglePosDropdown() {
+            const userForm = document.getElementById('userForm');
+            const posForm = document.getElementById('posForm');
+
+            if (posForm.classList.contains('show')) {
+                posForm.classList.remove('show');
+            } else {
+                posForm.classList.add('show');
+                userForm.classList.remove('show'); // Close other dropdown
+            }
+        }
+
+        function closeUserDropdown() {
+            document.getElementById('userForm').classList.remove('show');
+        }
+
+        function closePosDropdown() {
+            document.getElementById('posForm').classList.remove('show');
+        }
+
+        // Close dropdowns when clicking outside
+        window.onclick = function (event) {
+            const userForm = document.getElementById('userForm');
+            const posForm = document.getElementById('posForm');
+
+            if (!event.target.matches('.btn-dropdown') && !event.target.closest('.dropdown-content')) {
+                userForm.classList.remove('show');
+                posForm.classList.remove('show');
+            }
+        }
+
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function (e) {
+            const password = document.getElementById('id_password').value;
+            const confirmPassword = document.getElementById('id_confirm_password').value;
+
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Passwords do not match');
+                return false;
+            }
+
+            if (password && password.length < 6) {
+                e.preventDefault();
+                alert('Password must be at least 6 characters long');
+                return false;
+            }
+        });
+
+        // Auto-clear password fields when user starts typing
+        document.getElementById('id_password').addEventListener('focus', function () {
+            if (this.value === '') {
+                this.removeAttribute('value');
+            }
+        });
+
+        document.getElementById('id_confirm_password').addEventListener('focus', function () {
+            if (this.value === '') {
+                this.removeAttribute('value');
+            }
+        });
+
+        // Table toggle functions
+        document.getElementById('activity-btn').addEventListener('click', function () {
+            toggleTable('activity-table');
+        });
+
+        document.getElementById('staff-btn').addEventListener('click', function () {
+            toggleTable('staff-table');
+        });
+
+        document.getElementById('users-btn').addEventListener('click', function () {
+            toggleTable('users-table');
+        });
+
+        function toggleTable(tableId) {
+            const table = document.getElementById(tableId);
+            const isVisible = table.style.display === 'block';
+            // Hide all tables
+            document.getElementById('activity-table').style.display = 'none';
+            document.getElementById('staff-table').style.display = 'none';
+            document.getElementById('users-table').style.display = 'none';
+            // Show the selected table if it was not visible
+            if (!isVisible) {
+                table.style.display = 'block';
+            }
+        }
+
+        // Delete location handler - submits hidden form to avoid nested forms
+        document.getElementById('btn-delete-location').addEventListener('click', function () {
+            if (confirm('Are you sure you want to delete this location? This action cannot be undone and will also delete all associated users and POS devices.')) {
+                document.getElementById('delete-location-form').submit();
+            }
+        });
+    </script>
+</body>
+
+</html>

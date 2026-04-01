@@ -1,0 +1,567 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin - Locations</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: hsla(80, 27%, 98%, 1.00);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 220px;
+            background-color: hsla(80, 27%, 98%, 1.00);
+            color: hsla(80, 27%, 98%, 1.00);
+            display: flex;
+            flex-direction: column;
+            padding-top: 1rem;
+            position: fixed;
+            height: 100vh;
+            /* text color is set via the color property on links */
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            font-family: Algerian;
+        }
+
+        .sidebar a {
+            color: #333;
+            padding: 1rem 1.5rem;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+
+        .sidebar a.active {
+            background-color: #007bff;
+        }
+
+        .content {
+            margin-left: 220px;
+            padding: 2rem;
+            flex-grow: 1;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 900px;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .logout-link {
+            margin-top: auto;
+            padding: 1rem 1.5rem;
+            background-color: #dc3545;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+            border-top: 1px solid #495057;
+        }
+
+        .logout-link:hover {
+            background-color: #c82333;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 2rem;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn-new-location {
+            padding: 0.5rem 1rem;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-new-location:hover {
+            background-color: #218838;
+        }
+
+        /* Dropdown Form Styles */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: white;
+            min-width: 400px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            z-index: 1000;
+            padding: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .dropdown-content.show {
+            display: block;
+        }
+
+        .dropdown-content h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: #333;
+            font-size: 1.2rem;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            flex: 1;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .btn-submit {
+            padding: 0.5rem 1rem;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-submit:hover {
+            background-color: #218838;
+        }
+
+        .btn-cancel {
+            padding: 0.5rem 1rem;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-cancel:hover {
+            background-color: #5a6268;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .success-message {
+            color: #28a745;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-container input {
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 0.5rem;
+            width: 250px;
+        }
+
+        .search-container button {
+            padding: 0.5rem 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .search-container button:hover {
+            background-color: #0056b3;
+        }
+
+        .checkboxes-section {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+
+        .checkboxes-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .checkboxes-container label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .checkboxes-container input[type="checkbox"] {
+            margin-right: 0.5rem;
+            width: 16px;
+            height: 16px;
+        }
+
+        h2.content-title {
+            margin-bottom: 1.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        .locations-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .locations-table th,
+        .locations-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .locations-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .locations-table tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-edit {
+            padding: 0.25rem 0.5rem;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 3px;
+            font-size: 0.875rem;
+        }
+
+        .btn-edit:hover {
+            background-color: #0056b3;
+            color: white;
+        }
+
+        .btn-delete {
+            padding: 0.25rem 0.5rem;
+            background-color: #dc3545;
+            color: white;
+            text-decoration: none;
+            border-radius: 3px;
+            font-size: 0.875rem;
+        }
+
+        .btn-delete:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <img src="{% static 'images/icon.png' %}" alt="System Logo"
+            style="width: 200px; height: auto; align-self: center; margin-bottom: 20px;">
+
+        <a href="{% url 'admin_dashboard' %}" class="active"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
+        <a href="{% url 'locations' %}"><i class="fa-solid fa-map-location-dot"></i> LOCATIONS</a>
+        <a href="{% url 'accounts' %}"><i class="fa-solid fa-users"></i> ACCOUNTS</a>
+        <a href="{% url 'sales' %}"><i class="fa-solid fa-chart-line"></i> SALES</a>
+        <a href="{% url 'settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
+        <a href="{% url 'reports' %}"><i class="fa-solid fa-file-invoice-dollar"></i> REPORTS</a>
+        <a href="{% url 'admin_feedbacks' %}"><i class="fa-solid fa-comment-dots"></i> FEEDBACKS</a>
+        <a href="{% url 'admin_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </div>
+    <div class="content">
+        <div class="header">
+            <div class="header-actions">
+                <div class="dropdown">
+                    <button onclick="toggleDropdown()" class="btn-new-location" id="newLocationBtn">New
+                        Location</button>
+                    <div id="locationForm" class="dropdown-content">
+                        <h3>Register New Location</h3>
+                        <form method="post" action="{% url 'register_location' %}">
+                            {% csrf_token %}
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="id_location_name">Location Name:</label>
+                                    <input type="text" name="location_name" id="id_location_name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="id_username">Username:</label>
+                                    <input type="text" name="username" id="id_username" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="id_email_address">Email Address:</label>
+                                    <input type="email" name="email_address" id="id_email_address" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="id_category">Category:</label>
+                                    <select name="category" id="id_category" required>
+                                        <option value="">Select Category</option>
+                                        <option value="Building Materials">Building Materials</option>
+                                        <option value="Grocery">Grocery</option>
+                                        <option value="Sports">Sports</option>
+                                        <option value="Books">Books</option>
+                                        <option value="Agriculture Supplies">Agriculture Supplies</option>
+                                        <option value="Furniture">Furniture</option>
+                                        <option value="Music Instruments">Music Instruments</option>
+                                        <option value="Jewelry">Jewelry</option>
+                                        <option value="Clothing">Clothing</option>
+                                        <option value="Life Assurance & School Fees">Life Assurance & School Fees
+                                        </option>
+                                        <option value="Oil & Gas">Oil & Gas</option>
+                                        <option value="Office Supplies">Office Supplies</option>
+                                        <option value="Kitchen Appliances">Kitchen Appliances</option>
+                                        <option value="Automative">Automative</option>
+                                        <option value="Health & Beauty">Health & Beauty</option>
+                                        <option value="Residential Stands">Residential Stands</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="id_city">City:</label>
+                                    <input type="text" name="city" id="id_city" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="id_province">Province:</label>
+                                    <input type="text" name="province" id="id_province" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="id_password">Password:</label>
+                                    <input type="password" name="password" id="id_password" value="Zimconnect" required>
+                                    <small style="color: #666; font-size: 0.75rem;">Default password is set to
+                                        Zimconnect</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="id_confirm_password">Confirm Password:</label>
+                                    <input type="password" name="confirm_password" id="id_confirm_password"
+                                        value="Zimconnect" required>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn-cancel" onclick="closeDropdown()">Cancel</button>
+                                <button type="submit" class="btn-submit">Register Location</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="search-container">
+                    <input type="text" placeholder="Search locations..." id="searchInput">
+                    <button type="button" onclick="searchLocations()">Search</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <form method="get" class="checkboxes-section" id="filterForm"
+            style="display: flex; gap: 1rem; align-items: center; justify-content: flex-start;">
+            <div class="checkboxes-container">
+                <label>
+                    <input type="radio" name="filter" value="all" {% if not show_new and not show_active and not
+                        show_blocked %}checked onchange="this.form.submit()">
+                    All Locations
+                </label>
+                <label>
+                    <input type="radio" name="filter" value="new" {% if show_new and not show_active and not
+                        show_blocked %}checked onchange="this.form.submit()">
+                    New Locations
+                </label>
+                <label>
+                    <input type="radio" name="filter" value="active" {% if show_active and not show_new and not
+                        show_blocked %}checked onchange="this.form.submit()">
+                    Active Locations
+                </label>
+                <label>
+                    <input type="radio" name="filter" value="blocked" {% if show_blocked and not show_new and not
+                        show_active %}checked onchange="this.form.submit()">
+                    Blocked Locations
+                </label>
+                <label style="margin-left: 2rem; padding-left: 2rem; border-left: 2px solid #dee2e6;">
+                    <input type="checkbox" name="category" {% if show_category %}checked{% endif %}
+                        onchange="this.form.submit()">
+                    Show Category
+                </label>
+            </div>
+        </form>
+
+        <table class="locations-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Location Name</th>
+                    <th>Email Address</th>
+                    <th>User</th>
+                    <th>City</th>
+                    <th>Province</th>
+                    {% if show_category %}<th>Category</th>{% endif %}
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="locationsTableBody">
+                {% if locations %}
+                {% for location in locations %}
+                <tr>
+                    <td>{{ location.id }}</td>
+                    <td>{{ location.location_name }}</td>
+                    <td>{{ location.email_address }}</td>
+                    <td>{{ location.username }}</td>
+                    <td>{{ location.city }}</td>
+                    <td>{{ location.province }}</td>
+                    {% if show_category %}<td>{{ location.category }}</td>{% endif %}
+                    <td class="action-buttons">
+                        <a href="{% url 'edit_location' location.id %}" class="btn-edit">Edit</a>
+
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 2rem; color: rgba(7, 7, 7, 1);">
+                        No locations found
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function toggleDropdown() {
+            const dropdown = document.getElementById('locationForm');
+            dropdown.classList.toggle('show');
+        }
+
+        function closeDropdown() {
+            const dropdown = document.getElementById('locationForm');
+            dropdown.classList.remove('show');
+        }
+
+        // Close dropdown when clicking outside
+        window.onclick = function (event) {
+            if (!event.target.matches('.btn-new-location') && !event.target.closest('.dropdown-content')) {
+                const dropdown = document.getElementById('locationForm');
+                if (dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        }
+
+        function searchLocations() {
+            // Submit the search query by updating the URL or submitting a form if consistent with filtering
+            // Since we have a main filter form, we should ideally integrate search into it or keep it simple.
+            // The existing search was client-side. The view now supports server-side search via 'search' parameter.
+            // Let's redirect to the same page with the search query.
+            const searchTerm = document.getElementById('searchInput').value;
+            // Construct URL with search term and current filters (simplification: just search + default filters or keep current)
+            // Best approach: Add 'search' input to the form or submit existing form with hidden search input.
+            // For now, let's just reload with search param, expecting user to re-filter if needed, OR better:
+            // We can make the search input part of the form we just added?
+            // The search input is outside the form.
+            // Let's just do a simple window.location update for search, preserving other params if possible, or just search.
+            const url = new URL(window.location.href);
+            url.searchParams.set('search', searchTerm);
+            window.location.href = url.toString();
+        }
+
+        // Add event listener for Enter key in search input
+        document.getElementById('searchInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                searchLocations();
+            }
+        });
+    </script>
+</body>
+
+</html>

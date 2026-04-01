@@ -1,0 +1,236 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Accounts</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: hsla(80, 27%, 98%, 1.00);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 220px;
+            background-color: hsla(80, 27%, 98%, 1.00);
+            color: hsla(80, 27%, 98%, 1.00);
+            display: flex;
+            flex-direction: column;
+            padding-top: 1rem;
+            position: fixed;
+            height: 100vh;
+            /* text color is set via the color property on links */
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            font-family: Algerian;
+        }
+
+        .sidebar a {
+            color: #333;
+            padding: 1rem 1.5rem;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+
+        .sidebar a.active {
+            background-color: #007bff;
+        }
+
+        .content {
+            margin-left: 220px;
+            padding: 2rem;
+            flex-grow: 1;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 1200px;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 2rem;
+        }
+
+        .filters {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .filters label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filters input[type="checkbox"] {
+            margin: 0;
+        }
+
+        .filters button {
+            padding: 0.5rem 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .filters button:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2rem;
+        }
+
+        th,
+        td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .status-active {
+            color: green;
+        }
+
+        .status-blocked {
+            color: red;
+        }
+
+        .status-new {
+            color: blue;
+        }
+
+        .logout-link {
+            margin-top: auto;
+            padding: 1rem 1.5rem;
+            background-color: #dc3545;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+            border-top: 1px solid #495057;
+        }
+
+        .logout-link:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <img src="{% static 'images/icon.png' %}" alt="System Logo"
+            style="width: 200px; height: auto; align-self: center; margin-bottom: 20px;">
+
+        <a href="{% url 'admin_dashboard' %}" class="active"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
+        <a href="{% url 'locations' %}"><i class="fa-solid fa-map-location-dot"></i> LOCATIONS</a>
+        <a href="{% url 'accounts' %}"><i class="fa-solid fa-users"></i> ACCOUNTS</a>
+        <a href="{% url 'sales' %}"><i class="fa-solid fa-chart-line"></i> SALES</a>
+        <a href="{% url 'settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
+        <a href="{% url 'reports' %}"><i class="fa-solid fa-file-invoice-dollar"></i> REPORTS</a>
+        <a href="{% url 'admin_feedbacks' %}"><i class="fa-solid fa-comment-dots"></i> FEEDBACKS</a>
+        <a href="{% url 'admin_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </div>
+    <div class="content">
+        <div class="header">
+            <h2>Client Accounts</h2>
+        </div>
+
+        <form method="get" class="filters">
+            <input type="text" name="search" placeholder="Search accounts..." value="{{ search_query }}"
+                style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; margin-right: 1rem;">
+            <label>
+                <input type="radio" name="filter" value="all" {% if not show_new and not show_active and not
+                    show_blocked %}checked onchange="this.form.submit()">
+                All Accounts
+            </label>
+            <label>
+                <input type="radio" name="filter" value="new" {% if show_new and not show_active and not show_blocked
+                    %}checked onchange="this.form.submit()">
+                New Accounts
+            </label>
+            <label>
+                <input type="radio" name="filter" value="active" {% if show_active and not show_new and not show_blocked
+                    %}checked onchange="this.form.submit()">
+                Active Accounts
+            </label>
+            <label>
+                <input type="radio" name="filter" value="blocked" {% if show_blocked and not show_new and not
+                    show_active %}checked onchange="this.form.submit()">
+                Blocked Accounts
+            </label>
+        </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th>Created At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for client in clients %}
+                <tr>
+                    <td>{{ client.username }}</td>
+                    <td>{{ client.firstname }}</td>
+                    <td>{{ client.lastname }}</td>
+                    <td>{{ client.email_address }}</td>
+                    <td>{{ client.phone_number }}</td>
+                    <td class="{% if client.is_active %}status-active{% else %}status-blocked{% endif %}">
+                        {% if client.is_active %}Active{% else %}Blocked{% endif %}
+                    </td>
+                    <td>{{ client.created_at|date:"M d, Y" }}</td>
+                    <td><a href="{% url 'edit_client' client.id %}"
+                            style="color: #007bff; text-decoration: none;">Edit</a></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8">No accounts found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>
