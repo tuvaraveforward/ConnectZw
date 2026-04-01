@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Feedbacks</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body{font-family:Arial,Helvetica,sans-serif;background:#f5f5f5;margin:0;padding:0}
+        .container{max-width:1100px;margin:24px auto;padding:16px}
+        .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+        .filters{display:flex;gap:8px}
+        .btn{padding:8px 12px;border-radius:4px;text-decoration:none;color:#fff}
+        .btn-all{background:#6c757d}
+        .btn-feedback{background:#007bff}
+        .btn-complaint{background:#dc3545}
+        table{width:100%;border-collapse:collapse;background:#fff}
+        th,td{padding:12px;border-bottom:1px solid #eee;text-align:left}
+        th{background:#f0f0f0}
+        .source{font-weight:600}
+        .subject{font-weight:700}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>All Feedbacks</h1>
+            <div class="filters">
+                <a class="btn btn-all" href="?">All</a>
+                <a class="btn btn-feedback" href="?type=feedback">Feedback</a>
+                <a class="btn btn-complaint" href="?type=complaint">Complaint</a>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Subject</th>
+                    <th>Message</th>
+                    <th>Source</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if feedbacks %}
+                    {% for f in feedbacks %}
+                        <tr>
+                            <td>{{ f.feedback_type|capfirst }}</td>
+                            <td class="subject">{{ f.subject }}</td>
+                            <td>{{ f.message }}</td>
+                            <td class="source">{{ f.source }}{% if f.source_name %} — {{ f.source_name }}{% endif %}</td>
+                            <td>{% if f.created_at %}{{ f.created_at|date:"Y-m-d H:i" }}{% endif %}</td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr><td colspan="5">No feedbacks found.</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
