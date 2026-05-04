@@ -251,21 +251,12 @@
             <div class="form-group">
                 <label>Payment Method</label>
                 <div class="payment-methods">
-                    <label class="payment-method">
-                        <input type="radio" name="payment_method" value="ECOCASH" required>
-                        <span>ECOCASH</span>
-                    </label>
-                    <label class="payment-method">
-                        <input type="radio" name="payment_method" value="INBUCKS" required>
-                        <span>INBUCKS</span>
-                    </label>
-                    <label class="payment-method">
-                        <input type="radio" name="payment_method" value="PAYPAL" required>
-                        <span>PAYPAL</span>
-                    </label>
-                    <label class="payment-method">
-                        <input type="radio" name="payment_method" value="VISA/MASTERCARD" required>
-                        <span>VISA/MASTERCARD</span>
+                    <label class="payment-method selected">
+                        <input type="radio" name="payment_method" value="paynow" checked required>
+                            <img src="{% static 'images/paynow_logo.svg' %}"
+                             alt="Paynow" style="height:36px; margin-right:10px; vertical-align:middle;"
+                             onerror="this.style.display='none'">
+                        <span>Paynow</span>
                     </label>
                 </div>
             </div>

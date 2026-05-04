@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="40" viewBox="0 0 160 40">
+  <rect rx="6" ry="6" width="160" height="40" fill="#ffd200"/>
+  <text x="12" y="26" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#1a1a1a">Paynow</text>
+  <circle cx="132" cy="20" r="10" fill="#ffffff"/>
+  <path d="M126 18 L132 24 L138 16" stroke="#ffd200" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

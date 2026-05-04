@@ -33,7 +33,7 @@ def process_service_request_task(service_request_id):
 
             client = sr.client
             # compute balance
-            balance = Transaction.objects.filter(client=client).aggregate(
+            balance = Transaction.objects.filter(client=client, is_confirmed=True).aggregate(
                 total=Sum(
                     Case(
                         When(transaction_type='deposit', then='amount'),

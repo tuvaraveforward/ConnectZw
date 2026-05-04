@@ -5,6 +5,30 @@ from Admin.models import Transaction, Product
 from django.utils import timezone
 from django.db.models import Count
 from Project1.email_utils import send_redemption_confirmation_email
+from Project1.aes_utils import encrypt_bytes
+from django.db import connection
+
+
+def find_transaction_by_coupon_serial(coupon_id: str, serial_number: str = None):
+    """
+    Find a purchase transaction by coupon_code and optional serial_number.
+    Uses Python-level decryption since AES-GCM encrypted field ORM queries don't work.
+    """
+    for tx in Transaction.objects.filter(transaction_type='purchase'):
+        try:
+            if tx.coupon_code != coupon_id:
+                continue
+        except Exception:
+            continue
+        if serial_number:
+            try:
+                if tx.serial_number != serial_number:
+                    continue
+            except Exception:
+                continue
+        return tx
+    return None
+
 
 def pos_login(request):
     if request.method == 'POST':
@@ -55,28 +79,29 @@ def redeem_coupon(request):
         if action == 'redeem_confirm':
             coupon_id = request.POST.get('coupon_id')
             try:
-                # Update all transactions with this coupon code
-                transactions = Transaction.objects.filter(coupon_code=coupon_id, transaction_type='purchase')
+                # Find all transactions with this coupon code using Python-level decryption
+                matching_txs = [tx for tx in Transaction.objects.filter(transaction_type='purchase')
+                               if tx.coupon_code == coupon_id]
                 
                 pos_id = request.session.get('pos_id')
                 current_pos = Pos.objects.get(id=pos_id)
                 
-                updated_count = transactions.update(
-                    is_redeemed=True,
-                    redemption_pos=current_pos,
-                    redemption_timestamp=timezone.now()
-                )
+                updated_count = 0
+                for tx in matching_txs:
+                    tx.is_redeemed = True
+                    tx.redemption_pos = current_pos
+                    tx.redemption_timestamp = timezone.now()
+                    tx.save()
+                    updated_count += 1
                 
                 if updated_count > 0:
                     # Send Email Confirmation
-                    # We need the client to send them an email. 
-                    # We can get the client from the first transaction in the set.
-                    first_transaction = transactions.first()
+                    first_transaction = matching_txs[0]
                     if first_transaction and first_transaction.client:
                         send_redemption_confirmation_email(first_transaction.client, coupon_id, updated_count)
                     
                     messages.success(request, f'Coupon {coupon_id} redeemed successfully! {updated_count} items processed.')
-                    return redirect('redeem_coupon') # Reset form
+                    return redirect('redeem_coupon')
                 else:
                     messages.error(request, 'Error: Could not find transactions to redeem.')
             except Exception as e:
@@ -85,29 +110,23 @@ def redeem_coupon(request):
         else:
             # Default to verification logic
             coupon_id = request.POST.get('coupon_id')
-            serial_number = request.POST.get('Serial_number')
+            # accept either 'serial_number' or legacy 'Serial_number' field names
+            serial_number = request.POST.get('serial_number') or request.POST.get('Serial_number')
             
             try:
-                # Check for the specific transaction with this coupon and serial
-                transaction = Transaction.objects.filter(
-                    coupon_code=coupon_id, 
-                    serial_number=serial_number,
-                    transaction_type='purchase'
-                ).first()
+                # Use helper function for Python-level lookup
+                transaction = find_transaction_by_coupon_serial(coupon_id, serial_number)
 
                 if transaction:
                     if transaction.is_redeemed:
                          messages.error(request, 'Error: This coupon has already been redeemed.')
                     else:
                          # Verification successful, fetch all items in this basket (same coupon_code)
-                         # We assume all items in the basket share the same coupon_code
-                         basket_items = Transaction.objects.filter(
-                             coupon_code=coupon_id,
-                             transaction_type='purchase'
-                         )
+                         basket_items = [tx for tx in Transaction.objects.filter(transaction_type='purchase')
+                                        if tx.coupon_code == coupon_id]
                          context['basket_items'] = basket_items
                          context['verified'] = True
-                         context['redeemed_coupon_id'] = coupon_id # pass back for potential "Complete Redemption" action later
+                         context['redeemed_coupon_id'] = coupon_id
                          messages.success(request, 'Coupon verified successfully!')
                 else:
                      messages.error(request, 'Error: Invalid Coupon ID or Serial Number.')
@@ -126,12 +145,8 @@ def pos_check_validity(request):
         serial_number = request.POST.get('serial_number')
 
         try:
-            # Check for the transaction
-            transaction = Transaction.objects.filter(
-                coupon_code=coupon_id,
-                serial_number=serial_number,
-                transaction_type='purchase'
-            ).first()
+            # Use helper function for Python-level lookup
+            transaction = find_transaction_by_coupon_serial(coupon_id, serial_number)
 
             if transaction:
                 if transaction.is_redeemed:

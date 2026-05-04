@@ -17,13 +17,17 @@ from Project1.email_utils import (
     send_share_coupon_email,
     send_account_creation_email
 )
-from .ai_services.ai_services import get_ai_recommendation, get_chat_response
+from Project1.aes_utils import encrypt_bytes
+from .ai_services.ai_services import get_ai_recommendation, get_chat_response, check_fraud
 from django.core.mail import send_mail
 from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponse, JsonResponse
 import json
 from decimal import Decimal
+from paynow import Paynow
+from django.views.decorators.csrf import csrf_exempt
+import time
 
 # Create your views here.
 def client_login(request):
@@ -63,7 +67,7 @@ def client_dashboard(request):
     try:
         client = Client.objects.get(username=username)
         # Calculate account balance
-        balance = Transaction.objects.filter(client=client).aggregate(
+        balance = Transaction.objects.filter(client=client, is_confirmed=True).aggregate(
             total=Sum(
                 Case(
                     When(transaction_type='deposit', then='amount'),
@@ -123,14 +127,22 @@ def client_dashboard(request):
 
         # AI Recommendation
         try:
+            # Build transaction history payload
+            transactions = Transaction.objects.filter(client=client).order_by('-timestamp')[:50]
+            tx_history = [
+                {"amount": float(t.amount), "category": t.category, "timestamp": t.timestamp.isoformat()}
+                for t in transactions
+            ]
+            
             last_purchase_obj = Transaction.objects.filter(client=client, transaction_type='purchase').order_by('-timestamp').first()
             last_purchase_desc = last_purchase_obj.description if last_purchase_obj else ""
             
             ai_payload = {
-                "season": "festive", # Hardcoded for demo
+                "user_id": str(client.id),
+                "season": "festive",
                 "is_festive": 1,
                 "last_purchase": last_purchase_desc,
-                # Add other fields as needed
+                "transaction_history": tx_history
             }
             recommendation = get_ai_recommendation(ai_payload)
             context['recommendation'] = recommendation
@@ -149,7 +161,7 @@ def client_account(request):
     try:
         client = Client.objects.get(username=username)
         # Calculate account balance
-        balance = Transaction.objects.filter(client=client).aggregate(
+        balance = Transaction.objects.filter(client=client, is_confirmed=True).aggregate(
             total=Sum(
                 Case(
                     When(transaction_type='deposit', then='amount'),
@@ -214,7 +226,54 @@ def client_topup(request):
             amount = request.POST.get('amount')
             payment_method = request.POST.get('payment_method')
             if amount and payment_method:
-                # Create deposit transaction
+                # Fraud Check
+                fraud_payload = {
+                    "transaction_id": f"TOPUP-{client.id}-{timezone.now().timestamp()}",
+                    "user_id": str(client.id),
+                    "amount": float(amount),
+                    "merchant_mcc": "0000",
+                    "merchant_name": payment_method,
+                    "is_online": True
+                }
+                fraud_result = check_fraud(fraud_payload)
+                if fraud_result.get("decision") == "BLOCKED":
+                    messages.error(request, 'Transaction blocked due to suspicious activity.')
+                    return redirect('client_dashboard')
+
+                # If using Paynow, initiate the external payment flow
+                if payment_method.lower() in ['paynow', 'paynow_gateway', 'paynow_payment']:
+                    try:
+                        # Create a pending transaction record so we can reconcile later
+                        reference = f"TOPUP-{client.id}-{int(time.time())}"
+                        Transaction.objects.create(
+                            transaction_type='deposit',
+                            amount=Decimal(str(amount)),
+                            client=client,
+                            category='Topup',
+                            description=f'PENDING PAYNOW REF:{reference}',
+                            is_confirmed=False,
+                            external_reference=reference
+                        )
+
+                        # Build Paynow payment
+                        return_url = request.build_absolute_uri(reverse('paynow_return'))
+                        result_url = request.build_absolute_uri(reverse('paynow_result'))
+                        paynow = Paynow(settings.PAYNOW_INTEGRATION_ID, settings.PAYNOW_INTEGRATION_KEY, return_url, result_url)
+                        payment = paynow.create_payment(reference, client.email_address or client.username)
+                        payment.add('Account Topup', float(amount))
+                        init_response = paynow.send(payment)
+
+                        if hasattr(init_response, 'has_redirect') and init_response.has_redirect:
+                            return redirect(init_response.redirect_url)
+                        else:
+                            messages.error(request, 'Failed to initiate Paynow payment. Please try another method.')
+                            return redirect('client_topup')
+                    except Exception as e:
+                        print(f"Error initiating Paynow payment: {e}")
+                        messages.error(request, 'Payment initialization failed. Please try again.')
+                        return redirect('client_topup')
+
+                # Fallback: record deposit immediately for non-Paynow methods
                 Transaction.objects.create(
                     transaction_type='deposit',
                     amount=amount,
@@ -233,6 +292,70 @@ def client_topup(request):
         return render(request, 'Client/client_topup.html', context)
     except Client.DoesNotExist:
         return redirect('client_login')
+
+
+def paynow_return(request):
+    """User-facing return URL after completing Paynow payment."""
+    # Simple acknowledgement; actual reconciliation happens via result (IPN)
+    messages.info(request, 'Thank you. Your payment is being processed. You will receive confirmation shortly.')
+    return redirect('client_dashboard')
+
+
+@csrf_exempt
+def paynow_result(request):
+    """Endpoint for Paynow to POST transaction status updates (result_url).
+    Paynow will POST fields including `status`, `reference`, `amount`, `paynowreference`.
+    We match the `reference` to pending Transaction records and mark them confirmed when paid.
+    """
+    try:
+        data = request.POST.dict() if request.method == 'POST' else {}
+        status = data.get('status', '').lower()
+        reference = data.get('reference', '')
+        amount = data.get('amount')
+        paynow_ref = data.get('paynowreference', '')
+
+        # Only handle paid notifications
+        if not reference:
+            return HttpResponse('No reference provided', status=400)
+
+        # Extract client id from reference if possible (format TOPUP-<client_id>-...)
+        client_obj = None
+        try:
+            parts = reference.split('-')
+            if len(parts) >= 2:
+                client_id = int(parts[1])
+                from Client.models import Client as ClientModel
+                client_obj = ClientModel.objects.filter(id=client_id).first()
+        except Exception:
+            client_obj = None
+
+        # Find pending transactions with this reference (match external_reference or description)
+        from django.db.models import Q
+        pending_qs = Transaction.objects.filter(transaction_type='deposit', is_confirmed=False).filter(
+            Q(external_reference=reference) | Q(description__icontains=reference)
+        )
+
+        if status == 'paid':
+            for tx in pending_qs:
+                tx.description = f'Paynow confirmed: {paynow_ref} ({reference})'
+                tx.is_confirmed = True
+                tx.external_reference = paynow_ref or reference
+                tx.save()
+                try:
+                    # send confirmation email to user
+                    if tx.client:
+                        send_deposit_confirmation_email(tx.client, tx.amount, 'Paynow')
+                except Exception as e:
+                    print(f"Failed to send deposit confirmation email: {e}")
+
+            return HttpResponse('OK')
+
+        # For other statuses, log and ack
+        print(f"Paynow result received: status={status}, reference={reference}, amount={amount}")
+        return HttpResponse('IGNORED')
+    except Exception as e:
+        print(f"Error processing Paynow result: {e}")
+        return HttpResponse('ERROR', status=500)
 
 def client_history(request):
     if not request.session.get('client_logged_in'):
@@ -397,7 +520,7 @@ def checkout(request):
         total_cost = basket.get_total()
         
         # Check Balance
-        balance = Transaction.objects.filter(client=client).aggregate(
+        balance = Transaction.objects.filter(client=client, is_confirmed=True).aggregate(
             total=Sum(
                 Case(
                     When(transaction_type='deposit', then='amount'),
@@ -411,6 +534,20 @@ def checkout(request):
         if balance < total_cost:
             return JsonResponse({'status': 'error', 'message': 'Insufficient funds'})
             
+        # Fraud Check
+        first_item = items.first()
+        fraud_payload = {
+            "transaction_id": f"PURCHASE-{client.id}-{timezone.now().timestamp()}",
+            "user_id": str(client.id),
+            "amount": float(total_cost),
+            "merchant_mcc": "5411",
+            "merchant_name": first_item.product.dealer.firstname if first_item and first_item.product.dealer else "UNKNOWN",
+            "is_online": True
+        }
+        fraud_result = check_fraud(fraud_payload)
+        if fraud_result.get("decision") == "BLOCKED":
+            return JsonResponse({'status': 'error', 'message': 'Transaction flagged for fraud review'})
+
         try:
             import random
             import string
@@ -441,11 +578,11 @@ def checkout(request):
             # Coupon ID: client_id + time + date
             coupon_code = f"{client_id}{time_str}{date_str}"
 
+            # Generate a single serial number for the entire purchase so all items share it
+            random_letter = random.choice(string.ascii_uppercase)
+            serial_number = f"{client_id}{basket_category_indices}{time_str}{order_num}{random_letter}"
+
             for item in items:
-                # Serial number: client_id + id for all categories + time + order number + random letter
-                random_letter = random.choice(string.ascii_uppercase)
-                serial_number = f"{client_id}{basket_category_indices}{time_str}{order_num}{random_letter}"
-                
                 Transaction.objects.create(
                     transaction_type='purchase',
                     amount=item.get_cost(),
@@ -461,8 +598,12 @@ def checkout(request):
             basket.items.all().delete()
             
             # Send Email Confirmation
-            # Fetch the created transactions to include in the email
-            recent_transactions = Transaction.objects.filter(client=client, coupon_code=coupon_code)
+            # Fetch the created transactions to include in the email (lookup must use encrypted value)
+            try:
+                enc_coupon = encrypt_bytes(coupon_code.encode('utf-8'))
+                recent_transactions = Transaction.objects.filter(client=client, coupon_code=enc_coupon)
+            except Exception:
+                recent_transactions = Transaction.objects.filter(client=client, coupon_code=coupon_code)
             send_purchase_confirmation_email(client, recent_transactions, total_cost, coupon_code)
             
             return JsonResponse({'status': 'success', 'message': 'Purchase successful'})
@@ -567,13 +708,18 @@ def share_coupon(request):
             client = Client.objects.get(username=username)
             print(f"[INFO] share_coupon: Client '{username}' found")
             
-            # Find the transaction with this coupon_code
-            transaction = Transaction.objects.filter(client=client, coupon_code=coupon_code).first()
+            # Find the transaction with this coupon_code (use encrypted lookup)
+            try:
+                enc_coupon = encrypt_bytes(coupon_code.encode('utf-8'))
+                transaction = Transaction.objects.filter(client=client, coupon_code=enc_coupon).first()
+            except Exception:
+                transaction = Transaction.objects.filter(client=client, coupon_code=coupon_code).first()
             
             if not transaction:
                 print(f"[ERROR] share_coupon: No transaction found for client '{username}' with coupon code '{coupon_code}'")
                 # Debug info: show what coupons this client has
-                client_coupons = Transaction.objects.filter(client=client, coupon_code__isnull=False).exclude(coupon_code='').values_list('coupon_code', flat=True)
+                # values_list returns decrypted strings via the EncryptedCharField.from_db_value
+                client_coupons = Transaction.objects.filter(client=client, coupon_code__isnull=False).values_list('coupon_code', flat=True)
                 print(f"[DEBUG] Client's available coupons: {list(client_coupons)}")
                 return JsonResponse({'success': False, 'message': 'Coupon not found. Please make sure the coupon belongs to your account.'})
             
