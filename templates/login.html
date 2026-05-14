@@ -1,93 +1,40 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Choose Your Role</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
+{% block title %}Login - ConnectZw{% endblock %}
 
-        .container {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            max-width: 400px;
-            width: 100%;
-        }
-
-        h1 {
-            color: #333;
-            margin-bottom: 1.5rem;
-        }
-
-        .role-button {
-            display: block;
-            width: 100%;
-            padding: 1rem;
-            margin: 0.5rem 0;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            font-size: 1.1rem;
-            transition: background-color 0.3s;
-        }
-
-        .role-button:hover {
-            background-color: #0056b3;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="container">
-        <img src="{% static 'images/icon.png' %}" alt="System Logo"
-            style="position: absolute; top: 10px; left: 10px; width: 200px; height: auto; z-index: 1000;">
-        <h1>Welcome To ConnectZw</h1>
-        <p>Please enter your credentials to login:</p>
-
-        {% if messages %}
-        <div class="messages">
-            {% for message in messages %}
-            <div class="{{ message.tags }}" style="color: red; margin-bottom: 1rem;">{{ message }}</div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        <form method="post" action="{% url 'login' %}">
-            {% csrf_token %}
-            <div class="form-group" style="margin-bottom: 1rem; text-align: left;">
-                <label for="username" style="display: block; margin-bottom: 0.5rem; color: #333;">Username:</label>
-                <input type="text" name="username" id="username" required
-                    style="width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-            </div>
-            <div class="form-group" style="margin-bottom: 1.5rem; text-align: left;">
-                <label for="password" style="display: block; margin-bottom: 0.5rem; color: #333;">Password:</label>
-                <input type="password" name="password" id="password" required
-                    style="width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-            </div>
-            <button type="submit" class="role-button"
-                style="border: none; cursor: pointer; font-size: 1.1rem;">Login</button>
-        </form>
-
-        <div style="margin-top: 1.5rem; border-top: 1px solid #eee; padding-top: 1rem;">
-            <p style="margin-bottom: 0.5rem; font-size: 0.9rem; color: #666;">Don't have an account?</p>
-            <a href="{% url 'client_signup' %}" style="color: #007bff; text-decoration: none; font-weight: bold;">Sign
-                Up as Client</a>
-        </div>
+{% block content %}
+<div class="login-card">
+    <div class="login-header">
+        <img src="{% static 'images/icon.png' %}" alt="ConnectZw Logo" class="login-logo">
+        <h1>Welcome to ConnectZw</h1>
+        <p>Please enter your credentials to login</p>
     </div>
-</body>
 
-</html>
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="message-item {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" name="username" id="username" required autocomplete="username">
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" name="password" id="password" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="submit-btn">Login</button>
+    </form>
+
+    <div class="footer-links">
+        <span>Don't have an account?</span>
+        <a href="{% url 'client_signup' %}">Sign Up as Client</a>
+    </div>
+</div>
+{% endblock %}

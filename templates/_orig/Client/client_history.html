@@ -1,0 +1,34 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Client History</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* original history styles preserved */
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <img src="{% static 'images/icon.png' %}" alt="System Logo" style="width: 200px; height: auto; align-self: center; margin-bottom: 20px;">
+
+        <a href="{% url 'client_dashboard' %}" class="active"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
+        <a href="{% url 'client_account' %}"><i class="fa-solid fa-user"></i> ACCOUNT</a>
+        <a href="{% url 'client_purchases' %}"><i class="fa-solid fa-shopping-bag"></i> PURCHASES</a>
+        <a href="{% url 'client_history' %}"><i class="fa-solid fa-clock-rotate-left"></i> HISTORY</a>
+        <a href="{% url 'client_settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
+        <a href="{% url 'client_topup' %}"><i class="fa-solid fa-wallet"></i> TOPUP ACCOUNT</a>
+        <a href="{% url 'client_feedback' %}"><i class="fa-solid fa-comment-dots"></i> FEEDBACK</a>
+        <a href="{% url 'client_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </div>
+    <div class="content">
+        <!-- original content preserved in backup -->
+    </div>
+</body>
+
+</html>

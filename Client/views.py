@@ -28,6 +28,17 @@ from decimal import Decimal
 from paynow import Paynow
 from django.views.decorators.csrf import csrf_exempt
 import time
+import os
+
+TX_HAS_IS_CONFIRMED = any(f.name == 'is_confirmed' for f in Transaction._meta.get_fields())
+TX_HAS_EXTERNAL_REFERENCE = any(f.name == 'external_reference' for f in Transaction._meta.get_fields())
+
+
+def confirmed_transactions():
+    qs = Transaction.objects.all()
+    if TX_HAS_IS_CONFIRMED:
+        qs = qs.filter(is_confirmed=True)
+    return qs
 
 # Create your views here.
 def client_login(request):
@@ -67,9 +78,8 @@ def client_dashboard(request):
     try:
         client = Client.objects.get(username=username)
         # Calculate account balance
-        balance = Transaction.objects.filter(client=client, is_confirmed=True).aggregate(
-            total=Sum(
-                Case(
+        balance = confirmed_transactions().filter(client=client).aggregate(
+            total=Sum(Case(
                     When(transaction_type='deposit', then='amount'),
                     When(transaction_type__in=['purchase', 'redemption'], then=F('amount') * -1),
                     default=0,
@@ -115,6 +125,63 @@ def client_dashboard(request):
             'top_products_by_category': top_products_by_category,
         }
 
+        import os
+
+        # Define categories and their image folder names
+        category_list = [
+            'Building Materials', 'Electronics', 'Furniture', 'Groceries', 'Clothing', 'Automotive', 'Sports', 'Services',
+            'Health & Beauty', 'Books', 'Oil & Gas', 'Jewelry', 'Agriculture Supplies', 'Office Supplies', 'Residential Stands', 'Kitchen Appliances'
+        ]
+
+        # Path to images directory (relative to static/images/)
+        image_base = os.path.join('images')
+        categories_data = []
+        for cat in category_list:
+            # Try to find an image in static/images/<category>/
+            folder_name = cat.replace('&', 'and').replace(' ', '_').lower()
+            image_path = None
+            try:
+                # List files in the folder
+                abs_folder_path = os.path.join(os.path.dirname(__file__), '..', '..', 'static', 'images', folder_name)
+                files = os.listdir(abs_folder_path)
+                # Pick the first image file (jpg, png, jpeg, webp)
+                for f in files:
+                    if f.lower().endswith(('.jpg', '.jpeg', '.png', '.webp', '.gif')):
+                        image_path = os.path.join('images', folder_name, f)
+                        break
+            except Exception:
+                image_path = None
+            categories_data.append({
+                'name': cat,
+                'image': image_path  # None if not found
+            })
+
+        # Re-fetch products and organize by category to ensure consistency
+        all_products = Product.objects.filter(dealer__isnull=False).select_related('dealer').order_by('category', 'name')
+        products_by_category = defaultdict(list)
+        for product in all_products:
+            products_by_category[product.category].append(product)
+
+        top_products_by_category = {}
+        for cat in category_list:
+            prods = products_by_category.get(cat, [])
+            if prods:
+                try:
+                    top = max(prods, key=lambda p: p.price if p.price is not None else 0)
+                except Exception:
+                    top = prods[0]
+                top_products_by_category[cat] = top
+            else:
+                top_products_by_category[cat] = None
+
+        context = {
+            'username': username,
+            'balance': balance,
+            'recent_transactions': recent_transactions,
+            'categories': categories_data,  # Now a list of dicts with name and image
+            'products_by_category': dict(products_by_category),
+            'top_products_by_category': top_products_by_category,
+        }
 
         # Basket Context
         basket, created = Basket.objects.get_or_create(client=client)
@@ -161,7 +228,7 @@ def client_account(request):
     try:
         client = Client.objects.get(username=username)
         # Calculate account balance
-        balance = Transaction.objects.filter(client=client, is_confirmed=True).aggregate(
+        balance = confirmed_transactions().filter(client=client).aggregate(
             total=Sum(
                 Case(
                     When(transaction_type='deposit', then='amount'),
@@ -245,14 +312,19 @@ def client_topup(request):
                     try:
                         # Create a pending transaction record so we can reconcile later
                         reference = f"TOPUP-{client.id}-{int(time.time())}"
+                        tx_kwargs = {
+                            'transaction_type': 'deposit',
+                            'amount': Decimal(str(amount)),
+                            'client': client,
+                            'category': 'Topup',
+                            'description': f'PENDING PAYNOW REF:{reference}',
+                        }
+                        if TX_HAS_IS_CONFIRMED:
+                            tx_kwargs['is_confirmed'] = False
+                        if TX_HAS_EXTERNAL_REFERENCE:
+                            tx_kwargs['external_reference'] = reference
                         Transaction.objects.create(
-                            transaction_type='deposit',
-                            amount=Decimal(str(amount)),
-                            client=client,
-                            category='Topup',
-                            description=f'PENDING PAYNOW REF:{reference}',
-                            is_confirmed=False,
-                            external_reference=reference
+                            **tx_kwargs
                         )
 
                         # Build Paynow payment
@@ -331,15 +403,21 @@ def paynow_result(request):
 
         # Find pending transactions with this reference (match external_reference or description)
         from django.db.models import Q
-        pending_qs = Transaction.objects.filter(transaction_type='deposit', is_confirmed=False).filter(
-            Q(external_reference=reference) | Q(description__icontains=reference)
-        )
+        pending_qs = Transaction.objects.filter(transaction_type='deposit')
+        if TX_HAS_IS_CONFIRMED:
+            pending_qs = pending_qs.filter(is_confirmed=False)
+        if TX_HAS_EXTERNAL_REFERENCE:
+            pending_qs = pending_qs.filter(Q(external_reference=reference) | Q(description__icontains=reference))
+        else:
+            pending_qs = pending_qs.filter(description__icontains=reference)
 
         if status == 'paid':
             for tx in pending_qs:
                 tx.description = f'Paynow confirmed: {paynow_ref} ({reference})'
-                tx.is_confirmed = True
-                tx.external_reference = paynow_ref or reference
+                if TX_HAS_IS_CONFIRMED:
+                    tx.is_confirmed = True
+                if TX_HAS_EXTERNAL_REFERENCE:
+                    tx.external_reference = paynow_ref or reference
                 tx.save()
                 try:
                     # send confirmation email to user
@@ -520,7 +598,7 @@ def checkout(request):
         total_cost = basket.get_total()
         
         # Check Balance
-        balance = Transaction.objects.filter(client=client, is_confirmed=True).aggregate(
+        balance = confirmed_transactions().filter(client=client).aggregate(
             total=Sum(
                 Case(
                     When(transaction_type='deposit', then='amount'),

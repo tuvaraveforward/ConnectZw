@@ -1,248 +1,77 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Dealer - Sales</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: hsla(80, 27%, 98%, 1.00);
-            margin: 0;
-            height: 100vh;
-            display: flex;
-        }
+{% block title %}Dealer - Sales{% endblock %}
 
-        .sidebar {
-            width: 220px;
-            background-color: hsla(80, 27%, 98%, 1.00);
-            color: hsla(80, 27%, 98%, 1.00);
-            display: flex;
-            flex-direction: column;
-            padding-top: 1rem;
-            position: fixed;
-            height: 100vh;
-            color: #333;
-        }
+{% block shell_class %}wide{% endblock %}
 
-        .sidebar h2 {
-            text-align: center;
-            margin-bottom: 2rem;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #333;
-            font-family: Algerian;
-        }
+{% block head_extra %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+/* dealer sales tweaks */
+.content{max-width:1200px}
+.sales-table th,.sales-table td{padding:.75rem;border-bottom:1px solid #ddd}
+.no-sales{text-align:center;padding:2rem;color:#666}
+#searchInput{width:250px}
+.dealer-nav{display:flex;flex-direction:column;gap:6px;min-height:0;overflow-y:auto}
+</style>
+{% endblock %}
 
-        .sidebar a {
-            color: #333;
-            padding: 1rem 1.5rem;
-            text-decoration: none;
-            font-size: 1rem;
-            transition: background-color 0.3s ease;
-        }
+{% block sidebar_extra %}
+    <a href="{% url 'dealer_dashboard' %}"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
+    <a href="{% url 'dealer_locations' %}"><i class="fa-solid fa-map-location-dot"></i> LOCATIONS</a>
+    <a href="{% url 'dealer_sales' %}" class="active"><i class="fa-solid fa-chart-line"></i> SALES</a>
+    <a href="{% url 'dealer_settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
+    <a href="{% url 'dealer_reports' %}"><i class="fa-solid fa-file-invoice-dollar"></i> REPORTS</a>
+    <a href="{% url 'dealer_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    <div class="sidebar-user">{{ dealer.firstname }} {{ dealer.lastname }}</div>
+{% endblock %}
 
-        .sidebar a:hover {
-            background-color: #495057;
-        }
-
-        .sidebar a.active {
-            background-color: #007bff;
-        }
-
-        .content {
-            margin-left: 220px;
-            padding: 2rem;
-            flex-grow: 1;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 1200px;
-            margin-top: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .logout-link {
-            margin-top: auto;
-            padding: 1rem 1.5rem;
-            background-color: #dc3545;
-            color: white;
-            text-align: center;
-            text-decoration: none;
-            font-weight: bold;
-            border-top: 1px solid #495057;
-        }
-
-        .logout-link:hover {
-            background-color: #c82333;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 0;
-            border-bottom: 1px solid #ddd;
-            margin-bottom: 2rem;
-        }
-
-        .header h2 {
-            margin: 0;
-            color: #333;
-        }
-
-        .search-container {
-            display: flex;
-            align-items: center;
-        }
-
-        .search-container input {
-            padding: 0.5rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-right: 0.5rem;
-            width: 250px;
-        }
-
-        .search-container button {
-            padding: 0.5rem 1rem;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .search-container button:hover {
-            background-color: #0056b3;
-        }
-
-        h2.content-title {
-            margin-bottom: 1.5rem;
-        }
-
-        p {
-            margin-bottom: 1rem;
-        }
-
-        .sales-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-        }
-
-        .sales-table th,
-        .sales-table td {
-            padding: 0.75rem;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .sales-table th {
-            background-color: #f8f9fa;
-            font-weight: bold;
-        }
-
-        .sales-table tr:hover {
-            background-color: #f5f5f5;
-        }
-
-        .no-sales {
-            text-align: center;
-            padding: 2rem;
-            color: #666;
-        }
-    </style>
-</head>
-
-<body>
-
-    <div class="sidebar">
-        <img src="{% static 'images/icon.png' %}" alt="System Logo"
-            style="width: 200px; height: auto; align-self: center; margin-bottom: 20px;">
-        <a href="{% url 'dealer_dashboard' %}" class="active"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
-        <a href="{% url 'dealer_locations' %}"><i class="fa-solid fa-map-location-dot"></i> LOCATIONS</a>
-        <a href="{% url 'dealer_sales' %}"><i class="fa-solid fa-chart-line"></i> SALES</a>
-        <a href="{% url 'dealer_settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
-        <a href="{% url 'dealer_reports' %}"><i class="fa-solid fa-file-invoice-dollar"></i> REPORTS</a>
-        <a href="{% url 'dealer_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
-    </div>
-    <div class="content">
-        <div class="header">
-            <h2>Sales for Category: {{ dealer.category }}</h2>
-            <div class="search-container">
-                <input type="text" placeholder="Search sales..." id="searchInput">
-                <button type="button" onclick="searchSales()">Search</button>
-            </div>
+{% block content %}
+<div class="content">
+    <div class="header">
+        <h2>Sales for Category: {{ dealer.category }}</h2>
+        <div class="search-container">
+            <input type="text" placeholder="Search sales..." id="searchInput">
+            <button type="button" onclick="searchSales()">Search</button>
         </div>
-
-        <table class="sales-table">
-            <thead>
-                <tr>
-                    <th>Transaction Type</th>
-                    <th>Amount</th>
-                    <th>Client</th>
-                    <th>Location</th>
-                    <th>POS</th>
-                    <th>Timestamp</th>
-                </tr>
-            </thead>
-            <tbody id="salesTableBody">
-                {% if transactions %}
-                {% for transaction in transactions %}
-                <tr>
-                    <td>{{ transaction.transaction_type }}</td>
-                    <td>${{ transaction.amount }}</td>
-                    <td>{{ transaction.client.username }}</td>
-                    <td>{% if transaction.location %}{{ transaction.location.location_name }}{% else %}N/A{% endif %}
-                    </td>
-                    <td>{% if transaction.pos %}{{ transaction.pos.pos_name }}{% else %}N/A{% endif %}</td>
-                    <td>{{ transaction.timestamp }}</td>
-                </tr>
-                {% endfor %}
-                {% else %}
-                <tr>
-                    <td colspan="6" class="no-sales">
-                        No sales found for your category ({{ dealer.category }})
-                    </td>
-                </tr>
-                {% endif %}
-            </tbody>
-        </table>
     </div>
 
-    <script>
-        function searchSales() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const tableBody = document.getElementById('salesTableBody');
-            const rows = tableBody.getElementsByTagName('tr');
+    <table class="sales-table">
+        <thead>
+            <tr>
+                <th>Transaction Type</th>
+                <th>Amount</th>
+                <th>Client</th>
+                <th>Location</th>
+                <th>POS</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody id="salesTableBody">
+            {% if transactions %}
+            {% for transaction in transactions %}
+            <tr>
+                <td>{{ transaction.transaction_type }}</td>
+                <td>${{ transaction.amount }}</td>
+                <td>{{ transaction.client.username }}</td>
+                <td>{% if transaction.location %}{{ transaction.location.location_name }}{% else %}N/A{% endif %}</td>
+                <td>{% if transaction.pos %}{{ transaction.pos.pos_name }}{% else %}N/A{% endif %}</td>
+                <td>{{ transaction.timestamp }}</td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+                <td colspan="6" class="no-sales">No sales found for your category ({{ dealer.category }})</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
 
-            for (let i = 0; i < rows.length; i++) {
-                const row = rows[i];
-                const cells = row.getElementsByTagName('td');
-                let found = false;
-
-                for (let j = 0; j < cells.length; j++) {
-                    if (cells[j] && cells[j].textContent.toLowerCase().includes(searchTerm)) {
-                        found = true;
-                        break;
-                    }
-                }
-
-                row.style.display = searchTerm === '' || found ? '' : 'none';
-            }
-        }
-
-        // Add event listener for Enter key in search input
-        document.getElementById('searchInput').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                searchSales();
-            }
-        });
-    </script>
-</body>
-
-</html>
+{% block body_extra %}
+<script>
+function searchSales(){const searchTerm=document.getElementById('searchInput').value.toLowerCase();const tableBody=document.getElementById('salesTableBody');const rows=tableBody.getElementsByTagName('tr');for(let i=0;i<rows.length;i++){const row=rows[i];const cells=row.getElementsByTagName('td');let found=false;for(let j=0;j<cells.length;j++){if(cells[j]&&cells[j].textContent.toLowerCase().includes(searchTerm)){found=true;break}}row.style.display=searchTerm===''||found?'':'none'}}
+document.getElementById('searchInput').addEventListener('keypress',function(e){if(e.key==='Enter'){searchSales()}})
+</script>
+{% endblock %}

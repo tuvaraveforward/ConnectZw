@@ -1,6 +1,16 @@
-# TODO: Create About Template for Location App
+# Task: Reduce image sizes and show them on 4 columns
 
-- [x] Create templates/Location/location_about.html with sidebar, header, and content displaying about information
-- [x] Add location_about view in Location/views.py to render the template
-- [x] Add path for 'about/' in Location/urls.py
-- [x] Update the "ABOUT" link in templates/Location/location_dashboard.html to point to {% url 'location_about' %}
+## Progress
+- [x] 1. Create scripts/optimize_images.py
+- [x] 2. Run optimization script 
+- [x] 3. Update CSS in templates/Client/client-products.html for strict 4-column desktop grid + smaller images
+- [x] 4. Update templates/Client/client_dashboard.html products-grid CSS
+- [ ] 5. Test changes
+
+## Commands to run after edits:
+```
+python manage.py collectstatic --noinput
+python manage.py runserver
+```
+Visit http://127.0.0.1:8000/Client/products/grocery/ (login as client) to test 4-col smaller images.
+

@@ -113,3 +113,33 @@ def get_chat_response(message):
         return "You can browse our products by category below. Is there something specific you are looking for?"
         
     return "I'm not sure. Try asking for a specific product like 'Cement' or 'Tiles', or asking for 'nearest location'."
+
+
+def check_fraud(payload):
+    """
+    Basic rule-based fraud check used as a lightweight safeguard.
+    Returns a dict with keys: decision (ALLOW or BLOCKED), score (0-1), reason.
+    """
+    try:
+        amount = float(payload.get('amount', 0) or 0)
+    except Exception:
+        amount = 0.0
+
+    merchant = (payload.get('merchant_name') or '').lower()
+    is_online = bool(payload.get('is_online'))
+
+    # High-value transactions are flagged
+    if amount >= 10000:
+        return {"decision": "BLOCKED", "score": 0.98, "reason": "Amount exceeds allowed threshold"}
+
+    # Heuristic: online transactions with medium-high amounts get reviewed/blocked
+    if is_online and amount >= 5000:
+        return {"decision": "BLOCKED", "score": 0.85, "reason": "Large online transaction"}
+
+    # Suspicious merchant keyword
+    suspicious_keywords = ["fraud", "scam", "suspicious"]
+    if any(k in merchant for k in suspicious_keywords):
+        return {"decision": "BLOCKED", "score": 0.9, "reason": "Suspicious merchant name"}
+
+    # Default: allow
+    return {"decision": "ALLOW", "score": 0.05, "reason": "No rule matched"}

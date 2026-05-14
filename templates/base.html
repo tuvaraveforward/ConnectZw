@@ -1,0 +1,566 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}ConnectZw{% endblock %}</title>
+  <style>
+    /* ── Reset ── */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    /* ── Page wrapper ── */
+    body {
+      background: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    /* ── Split-screen shell ── */
+    .shell {
+      display: flex;
+      width: 100%;
+      max-width: 960px;
+      min-height: 560px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #1e3a5f;
+      background: #f4f6f9;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 320px;
+      min-width: 320px;
+      background: #0f2744;
+      padding: 40px 30px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-full {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 36px;
+    }
+
+    .brand-icon-lg {
+      width: 56px;
+      height: 56px;
+      background: #0d5c46;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      border: 1.5px solid #1D9E75;
+      flex-shrink: 0;
+    }
+
+    .brand-z-lg {
+      color: #4ecfa8;
+      font-size: 28px;
+      font-weight: 700;
+      font-family: Georgia, serif;
+      letter-spacing: -2px;
+      line-height: 1;
+    }
+
+    .brand-dot-lg {
+      width: 9px;
+      height: 9px;
+      background: #4ecfa8;
+      border-radius: 50%;
+      position: absolute;
+      bottom: 7px;
+      right: 7px;
+    }
+
+    .brand-words {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .brand-name-lg {
+      color: #ffffff;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      line-height: 1;
+    }
+
+    .brand-tagline {
+      color: #6b8cae;
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .brand-mantra {
+      flex: 1;
+      margin-top: 20px;
+    }
+
+    .mantra-text {
+      color: #4ecfa8;
+      font-size: 18px;
+      font-weight: 600;
+      font-family: Georgia, serif;
+      font-style: italic;
+      line-height: 1.4;
+      margin-bottom: 14px;
+    }
+
+    .mantra-sub {
+      color: #a4b8cc;
+      font-size: 12px;
+      letter-spacing: 0.3px;
+      line-height: 1.6;
+    }
+
+    /* Sidebar nav links (dashboard pages) */
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      font-size: 13px;
+      color: #8aaec8;
+      text-decoration: none;
+      border-left: 2.5px solid transparent;
+      border-radius: 4px;
+      transition: all 0.18s;
+    }
+
+    .sidebar a:hover {
+      color: #4ecfa8;
+      background: rgba(78, 207, 168, 0.06);
+      border-left-color: #4ecfa8;
+    }
+
+    .sidebar a.active {
+      color: #4ecfa8;
+      border-left-color: #4ecfa8;
+      background: rgba(78, 207, 168, 0.09);
+    }
+
+    .sidebar a.logout-link {
+      margin-top: auto;
+      color: #cf6679;
+    }
+
+    .sidebar-user {
+      margin-top: 8px;
+      padding: 0 12px;
+      font-size: 12px;
+      color: #a4b8cc;
+      word-break: break-word;
+    }
+
+    /* ── Main content area ── */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+      background: #f4f6f9;
+    }
+
+    /* ── Login card (shared) ── */
+    .login-card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 40px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      border: 1px solid #edf1f5;
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .login-logo {
+      width: 130px;
+      height: auto;
+      margin-bottom: 18px;
+    }
+
+    .login-header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #0f2744;
+      margin-bottom: 8px;
+    }
+
+    .login-header p {
+      font-size: 13px;
+      color: #7a92ab;
+    }
+
+    /* ── Form elements ── */
+    .form-group {
+      margin-bottom: 18px;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 13px;
+      color: #1e3a5f;
+      font-weight: 500;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid #dde3ec;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #0f2744;
+      background: #ffffff;
+      transition: all 0.2s;
+      outline: none;
+    }
+
+    .form-group input:focus {
+      border-color: #4ecfa8;
+      box-shadow: 0 0 0 3px rgba(78, 207, 168, 0.12);
+    }
+
+    /* ── Buttons ── */
+    .submit-btn,
+    .btn-primary {
+      display: block;
+      width: 40%;
+      padding: 13px 14px;
+      background: #0d5c46;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 8px;
+    }
+
+    .submit-btn:hover,
+    .btn-primary:hover {
+      background: #0a4736;
+    }
+
+    /* ── Messages ── */
+    .messages {
+      margin-bottom: 18px;
+    }
+
+    .message-item {
+      padding: 11px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 8px;
+      border-left: 4px solid #ff4d4f;
+      background: #fff2f0;
+      color: #cf1322;
+    }
+
+    /* ── Footer helper row ── */
+    .footer-links {
+      margin-top: 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .footer-links span {
+      color: #7a92ab;
+    }
+
+    .footer-links a,
+    .signup-link {
+      color: #0d5c46;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover,
+    .signup-link:hover {
+      color: #4ecfa8;
+    }
+
+    /* ── Dashboard content area ── */
+    .content {
+      flex: 1;
+      padding: 32px;
+      overflow: visible;
+      width: 100%;
+    }
+
+    /* ── Tables ── */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      border: 1px solid #edf1f5;
+      margin-top: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      text-align: left;
+    }
+
+    th {
+      background: #f8fafc;
+      color: #475569;
+      font-weight: 600;
+      padding: 16px;
+      border-bottom: 2px solid #edf1f5;
+    }
+
+    td {
+      padding: 16px;
+      color: #1e293b;
+      border-bottom: 1px solid #edf1f5;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover {
+      background: #f1f5f9;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .search-container {
+      display: flex;
+      gap: 8px;
+    }
+
+    .search-container input {
+      padding: 8px 12px;
+      border: 1px solid #dde3ec;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
+    .search-container button,
+    .reset-password {
+      padding: 8px 16px;
+      background: #0d5c46;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    /* ── Wide shell (dashboard pages) ── */
+    .shell.wide {
+      max-width: 100%;
+      min-height: 100vh;
+      border-radius: 0;
+      border: none;
+      flex-direction: column;
+    }
+
+    .shell.wide .main {
+      justify-content: flex-start;
+      align-items: stretch;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .shell.wide .sidebar {
+      width: 100%;
+      min-width: 100%;
+      background: #0f2744;
+      padding: 0;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      height: auto;
+      border-bottom: 1px solid #1a3a52;
+    }
+
+    .shell.wide .brand-full {
+      margin: 0;
+      padding: 12px 30px;
+      display: flex;
+      flex-shrink: 0;
+    }
+
+    .shell.wide .brand-mantra {
+      display: none;
+    }
+
+    .shell.wide .sidebar a {
+      padding: 16px 12px;
+      margin: 0;
+      border-left: none;
+      border-bottom: 3px solid transparent;
+      border-radius: 0;
+    }
+
+    .shell.wide .sidebar a:hover {
+      border-left-color: transparent;
+      border-bottom-color: #4ecfa8;
+    }
+
+    .shell.wide .sidebar a.active {
+      border-left-color: transparent;
+      border-bottom-color: #4ecfa8;
+    }
+
+    .shell.wide .sidebar-nav {
+      display: flex;
+      flex: 1;
+      align-items: center;
+      gap: 0;
+      padding: 0 30px;
+      overflow-x: auto;
+    }
+
+    .shell.wide .sidebar a.logout-link {
+      margin-top: 0;
+      margin-left: auto;
+      padding-right: 30px;
+      border-bottom: 3px solid transparent;
+    }
+
+    .shell.wide .sidebar-user {
+      margin-top: 0;
+      padding: 0;
+      margin-left: auto;
+      padding-right: 16px;
+    }
+
+    body:has(.shell.wide) {
+      padding: 0;
+      align-items: flex-start;
+      justify-content: flex-start;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .shell {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        min-width: 100%;
+        padding: 24px 20px;
+        flex-direction: column;
+      }
+
+      .sidebar-nav {
+        flex-direction: column !important;
+        width: 100% !important;
+        padding: 0 !important;
+      }
+
+      .sidebar a {
+        border-left: 2.5px solid transparent !important;
+        border-bottom: none !important;
+      }
+
+      .sidebar a.logout-link {
+        margin-left: 0 !important;
+      }
+
+      .main {
+        padding: 24px 16px;
+      }
+
+      .brand-full {
+        margin-bottom: 16px;
+      }
+
+      .shell.wide .sidebar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .shell.wide .brand-mantra {
+        display: none;
+      }
+    }
+  </style>
+  {% block head_links %}{% endblock %}
+</head>
+
+<body>
+  <div class="shell {% block shell_class %}{% endblock %}">
+
+    <!-- ── Sidebar ── -->
+    <aside class="sidebar">
+      <div class="brand-full">
+        <div class="brand-icon-lg">
+          <span class="brand-z-lg">Z</span>
+          <div class="brand-dot-lg"></div>
+        </div>
+        <div class="brand-words">
+          <div class="brand-name-lg">ConnectZw</div>
+          <div class="brand-tagline">Remittance Platform</div>
+        </div>
+      </div>
+
+      <div class="brand-mantra">
+        <div class="mantra-text">"Bridging worlds, building home."</div>
+        <div class="mantra-sub">Formalising diaspora remittances &middot; Strengthening Zimbabwe's local economy
+          &middot; Reducing informal market dependency</div>
+      </div>
+
+      <div class="sidebar-nav">
+        {% block sidebar_extra %}{% endblock %}
+      </div>
+      <div class="sidebar-user">{% block sidebar_user %}{% endblock %}</div>
+    </aside>
+
+    <!-- ── Main content ── -->
+    <main class="main">
+      {% block content %}{% endblock %}
+    </main>
+
+  </div>
+
+  {% block body_extra %}{% endblock %}
+</body>
+
+</html>

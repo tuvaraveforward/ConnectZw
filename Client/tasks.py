@@ -8,6 +8,14 @@ import json
 import random
 import string
 
+TX_HAS_IS_CONFIRMED = any(f.name == 'is_confirmed' for f in Transaction._meta.get_fields())
+
+def confirmed_transactions():
+    qs = Transaction.objects.all()
+    if TX_HAS_IS_CONFIRMED:
+        qs = qs.filter(is_confirmed=True)
+    return qs
+
 
 def send_service_confirmation_email_task(service_request_id, confirm_url, decline_url):
     """Send service confirmation email in a background thread."""
@@ -33,7 +41,7 @@ def process_service_request_task(service_request_id):
 
             client = sr.client
             # compute balance
-            balance = Transaction.objects.filter(client=client, is_confirmed=True).aggregate(
+            balance = confirmed_transactions().filter(client=client).aggregate(
                 total=Sum(
                     Case(
                         When(transaction_type='deposit', then='amount'),

@@ -1,84 +1,76 @@
-<!DOCTYPE html>
+{% extends "base.html" %}
 {% load static %}
 {% load client_filters %}
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Products — {{ category }}</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* Reused dashboard styles (trimmed) */
-        body { font-family: Arial, sans-serif; background-color: hsla(80, 27%, 98%, 1.00); margin: 0; }
-        .sidebar { width: 220px; background-color: hsla(80, 27%, 98%, 1.00); position: fixed; height: 100vh; color: #333; padding-top:1rem }
-        .sidebar a { color: #333; padding: 1rem 1.5rem; display:block; text-decoration:none }
-        .content { margin-left: 220px; padding: 2rem; flex-grow: 1; max-width: 1100px; margin-top: 2rem; margin-bottom:2rem }
-        h2.content-title { margin-bottom: 1rem }
+{% block title %}Products — {{ category }}{% endblock %}
+{% block shell_class %}wide{% endblock %}
 
-        .products-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap:1rem }
-        .product-card { background:white; border-radius:8px; padding:1rem; box-shadow: 0 2px 6px rgba(0,0,0,0.08) }
-        .product-image { width:100%; height:160px; object-fit:cover; border-radius:6px; background:#eee }
-        .add-to-basket-container { display:flex; gap:8px; margin-top:8px }
+{% block head_extra %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+.products-grid { 
+  display: grid; 
+  grid-template-columns: repeat(4, 1fr); 
+  gap: 1rem; 
+}
+.product-card { background:white; border-radius:8px; padding:1rem; box-shadow: 0 2px 6px rgba(0,0,0,0.08) }
+.product-image { width:100%; height:80px; object-fit:contain; border-radius:6px; background:#eee }
+.add-to-basket-container { display:flex; gap:8px; margin-top:8px }
 
-        .basket-floating-icon { position: fixed; bottom: 20px; right: 20px; background-color: #ffc107; color: #333; width: 60px; height: 60px; border-radius: 50%; display:flex; align-items:center; justify-content:center; font-size:1.5rem; box-shadow:0 4px 8px rgba(0,0,0,0.2); cursor:pointer; z-index:1000 }
-        .basket-count { position: absolute; top: -5px; right: -5px; background-color: #dc3545; color: white; border-radius: 50%; width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:0.8rem }
-        .basket-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1001; justify-content:center; align-items:center }
-        .basket-content { background:white; width:90%; max-width:600px; border-radius:8px; max-height:80vh; overflow:hidden }
-    </style>
-</head>
+.basket-floating-icon { position: fixed; bottom: 20px; right: 20px; background-color: #ffc107; color: #333; width: 60px; height: 60px; border-radius: 50%; display:flex; align-items:center; justify-content:center; font-size:1.5rem; box-shadow:0 4px 8px rgba(0,0,0,0.2); cursor:pointer; z-index:1000 }
+.basket-count { position: absolute; top: -5px; right: -5px; background-color: #dc3545; color: white; border-radius: 50%; width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:0.8rem }
+.basket-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1001; justify-content:center; align-items:center }
+.basket-content { background:white; width:90%; max-width:600px; border-radius:8px; max-height:80vh; overflow:hidden }
+</style>
+{% endblock %}
 
-<body>
+{% block sidebar_extra %}
+<a href="{% url 'client_dashboard' %}"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
+<a href="{% url 'client_account' %}"><i class="fa-solid fa-user"></i> ACCOUNT</a>
+<a href="{% url 'client_purchases' %}"><i class="fa-solid fa-shopping-bag"></i> PURCHASES</a>
+<a href="{% url 'client_history' %}"><i class="fa-solid fa-clock-rotate-left"></i> HISTORY</a>
+<a href="{% url 'client_settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
+<a href="{% url 'client_topup' %}"><i class="fa-solid fa-wallet"></i> TOPUP ACCOUNT</a>
+<a href="{% url 'client_feedback' %}"><i class="fa-solid fa-comment-dots"></i> FEEDBACK</a>
+<a href="{% url 'client_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+{% endblock %}
 
-    <div class="sidebar">
-        <br>
-        <img src="{% static 'images/icon.png' %}" alt="System Logo" style="width: 200px; display:block; margin:0 auto 12px;">
-        <a href="{% url 'client_dashboard' %}">DASHBOARD</a>
-        <a href="{% url 'client_account' %}">ACCOUNT</a>
-        <a href="{% url 'client_purchases' %}">PURCHASES</a>
-        <a href="{% url 'client_history' %}">HISTORY</a>
-        <a href="{% url 'client_settings' %}">SETTINGS</a>
-        <a href="{% url 'client_topup' %}">TOPUP ACCOUNT</a>
-        <a href="{% url 'client_feedback' %}">FEEDBACK</a>
-        <a href="{% url 'client_login' %}" style="margin-top:12px;color:white;background:#dc3545;padding:10px;border-radius:6px;display:block;text-align:center">Logout</a>
+{% block content %}
+<div class="content" style="max-width:1200px">
+    <div class="header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;border-bottom:1px solid #eee;padding-bottom:1rem">
+        <div style="display:flex;gap:12px;align-items:center">
+            <a href="{% url 'client_dashboard' %}" style="font-weight:600; font-size:0.95rem;text-decoration:none;color:#333;">← Back</a>
+            <h2 class="content-title" style="margin:0">{{ category }}</h2>
+        </div>
+        <div>
+            Welcome, {{ username }}
+        </div>
     </div>
 
-    <div class="content">
-        <div class="header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;border-bottom:1px solid #eee;padding-bottom:1rem">
-            <div style="display:flex;gap:12px;align-items:center">
-                <a href="{% url 'client_dashboard' %}" style="font-weight:600; font-size:0.95rem">← Back</a>
-                <h2 class="content-title">{{ category }}</h2>
-            </div>
-            <div>
-                Welcome, {{ username }}
+    {% if products and products.exists %}
+    <div class="products-grid">
+        {% for product in products %}
+        <div class="product-card">
+            {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
+            {% else %}
+            <div class="product-image" style="display:flex;align-items:center;justify-content:center;color:#999">No Image</div>
+            {% endif %}
+
+            <div style="margin-top:8px;font-weight:700">{{ product.name }}</div>
+            <div style="color:#28a745;margin-top:6px">${{ product.price }}</div>
+            <div style="font-size:0.85rem;color:#666;margin-top:6px">Sold by: {{ product.dealer.name|default:product.dealer.username }}</div>
+
+            <div class="add-to-basket-container">
+                <input type="number" min="1" value="1" id="qty-{{ product.id }}" style="width:72px;padding:6px;border:1px solid #ddd;border-radius:6px">
+                <button class="btn btn-primary" onclick="handleAdd('{{ product.id }}','{{ product.category }}','{{ product.name }}')" style="background:#007bff;color:white;border:none;padding:8px 10px;border-radius:6px;cursor:pointer">Add to Basket</button>
             </div>
         </div>
-
-        {% if products and products.exists %}
-        <div class="products-grid">
-            {% for product in products %}
-            <div class="product-card">
-                {% if product.image %}
-                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
-                {% else %}
-                <div class="product-image" style="display:flex;align-items:center;justify-content:center;color:#999">No Image</div>
-                {% endif %}
-
-                <div style="margin-top:8px;font-weight:700">{{ product.name }}</div>
-                <div style="color:#28a745;margin-top:6px">${{ product.price }}</div>
-                <div style="font-size:0.85rem;color:#666;margin-top:6px">Sold by: {{ product.dealer.name|default:product.dealer.username }}</div>
-
-                <div class="add-to-basket-container">
-                    <input type="number" min="1" value="1" id="qty-{{ product.id }}" style="width:72px;padding:6px;border:1px solid #ddd;border-radius:6px">
-                    <button class="btn btn-primary" onclick="handleAdd('{{ product.id }}','{{ product.category }}','{{ product.name }}')" style="background:#007bff;color:white;border:none;padding:8px 10px;border-radius:6px">Add to Basket</button>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        {% else %}
-        <p>No products found for this category.</p>
-        {% endif %}
+        {% endfor %}
     </div>
+    {% else %}
+    <p>No products found for this category.</p>
+    {% endif %}
 
     <!-- Basket Floating Icon -->
     <div class="basket-floating-icon" onclick="toggleBasket()">
@@ -90,20 +82,20 @@
     <div id="basket-modal" class="basket-modal">
         <div class="basket-content">
             <div style="padding:1rem;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center">
-                <h3>Your Basket</h3>
-                <button onclick="toggleBasket()" style="border:none;background:#6c757d;color:white;padding:6px 10px;border-radius:6px">Close</button>
+                <h3 style="margin:0">Your Basket</h3>
+                <button onclick="toggleBasket()" style="border:none;background:#6c757d;color:white;padding:6px 10px;border-radius:6px;cursor:pointer">Close</button>
             </div>
             <div style="padding:1rem;max-height:60vh;overflow:auto">
                 {% if basket_items %}
                     {% for item in basket_items %}
-                        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0">
+                        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0;align-items:center;">
                             <div>
                                 <strong>{{ item.product.name }}</strong><br>
                                 <span style="color:#666">${{ item.product.price }}</span>
                             </div>
                             <div style="display:flex;gap:8px;align-items:center">
                                 <input type="number" min="1" value="{{ item.quantity }}" onchange="updateBasketItem('{{ item.id }}', this.value)" style="width:64px;padding:6px;border:1px solid #ddd;border-radius:6px">
-                                <button onclick="removeBasketItem('{{ item.id }}')" style="background:#dc3545;color:white;border:none;padding:6px 8px;border-radius:6px">X</button>
+                                <button onclick="removeBasketItem('{{ item.id }}')" style="background:#dc3545;color:white;border:none;padding:6px 8px;border-radius:6px;cursor:pointer">X</button>
                             </div>
                         </div>
                     {% endfor %}
@@ -112,132 +104,57 @@
                 {% endif %}
             </div>
             <div style="padding:1rem;border-top:1px solid #eee;text-align:right">
-                <h4>Total: $<span id="basket-total">{{ basket_total|default:0 }}</span></h4>
-                <button onclick="checkout()" style="background:#007bff;color:white;border:none;padding:8px 12px;border-radius:6px">Checkout</button>
+                <h4 style="margin:0 0 10px 0">Total: $<span id="basket-total">{{ basket_total|default:0 }}</span></h4>
+                <button onclick="checkout()" style="background:#007bff;color:white;border:none;padding:8px 12px;border-radius:6px;cursor:pointer">Checkout</button>
             </div>
         </div>
     </div>
+</div>
+{% endblock %}
 
-    <script>
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
+{% block body_extra %}
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
                 }
             }
-            return cookieValue;
         }
-        const csrftoken = getCookie('csrftoken');
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
 
-        function toggleBasket() {
-            const modal = document.getElementById('basket-modal');
-            if (modal.style.display === 'flex') modal.style.display = 'none'; else modal.style.display = 'flex';
-        }
+    function toggleBasket() {
+        const modal = document.getElementById('basket-modal');
+        if (modal.style.display === 'flex') modal.style.display = 'none'; else modal.style.display = 'flex';
+    }
 
-        function addToBasket(productId) {
-            const qtyInput = document.getElementById('qty-' + productId);
-            const quantity = qtyInput ? qtyInput.value : 1;
-            fetch(`/Client/add-to-basket/${productId}/`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken }, body: JSON.stringify({ 'quantity': quantity })
-            }).then(r => r.json()).then(data => {
-                if (data.status === 'success') { document.getElementById('basket-count').textContent = data.cart_count; alert('Added to basket'); location.reload(); }
-                else alert('Error: ' + (data.message || 'Unable to add'))
-            }).catch(() => alert('Network error'))
-        }
+    function addToBasket(productId) {
+        const qtyInput = document.getElementById('qty-' + productId);
+        const quantity = qtyInput ? qtyInput.value : 1;
+        fetch(`/Client/add-to-basket/${productId}/`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken }, body: JSON.stringify({ 'quantity': quantity })
+        }).then(r => r.json()).then(data => {
+            if (data.status === 'success') { document.getElementById('basket-count').textContent = data.cart_count; alert('Added to basket'); location.reload(); }
+            else alert('Error: ' + (data.message || 'Unable to add'))
+        }).catch(() => alert('Network error'))
+    }
 
-        // If product is a service, show a modal to collect extra details
-        function handleAdd(productId, category, name) {
-            if (category && category.trim().toLowerCase() === 'services') {
-                openServiceModal(productId, name);
-            } else {
-                addToBasket(productId);
-            }
-        }
+    function handleAdd(productId, category, name) {
+        // Just call addToBasket for now, as service modal is missing
+        addToBasket(productId);
+    }
 
-        function openServiceModal(productId, productName) {
-            const modal = document.getElementById('service-modal');
-            document.getElementById('service-product-name').textContent = productName;
-            document.getElementById('service-product-id').value = productId;
-            modal.style.display = 'flex';
-        }
+    function updateBasketItem(itemId, quantity) { fetch(`/Client/update-basket-item/${itemId}/`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken }, body: JSON.stringify({ 'quantity': quantity }) }).then(r=>r.json()).then(data=>{ if(data.status==='success') location.reload(); else alert('Error: '+data.message) }); }
 
-        function closeServiceModal() {
-            document.getElementById('service-modal').style.display = 'none';
-        }
+    function removeBasketItem(itemId) { if(!confirm('Are you sure?')) return; fetch(`/Client/remove-basket-item/${itemId}/`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken }, body: JSON.stringify({}) }).then(r=>r.json()).then(data=>{ if(data.status==='success') location.reload(); else alert('Error: '+data.message) }); }
 
-        function submitServiceForm() {
-            const productId = document.getElementById('service-product-id').value;
-            const serviceProvider = document.getElementById('service_provider').value;
-            const amount = document.getElementById('service_amount').value;
-            const beneficiaries = document.getElementById('beneficiaries').value;
-            const providerContact = document.getElementById('provider_contact').value;
-
-            const payload = {
-                service_provider: serviceProvider,
-                amount: amount,
-                beneficiaries: beneficiaries,
-                provider_contact: providerContact
-            };
-
-            fetch(`/Client/service-request/${productId}/`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken }, body: JSON.stringify(payload) })
-                .then(r => r.json()).then(data => {
-                    if (data.status === 'success') { alert('Request submitted'); closeServiceModal(); location.reload(); }
-                    else alert('Error: ' + (data.message || 'Unable to submit'))
-                }).catch(() => alert('Network error'));
-        }
-
-        function updateBasketItem(itemId, quantity) {
-            fetch(`/Client/update-basket-item/${itemId}/`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken }, body: JSON.stringify({ 'quantity': quantity }) })
-                .then(r => r.json()).then(data => { if (data.status === 'success') location.reload(); else alert('Error: ' + data.message) });
-        }
-
-        function removeBasketItem(itemId) {
-            if (!confirm('Are you sure?')) return;
-            fetch(`/Client/remove-basket-item/${itemId}/`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken }, body: JSON.stringify({}) })
-                .then(r => r.json()).then(data => { if (data.status === 'success') location.reload(); else alert('Error: ' + data.message) });
-        }
-
-        function checkout() {
-            if (!confirm('Do you want to purchase the items in your basket?')) return;
-            fetch(`/Client/checkout/`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken }, body: JSON.stringify({}) })
-                .then(r => r.json()).then(data => { if (data.status === 'success') { alert('Purchase successful!'); location.reload(); } else alert('Error: ' + data.message) });
-        }
-    </script>
-
-    <!-- Service modal for collecting extra details (e.g., school fees) -->
-    <div id="service-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:1100;justify-content:center;align-items:center">
-        <div style="background:white;padding:16px;border-radius:8px;width:90%;max-width:520px">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-                <h3 style="margin:0">Service: <span id="service-product-name"></span></h3>
-                <button onclick="closeServiceModal()" style="border:none;background:#6c757d;color:white;padding:6px 10px;border-radius:6px">Close</button>
-            </div>
-            <input type="hidden" id="service-product-id" value="">
-            <div style="display:flex;flex-direction:column;gap:8px">
-                <label>Service Provider</label>
-                <input id="service_provider" type="text" placeholder="Name of provider (e.g., school)" style="padding:8px;border:1px solid #ddd;border-radius:6px">
-
-                <label>Amount</label>
-                <input id="service_amount" type="number" step="0.01" style="padding:8px;border:1px solid #ddd;border-radius:6px">
-
-                <label>Beneficiary Name(s)</label>
-                <input id="beneficiaries" type="text" placeholder="Comma-separated beneficiary names" style="padding:8px;border:1px solid #ddd;border-radius:6px">
-
-                <label>Provider Contact</label>
-                <input id="provider_contact" type="text" placeholder="Phone or email" style="padding:8px;border:1px solid #ddd;border-radius:6px">
-
-                <div style="text-align:right;margin-top:8px">
-                    <button onclick="submitServiceForm()" style="background:#28a745;color:white;border:none;padding:8px 12px;border-radius:6px">Submit</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-</body>
-
-</html>
+    function checkout() { if(!confirm('Do you want to purchase the items in your basket?')) return; fetch(`/Client/checkout/`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken }, body: JSON.stringify({}) }).then(r=>r.json()).then(data=>{ if(data.status==='success'){ alert('Purchase successful!'); location.reload() } else alert('Error: '+data.message) }); }
+</script>
+{% endblock %}

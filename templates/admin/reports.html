@@ -1,203 +1,78 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Reports</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: hsla(80, 27%, 98%, 1.00);
-            margin: 0;
-            height: 100vh;
-            display: flex;
-        }
+{% block title %}Reports{% endblock %}
 
-        .sidebar {
-            width: 220px;
-            background-color: hsla(80, 27%, 98%, 1.00);
-            color: hsla(80, 27%, 98%, 1.00);
-            display: flex;
-            flex-direction: column;
-            padding-top: 1rem;
-            position: fixed;
-            height: 100vh;
-            color: #333;
-        }
+{% block shell_class %}wide{% endblock %}
 
-        .sidebar h2 {
-            text-align: center;
-            margin-bottom: 2rem;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #333;
-            font-family: Algerian;
-        }
+{% block head_extra %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+.content{max-width:1200px}
+.section{margin-bottom:2rem;padding:1.25rem;border:1px solid #dde3ec;border-radius:12px;background:#fff}
+.section h3{margin-bottom:1rem;color:#1e3a5f}
+form{display:flex;flex-direction:column;gap:1rem}
+label{font-weight:600;color:#1e3a5f}
+input,select,button{padding:.6rem .7rem;border:1px solid #d0d9e4;border-radius:8px}
+button{background-color:#0d5c46;color:#fff;cursor:pointer;border:none;font-weight:600}
+button:hover{background-color:#0a4736}
+.form-row{display:flex;gap:1rem;flex-wrap:wrap}
+.form-row>div{flex:1;min-width:220px}
+.dealer-nav{display:flex;flex-direction:column;gap:6px;min-height:0;overflow-y:auto}
+</style>
+{% endblock %}
 
-        .sidebar a {
-            color: #333;
-            padding: 1rem 1.5rem;
-            text-decoration: none;
-            font-size: 1rem;
-            transition: background-color 0.3s ease;
-        }
+{% block sidebar_extra %}
 
-        .sidebar a:hover {
-            background-color: #495057;
-        }
+    <a href="{% url 'admin_dashboard' %}"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
+    <a href="{% url 'locations' %}"><i class="fa-solid fa-map-location-dot"></i> LOCATIONS</a>
+    <a href="{% url 'accounts' %}"><i class="fa-solid fa-users"></i> ACCOUNTS</a>
+    <a href="{% url 'sales' %}"><i class="fa-solid fa-chart-line"></i> SALES</a>
+    <a href="{% url 'settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
+    <a href="{% url 'reports' %}" class="active"><i class="fa-solid fa-file-invoice-dollar"></i> REPORTS</a>
+    <a href="{% url 'admin_feedbacks' %}"><i class="fa-solid fa-comment-dots"></i> FEEDBACKS</a>
+    <a href="{% url 'admin_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+{% endblock %}
 
-        .sidebar a.active {
-            background-color: #007bff;
-        }
-
-        .content {
-            margin-left: 220px;
-            padding: 2rem;
-            flex-grow: 1;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 1200px;
-            margin-top: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 0;
-            border-bottom: 1px solid #ddd;
-            margin-bottom: 2rem;
-        }
-
-        .logout-link {
-            margin-top: auto;
-            padding: 1rem 1.5rem;
-            background-color: #dc3545;
-            color: white;
-            text-align: center;
-            text-decoration: none;
-            font-weight: bold;
-            border-top: 1px solid #495057;
-        }
-
-        .logout-link:hover {
-            background-color: #c82333;
-        }
-
-        .section {
-            margin-bottom: 2rem;
-            padding: 1rem;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-        }
-
-        .section h3 {
-            margin-bottom: 1rem;
-            color: #333;
-        }
-
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        label {
-            font-weight: bold;
-        }
-
-        input,
-        select,
-        button {
-            padding: 0.5rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        button {
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .form-row>div {
-            flex: 1;
-            min-width: 200px;
-        }
-    </style>
-</head>
-
-<body>
-
-    <div class="sidebar">
-        <img src="{% static 'images/icon.png' %}" alt="System Logo"
-            style="width: 200px; height: auto; align-self: center; margin-bottom: 20px;">
-
-        <a href="{% url 'admin_dashboard' %}" class="active"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
-        <a href="{% url 'locations' %}"><i class="fa-solid fa-map-location-dot"></i> LOCATIONS</a>
-        <a href="{% url 'accounts' %}"><i class="fa-solid fa-users"></i> ACCOUNTS</a>
-        <a href="{% url 'sales' %}"><i class="fa-solid fa-chart-line"></i> SALES</a>
-        <a href="{% url 'settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
-        <a href="{% url 'reports' %}"><i class="fa-solid fa-file-invoice-dollar"></i> REPORTS</a>
-        <a href="{% url 'admin_feedbacks' %}"><i class="fa-solid fa-comment-dots"></i> FEEDBACKS</a>
-        <a href="{% url 'admin_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+{% block content %}
+<div class="content">
+    <div class="header">
+        <h2>Reports</h2>
     </div>
-    <div class="content">
-        <div class="header">
-            <h2>Reports</h2>
-        </div>
 
-        <div class="section">
-            <h3>Generate Transaction Report</h3>
-            <form method="post">
-                {% csrf_token %}
-                <div class="form-row">
-                    <div>
-                        <label for="{{ form.dealer.id_for_label }}">Dealer:</label>
-                        {{ form.dealer }}
-                    </div>
-                    <div>
-                        <label for="{{ form.client.id_for_label }}">Client:</label>
-                        {{ form.client }}
-                    </div>
-                    <div>
-                        <label for="{{ form.location.id_for_label }}">Location:</label>
-                        {{ form.location }}
-                    </div>
+    <div class="section">
+        <h3>Generate Transaction Report</h3>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-row">
+                <div>
+                    <label for="{{ form.dealer.id_for_label }}">Dealer:</label>
+                    {{ form.dealer }}
                 </div>
-                <div class="form-row">
-                    <div>
-                        <label for="{{ form.start_date.id_for_label }}">Start Date:</label>
-                        {{ form.start_date }}
-                    </div>
-                    <div>
-                        <label for="{{ form.end_date.id_for_label }}">End Date:</label>
-                        {{ form.end_date }}
-                    </div>
-                    <div>
-                        <label for="{{ form.email.id_for_label }}">Email Address:</label>
-                        {{ form.email }}
-                    </div>
+                <div>
+                    <label for="{{ form.client.id_for_label }}">Client:</label>
+                    {{ form.client }}
                 </div>
-                <button type="submit">Generate and Send Report</button>
-            </form>
-        </div>
+                <div>
+                    <label for="{{ form.location.id_for_label }}">Location:</label>
+                    {{ form.location }}
+                </div>
+            </div>
+            <div class="form-row">
+                <div>
+                    <label for="{{ form.start_date.id_for_label }}">Start Date:</label>
+                    {{ form.start_date }}
+                </div>
+                <div>
+                    <label for="{{ form.end_date.id_for_label }}">End Date:</label>
+                    {{ form.end_date }}
+                </div>
+                <div>
+                    <label for="{{ form.email.id_for_label }}">Email Address:</label>
+                    {{ form.email }}
+                </div>
+            </div>
+            <button type="submit">Generate and Send Report</button>
+        </form>
     </div>
-</body>
-
-</html>
+</div>
+{% endblock %}
