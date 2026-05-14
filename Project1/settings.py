@@ -126,6 +126,9 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
+# The absolute path to the directory where collectstatic will collect static files for deployment.
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
 # Media files (Images, etc.)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
