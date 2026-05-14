@@ -7,3 +7,5 @@ pycryptodome==3.19.0
 
 gunicorn==23.0.0
 whitenoise==6.8.2
+
+paynow==1.0.8
