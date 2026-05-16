@@ -150,14 +150,14 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Email configuration
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'tuvaravef@gmail.com'  # Replace with your email
-EMAIL_HOST_PASSWORD = 'xzctviuezjqwinrl'  # Replace with your app password
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'tuvaravef@gmail.com'
+# EMAIL_HOST_PASSWORD = 'your_app_password'
 
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
 # Default primary key field type

@@ -18,7 +18,7 @@ def send_client_email(subject, template_name, context, recipient_list):
             from_email,
             recipient_list,
             html_message=html_message,
-            fail_silently=False,
+            fail_silently=True,
         )
         return True
     except Exception as e:
