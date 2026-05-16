@@ -82,19 +82,26 @@ WSGI_APPLICATION = 'Project1.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default=postgresql://connectzw_user:exeOo98FojnnLZnjCgNeqAAeC2cymc2M@dpg-d82r6breo5us73fdr0v0-a/connectzw_db',
-        conn_max_age=600
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'connectzw',
+        'USER': 'connectzw_user',
+        'PASSWORD': 'exeOo98FojnnLZnjCgNeqAAeC2cymc2M',
+        'HOST': 'dpg-d82r6breo5us73fdr0v0-a.oregon-postgres.render.com',
+        'PORT': '5432',# Default is 5432
+           'OPTIONS': {
+            'sslmode': 'require',
+        },  
+    }
 }
 # Use Render's database if provided in the environment
-database_url = os.environ.get("DATABASE_URL")
-if database_url:
-    DATABASES['default'] = dj_database_url.config(
-        default=database_url,
-        conn_max_age=600
+DATABASES = {
+    'default': dj_database_url.config(
+        default='postgresql://connectzw_user:exeOo98FojnnLZnjCgNeqAAeC2cymc2M@dpg-d82r6breo5us73fdr0v0-a.oregon-postgres.render.com:5432/connectzw',
+        conn_max_age=600,
+        ssl_require=True
     )
-
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
