@@ -130,28 +130,14 @@ def client_dashboard(request):
             'Health & Beauty', 'Books', 'Oil & Gas', 'Jewelry', 'Agriculture Supplies', 'Office Supplies', 'Residential Stands', 'Kitchen Appliances'
         ]
 
-        # Path to images directory (relative to static/images/)
-        image_base = os.path.join('images')
         categories_data = []
         for cat in category_list:
-            # Try to find an image in static/images/<category>/
-            folder_name = cat.replace('&', 'and').replace(' ', '_').lower()
-            image_path = None
-            try:
-                # List files in the folder
-                abs_folder_path = os.path.join(os.path.dirname(__file__), '..', '..', 'static', 'images', folder_name)
-                files = os.listdir(abs_folder_path)
-                # Pick the first image file (jpg, png, jpeg, webp)
-                for f in files:
-                    if f.lower().endswith(('.jpg', '.jpeg', '.png', '.webp', '.gif')):
-                        image_path = os.path.join('images', folder_name, f)
-                        break
-            except Exception:
-                image_path = None
-            categories_data.append({
-                'name': cat,
-                'image': image_path  # None if not found
-            })
+            image_url = None
+            for p in products_by_category.get(cat, []):
+                if p.image:
+                    image_url = p.image.url
+                    break
+            categories_data.append({'name': cat, 'image': image_url})
 
         # Re-fetch products and organize by category to ensure consistency
         all_products = Product.objects.filter(dealer__isnull=False).select_related('dealer').order_by('category', 'name')
@@ -858,6 +844,38 @@ def client_products(request, category):
         'basket_count': basket_items.count(),
     }
     return render(request, 'Client/client-products.html', context)
+
+
+def client_cart(request):
+    if not request.session.get('client_logged_in'):
+        return redirect('client_login')
+    username = request.session.get('client_username')
+    try:
+        client = Client.objects.get(username=username)
+    except Client.DoesNotExist:
+        return redirect('client_login')
+
+    basket, _ = Basket.objects.get_or_create(client=client)
+    items = basket.items.select_related('product', 'product__dealer').all()
+    total = basket.get_total()
+
+    balance = confirmed_transactions().filter(client=client).aggregate(
+        total=Sum(Case(
+            When(transaction_type='deposit', then='amount'),
+            When(transaction_type__in=['purchase', 'redemption'], then=F('amount') * -1),
+            default=0,
+            output_field=DecimalField()
+        ))
+    )['total'] or 0
+
+    return render(request, 'Client/client_cart.html', {
+        'username': username,
+        'client': client,
+        'items': items,
+        'total': total,
+        'balance': balance,
+        'basket_count': items.count(),
+    })
 
 
 def service_request(request, product_id):

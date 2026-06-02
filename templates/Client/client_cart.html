@@ -1,0 +1,616 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Your Cart{% endblock %}
+{% block shell_class %}wide{% endblock %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .content {
+        flex: 1;
+        width: 100%;
+        min-width: 0;
+        padding: 32px;
+        box-sizing: border-box;
+    }
+
+    /* ── Invoice card ── */
+    .invoice-wrap {
+        max-width: 860px;
+        margin: 0 auto;
+    }
+
+    .invoice-card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #edf1f5;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
+
+    /* ── Invoice header band ── */
+    .invoice-header {
+        background: #0f2744;
+        color: #fff;
+        padding: 28px 36px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 24px;
+        flex-wrap: wrap;
+    }
+
+    .invoice-brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .invoice-brand-icon {
+        width: 48px;
+        height: 48px;
+        background: #0d5c46;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1.5px solid #1D9E75;
+        flex-shrink: 0;
+        position: relative;
+    }
+
+    .invoice-brand-z {
+        color: #4ecfa8;
+        font-size: 24px;
+        font-weight: 700;
+        font-family: Georgia, serif;
+        letter-spacing: -2px;
+        line-height: 1;
+    }
+
+    .invoice-brand-dot {
+        width: 7px;
+        height: 7px;
+        background: #4ecfa8;
+        border-radius: 50%;
+        position: absolute;
+        bottom: 6px;
+        right: 6px;
+    }
+
+    .invoice-brand-words { display: flex; flex-direction: column; gap: 3px; }
+    .invoice-brand-name { font-size: 18px; font-weight: 700; color: #fff; }
+    .invoice-brand-tag { font-size: 10px; color: #6b8cae; letter-spacing: 1px; text-transform: uppercase; }
+
+    .invoice-meta { text-align: right; }
+    .invoice-title {
+        font-size: 26px;
+        font-weight: 700;
+        color: #4ecfa8;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        line-height: 1;
+        margin-bottom: 8px;
+    }
+    .invoice-meta-row { font-size: 12px; color: #a4b8cc; margin-top: 4px; }
+    .invoice-meta-row span { color: #fff; font-weight: 600; }
+
+    /* ── Bill-to section ── */
+    .invoice-billto {
+        padding: 20px 36px;
+        border-bottom: 1px solid #edf1f5;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 12px;
+        background: #f8fafc;
+    }
+
+    .invoice-billto-label {
+        font-size: 10px;
+        font-weight: 700;
+        color: #7a92ab;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+    }
+
+    .invoice-billto-name {
+        font-size: 15px;
+        font-weight: 700;
+        color: #0f2744;
+    }
+
+    .invoice-billto-sub {
+        font-size: 12px;
+        color: #7a92ab;
+        margin-top: 2px;
+    }
+
+    .invoice-balance-pill {
+        background: #edf9f5;
+        border: 1px solid #b2e8d4;
+        border-radius: 20px;
+        padding: 6px 16px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #0d5c46;
+        white-space: nowrap;
+        align-self: center;
+    }
+
+    /* ── Line items table ── */
+    .invoice-table-wrap {
+        padding: 0 36px;
+        overflow-x: auto;
+    }
+
+    .invoice-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+        margin: 24px 0 0;
+    }
+
+    .invoice-table thead tr {
+        background: #f0f4f8;
+    }
+
+    .invoice-table th {
+        padding: 12px 14px;
+        font-size: 11px;
+        font-weight: 700;
+        color: #475569;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .invoice-table th:last-child,
+    .invoice-table td:last-child { text-align: right; }
+
+    .invoice-table th:nth-child(2),
+    .invoice-table td:nth-child(2) { text-align: center; }
+
+    .invoice-table td {
+        padding: 16px 14px;
+        color: #1e293b;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+    }
+
+    .invoice-table tr:last-child td { border-bottom: none; }
+
+    .invoice-table tr:hover td { background: #fafcff; }
+
+    .item-product-cell { display: flex; align-items: center; gap: 12px; }
+
+    .item-thumb {
+        width: 44px;
+        height: 44px;
+        object-fit: cover;
+        border-radius: 6px;
+        border: 1px solid #edf1f5;
+        flex-shrink: 0;
+        background: #f4f6f9;
+    }
+
+    .item-thumb-placeholder {
+        width: 44px;
+        height: 44px;
+        border-radius: 6px;
+        border: 1px solid #edf1f5;
+        background: #f4f6f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: #b0bec5;
+        font-size: 18px;
+    }
+
+    .item-name { font-weight: 600; color: #0f2744; font-size: 14px; }
+    .item-dealer { font-size: 11px; color: #7a92ab; margin-top: 2px; }
+    .item-category-badge {
+        display: inline-block;
+        font-size: 10px;
+        background: #edf6f2;
+        color: #0d5c46;
+        border: 1px solid #b2e8d4;
+        border-radius: 10px;
+        padding: 2px 8px;
+        margin-top: 3px;
+        font-weight: 600;
+    }
+
+    .qty-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: #f0f4f8;
+        border: 1px solid #dde3ec;
+        border-radius: 6px;
+        font-weight: 700;
+        color: #0f2744;
+        font-size: 14px;
+    }
+
+    .unit-price { color: #475569; }
+    .line-total { font-weight: 700; color: #0f2744; }
+
+    .remove-btn {
+        background: none;
+        border: none;
+        color: #b0bec5;
+        font-size: 15px;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: color 0.15s, background 0.15s;
+    }
+    .remove-btn:hover { color: #dc3545; background: #fff0f0; }
+
+    /* ── Totals block ── */
+    .invoice-totals {
+        padding: 20px 36px 28px;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .invoice-totals-box {
+        width: 280px;
+        border: 1px solid #edf1f5;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .totals-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 16px;
+        font-size: 14px;
+        border-bottom: 1px solid #f1f5f9;
+        color: #475569;
+    }
+
+    .totals-row:last-child { border-bottom: none; }
+
+    .totals-row.grand-total {
+        background: #0f2744;
+        color: #fff;
+        font-weight: 700;
+        font-size: 15px;
+    }
+
+    .totals-row.grand-total .totals-amount { color: #4ecfa8; font-size: 17px; }
+
+    /* ── Insufficient funds warning ── */
+    .insufficient-banner {
+        margin: 0 36px 16px;
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+        border-radius: 8px;
+        padding: 10px 16px;
+        font-size: 13px;
+        color: #856404;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* ── Action buttons ── */
+    .invoice-actions {
+        padding: 0 36px 32px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 22px;
+        background: #f0f4f8;
+        color: #0f2744;
+        border: 1px solid #dde3ec;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background 0.15s;
+    }
+    .btn-back:hover { background: #e2e8f0; }
+
+    .btn-checkout {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 32px;
+        background: #0d5c46;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.12s;
+        letter-spacing: 0.3px;
+    }
+    .btn-checkout:hover { background: #0a4736; transform: translateY(-1px); }
+    .btn-checkout:disabled { background: #94a3b8; cursor: not-allowed; transform: none; }
+
+    /* ── Empty cart ── */
+    .empty-cart {
+        text-align: center;
+        padding: 60px 36px;
+        color: #7a92ab;
+    }
+    .empty-cart i { font-size: 3rem; margin-bottom: 16px; color: #dde3ec; display: block; }
+    .empty-cart p { font-size: 15px; margin-bottom: 20px; }
+
+    /* ── Toast ── */
+    .toast {
+        position: fixed;
+        bottom: 28px;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        background: #0f2744;
+        color: #fff;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        opacity: 0;
+        transition: opacity 0.25s, transform 0.25s;
+        z-index: 9999;
+        pointer-events: none;
+        white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.success { background: #0d5c46; }
+    .toast.error   { background: #dc3545; }
+</style>
+{% endblock %}
+
+{% block sidebar_extra %}
+<a href="{% url 'client_dashboard' %}"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
+<a href="{% url 'client_account' %}"><i class="fa-solid fa-user"></i> ACCOUNT</a>
+<a href="{% url 'client_purchases' %}"><i class="fa-solid fa-shopping-bag"></i> PURCHASES</a>
+<a href="{% url 'client_history' %}"><i class="fa-solid fa-clock-rotate-left"></i> HISTORY</a>
+<a href="{% url 'client_settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
+<a href="{% url 'client_topup' %}"><i class="fa-solid fa-wallet"></i> TOPUP ACCOUNT</a>
+<a href="{% url 'client_feedback' %}"><i class="fa-solid fa-comment-dots"></i> FEEDBACK</a>
+<a href="{% url 'client_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+{% endblock %}
+
+{% block content %}
+<div class="content">
+<div class="invoice-wrap">
+    <div class="invoice-card">
+
+        <!-- ── Header ── -->
+        <div class="invoice-header">
+            <div class="invoice-brand">
+                <div class="invoice-brand-icon">
+                    <span class="invoice-brand-z">Z</span>
+                    <div class="invoice-brand-dot"></div>
+                </div>
+                <div class="invoice-brand-words">
+                    <div class="invoice-brand-name">ConnectZw</div>
+                    <div class="invoice-brand-tag">Remittance Platform</div>
+                </div>
+            </div>
+            <div class="invoice-meta">
+                <div class="invoice-title">Cart</div>
+                <div class="invoice-meta-row">Date&nbsp; <span id="invoice-date"></span></div>
+                <div class="invoice-meta-row">Items&nbsp; <span>{{ items.count }}</span></div>
+            </div>
+        </div>
+
+        <!-- ── Bill-to ── -->
+        <div class="invoice-billto">
+            <div>
+                <div class="invoice-billto-label">Bill To</div>
+                <div class="invoice-billto-name">{{ client.firstname }} {{ client.lastname }}</div>
+                <div class="invoice-billto-sub">@{{ username }}</div>
+                {% if client.email_address %}
+                <div class="invoice-billto-sub">{{ client.email_address }}</div>
+                {% endif %}
+            </div>
+            <div class="invoice-balance-pill">
+                <i class="fa-solid fa-wallet" style="margin-right:6px;"></i>
+                Balance: ${{ balance }}
+            </div>
+        </div>
+
+        {% if items %}
+
+        <!-- ── Line items ── -->
+        <div class="invoice-table-wrap">
+            <table class="invoice-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Qty</th>
+                        <th>Unit Price</th>
+                        <th>Line Total</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="cart-tbody">
+                    {% for item in items %}
+                    <tr id="row-{{ item.id }}">
+                        <td>
+                            <div class="item-product-cell">
+                                {% if item.product.image %}
+                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="item-thumb">
+                                {% else %}
+                                    <div class="item-thumb-placeholder">
+                                        <i class="fa-solid fa-box"></i>
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    <div class="item-name">{{ item.product.name }}</div>
+                                    {% if item.product.dealer %}
+                                    <div class="item-dealer">{{ item.product.dealer.firstname }} {{ item.product.dealer.lastname }}</div>
+                                    {% endif %}
+                                    <span class="item-category-badge">{{ item.product.category }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="qty-badge">{{ item.quantity }}</span></td>
+                        <td class="unit-price">${{ item.product.price }}</td>
+                        <td class="line-total">${{ item.get_cost }}</td>
+                        <td>
+                            <button class="remove-btn" onclick="removeItem({{ item.id }})" title="Remove">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ── Totals ── -->
+        <div class="invoice-totals">
+            <div class="invoice-totals-box">
+                <div class="totals-row">
+                    <span>Subtotal</span>
+                    <span class="totals-amount">${{ total }}</span>
+                </div>
+                <div class="totals-row">
+                    <span>Platform fee</span>
+                    <span class="totals-amount">$0.00</span>
+                </div>
+                <div class="totals-row grand-total">
+                    <span>Total Due</span>
+                    <span class="totals-amount">${{ total }}</span>
+                </div>
+            </div>
+        </div>
+
+        {% if balance < total %}
+        <div class="insufficient-banner">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            Insufficient balance. Your balance is ${{ balance }} but the total is ${{ total }}.
+            <a href="{% url 'client_topup' %}" style="margin-left:8px;font-weight:700;color:#856404;text-decoration:underline;">Top up</a>
+        </div>
+        {% endif %}
+
+        <!-- ── Actions ── -->
+        <div class="invoice-actions">
+            <a href="{% url 'client_dashboard' %}" class="btn-back">
+                <i class="fa-solid fa-arrow-left"></i> Continue Shopping
+            </a>
+            <button class="btn-checkout" id="checkout-btn"
+                    {% if balance < total %}disabled title="Insufficient balance"{% endif %}
+                    onclick="doCheckout()">
+                <i class="fa-solid fa-lock"></i> Proceed to Checkout
+            </button>
+        </div>
+
+        {% else %}
+
+        <!-- ── Empty state ── -->
+        <div class="empty-cart">
+            <i class="fa-solid fa-cart-shopping"></i>
+            <p>Your cart is empty.</p>
+            <a href="{% url 'client_dashboard' %}" class="btn-back">
+                <i class="fa-solid fa-arrow-left"></i> Browse Categories
+            </a>
+        </div>
+
+        {% endif %}
+
+    </div><!-- /invoice-card -->
+</div><!-- /invoice-wrap -->
+</div><!-- /content -->
+{% endblock %}
+
+{% block body_extra %}
+<div class="toast" id="toast"></div>
+
+<script>
+    // Set invoice date
+    const now = new Date();
+    document.getElementById('invoice-date').textContent =
+        now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+    function getCookie(name) {
+        let v = null;
+        if (document.cookie) {
+            document.cookie.split(';').forEach(c => {
+                c = c.trim();
+                if (c.startsWith(name + '=')) v = decodeURIComponent(c.slice(name.length + 1));
+            });
+        }
+        return v;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    function showToast(msg, type) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = 'toast show ' + (type || '');
+        setTimeout(() => { t.className = 'toast'; }, 3200);
+    }
+
+    function removeItem(itemId) {
+        if (!confirm('Remove this item from your cart?')) return;
+        fetch(`/Client/remove-basket-item/${itemId}/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+            body: JSON.stringify({})
+        })
+        .then(r => r.json())
+        .then(d => {
+            if (d.status === 'success') {
+                showToast('Item removed.', 'success');
+                // Reload to recalculate totals
+                setTimeout(() => location.reload(), 600);
+            } else {
+                showToast('Error: ' + d.message, 'error');
+            }
+        })
+        .catch(() => showToast('Network error.', 'error'));
+    }
+
+    function doCheckout() {
+        const btn = document.getElementById('checkout-btn');
+        if (btn.disabled) return;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing…';
+
+        fetch('/Client/checkout/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+            body: JSON.stringify({})
+        })
+        .then(r => r.json())
+        .then(d => {
+            if (d.status === 'success') {
+                showToast('Purchase successful! Redirecting…', 'success');
+                setTimeout(() => window.location.href = '/Client/purchases/', 1500);
+            } else {
+                showToast('Error: ' + d.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-lock"></i> Proceed to Checkout';
+            }
+        })
+        .catch(() => {
+            showToast('Network error. Please try again.', 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-lock"></i> Proceed to Checkout';
+        });
+    }
+</script>
+{% endblock %}
