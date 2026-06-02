@@ -1,193 +1,145 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Location - Reports</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-            margin: 0;
-            display: flex;
-            height: 100vh;
-        }
+{% block title %}Reports — {{ location.location_name }}{% endblock %}
+{% block shell_class %}wide{% endblock %}
 
-        .sidebar {
-            width: 220px;
-            background-color: #fff;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            padding-top: 1rem;
-        }
+{% block head_extra %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .content { flex: 1; width: 100%; min-width: 0; padding: 32px; box-sizing: border-box; }
 
-        .sidebar h2 {
-            text-align: center;
-            margin-bottom: 2rem;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #333;
-        }
+    .page-title {
+        font-size: 20px; font-weight: 700; color: #0f2744;
+        margin-bottom: 24px; display: flex; align-items: center; gap: 10px;
+    }
 
-        .sidebar a {
-            color: #333;
-            padding: 1rem 1.5rem;
-            text-decoration: none;
-            font-size: 1rem;
-            transition: background-color 0.3s ease;
-        }
+    .form-card {
+        background: #fff; border: 1px solid #edf1f5;
+        border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        padding: 28px 32px; max-width: 680px;
+    }
 
-        .sidebar a:hover,
-        .sidebar a.active {
-            background-color: #007bff;
-            color: white;
-        }
+    .form-card h3 {
+        font-size: 15px; font-weight: 700; color: #0f2744;
+        margin: 0 0 22px 0; padding-bottom: 14px;
+        border-bottom: 1px solid #edf1f5;
+        display: flex; align-items: center; gap: 9px;
+    }
 
-        .content {
-            flex-grow: 1;
-            padding: 2rem;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 1200px;
-            margin-top: 2rem;
-            margin-bottom: 2rem;
-            margin-left: 2rem;
-        }
+    .field-row { margin-bottom: 18px; }
 
-        .logout-link {
-            margin-top: auto;
-            padding: 1rem 1.5rem;
-            background-color: #dc3545;
-            color: white !important;
-            text-align: center;
-            text-decoration: none;
-            font-weight: bold;
-        }
+    .field-label {
+        display: block; font-size: 12px; font-weight: 700;
+        color: #475569; letter-spacing: 0.6px; text-transform: uppercase;
+        margin-bottom: 7px;
+    }
 
-        .logout-link:hover {
-            background-color: #c82333;
-        }
+    .form-input, .form-select {
+        width: 100%; padding: 10px 13px; border: 1.5px solid #dde3ec;
+        border-radius: 8px; font-size: 14px; color: #0f2744; outline: none;
+        box-sizing: border-box; transition: border-color 0.15s, box-shadow 0.15s;
+        background: #fff; font-family: inherit;
+    }
+    .form-input:focus, .form-select:focus {
+        border-color: #4ecfa8; box-shadow: 0 0 0 3px rgba(78,207,168,0.12);
+    }
+    .form-select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23475569' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: right 13px center; padding-right: 34px;
+    }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 0;
-            border-bottom: 1px solid #ddd;
-            margin-bottom: 2rem;
-        }
+    .form-row-half { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
-        .header h2 {
-            margin: 0;
-            color: #333;
-        }
+    .submit-btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 12px 28px; background: #0d5c46; color: #fff;
+        border: none; border-radius: 8px; font-size: 14px; font-weight: 700;
+        cursor: pointer; transition: background 0.2s; margin-top: 6px;
+    }
+    .submit-btn:hover { background: #0a4736; }
 
-        .section {
-            margin-bottom: 2rem;
-            padding: 1rem;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-        }
+    .alert {
+        padding: 12px 16px; border-radius: 8px; margin-bottom: 18px;
+        font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px;
+    }
+    .alert-success { background: #d4f5e9; color: #0d5c46; border: 1px solid #a8e6cf; }
+    .alert-error   { background: #fde8e8; color: #7b1d1d; border: 1px solid #f5c6c6; }
 
-        .section h3 {
-            margin-bottom: 1rem;
-            color: #333;
-        }
+    @media (max-width: 600px) { .form-row-half { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
 
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
+{% block sidebar_extra %}
+<a href="{% url 'location_dashboard' %}"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
+<a href="{% url 'location_sales' %}"><i class="fa-solid fa-chart-line"></i> SALES</a>
+<a href="{% url 'location_reports' %}" class="active"><i class="fa-solid fa-file-invoice-dollar"></i> REPORTS</a>
+<a href="{% url 'location_feedback' %}"><i class="fa-solid fa-comment-dots"></i> FEEDBACK</a>
+<a href="{% url 'location_settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
+<a href="{% url 'location_about' %}"><i class="fa-solid fa-circle-info"></i> ABOUT</a>
+<a href="{% url 'location_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> LOGOUT</a>
+{% endblock %}
 
-        label {
-            font-weight: bold;
-        }
-
-        input,
-        select,
-        button {
-            padding: 0.5rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        button {
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .form-row>div {
-            flex: 1;
-            min-width: 200px;
-        }
-    </style>
-</head>
-
-<body>
-
-    <div class="sidebar">
-        <img src="{% static 'images/icon.png' %}" alt="System Logo"
-            style="width: 200px; height: auto; align-self: center; margin-bottom: 20px;">
-
-        <a href="{% url 'location_dashboard' %}" class="active"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
-        <a href="{% url 'location_sales' %}"><i class="fa-solid fa-chart-line"></i> SALES</a>
-        <a href="{% url 'location_reports' %}"><i class="fa-solid fa-file-invoice-dollar"></i> REPORTS</a>
-        <a href="{% url 'location_feedback' %}"><i class="fa-solid fa-comment-dots"></i> FEEDBACK</a>
-        <a href="{% url 'location_settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
-        <a href="{% url 'location_about' %}"><i class="fa-solid fa-circle-info"></i> ABOUT</a>
-        <a href="{% url 'location_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i>
-            LOGOUT</a>
+{% block content %}
+<div class="content">
+    <div class="page-title">
+        <i class="fa-solid fa-file-invoice-dollar" style="color:#0d5c46;"></i>
+        Reports — {{ location.location_name }}
     </div>
-    <div class="content">
-        <div class="header">
-            <h2>Reports for Location: {{ location.location_name }}</h2>
-        </div>
 
-        <div class="section">
-            <h3>Generate Transaction Report</h3>
-            <form method="post">
-                {% csrf_token %}
-                <div class="form-row">
-                    <div>
-                        <label for="{{ form.client.id_for_label }}">Client:</label>
-                        {{ form.client }}
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div>
-                        <label for="{{ form.start_date.id_for_label }}">Start Date:</label>
-                        {{ form.start_date }}
-                    </div>
-                    <div>
-                        <label for="{{ form.end_date.id_for_label }}">End Date:</label>
-                        {{ form.end_date }}
-                    </div>
-                    <div>
-                        <label for="{{ form.email.id_for_label }}">Email Address:</label>
-                        {{ form.email }}
-                    </div>
-                </div>
-                <button type="submit">Generate and Send Report</button>
-            </form>
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            <i class="fa-solid {% if 'success' in message.tags %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}"></i>
+            {{ message }}
         </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="form-card">
+        <h3>
+            <i class="fa-solid fa-envelope" style="color:#4ecfa8;"></i>
+            Generate &amp; Send Transaction Report
+        </h3>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="field-row">
+                <label class="field-label" for="{{ form.client.id_for_label }}">Client</label>
+                <select class="form-select" id="{{ form.client.id_for_label }}" name="{{ form.client.html_name }}">
+                    {% for val, label in form.client.field.choices %}
+                    <option value="{{ val }}" {% if form.client.value|stringformat:"s" == val|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-row-half">
+                <div class="field-row">
+                    <label class="field-label" for="{{ form.start_date.id_for_label }}">Start Date</label>
+                    <input class="form-input" type="date" id="{{ form.start_date.id_for_label }}"
+                           name="{{ form.start_date.html_name }}" value="{{ form.start_date.value|default:'' }}">
+                </div>
+                <div class="field-row">
+                    <label class="field-label" for="{{ form.end_date.id_for_label }}">End Date</label>
+                    <input class="form-input" type="date" id="{{ form.end_date.id_for_label }}"
+                           name="{{ form.end_date.html_name }}" value="{{ form.end_date.value|default:'' }}">
+                </div>
+            </div>
+
+            <div class="field-row">
+                <label class="field-label" for="{{ form.email.id_for_label }}">Send Report To (Email)</label>
+                <input class="form-input" type="email" id="{{ form.email.id_for_label }}"
+                       name="{{ form.email.html_name }}" value="{{ form.email.value|default:'' }}"
+                       placeholder="recipient@example.com">
+            </div>
+
+            <button type="submit" class="submit-btn">
+                <i class="fa-solid fa-paper-plane"></i>
+                Generate and Send Report
+            </button>
+        </form>
     </div>
-</body>
-
-</html>
+</div>
+{% endblock %}

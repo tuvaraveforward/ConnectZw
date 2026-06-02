@@ -1,127 +1,87 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>About</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-            margin: 0;
-            display: flex;
-            height: 100vh;
-        }
+{% block title %}About{% endblock %}
+{% block shell_class %}wide{% endblock %}
 
-        .sidebar {
-            width: 220px;
-            background-color: #fff;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            padding-top: 1rem;
-        }
+{% block head_extra %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .content { flex: 1; width: 100%; min-width: 0; padding: 32px; box-sizing: border-box; }
 
-        .sidebar h2 {
-            text-align: center;
-            margin-bottom: 2rem;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #333;
-        }
+    .page-title {
+        font-size: 20px; font-weight: 700; color: #0f2744;
+        margin-bottom: 24px; display: flex; align-items: center; gap: 10px;
+    }
 
-        .sidebar a {
-            color: #333;
-            padding: 1rem 1.5rem;
-            text-decoration: none;
-            font-size: 1rem;
-            transition: background-color 0.3s ease;
-        }
+    .about-card {
+        background: #fff; border: 1px solid #edf1f5;
+        border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        padding: 28px 32px; max-width: 600px;
+    }
 
-        .sidebar a:hover,
-        .sidebar a.active {
-            background-color: #007bff;
-            color: white;
-        }
+    .about-card h3 {
+        font-size: 15px; font-weight: 700; color: #0f2744;
+        margin: 0 0 18px 0; padding-bottom: 14px;
+        border-bottom: 1px solid #edf1f5;
+        display: flex; align-items: center; gap: 9px;
+    }
 
-        .content {
-            flex-grow: 1;
-            padding: 2rem;
-        }
+    .about-card p {
+        font-size: 14px; color: #475569; line-height: 1.7; margin: 0 0 12px 0;
+    }
+    .about-card p:last-child { margin-bottom: 0; }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #ddd;
-            margin-bottom: 2rem;
-        }
+    .meta-row {
+        display: flex; align-items: center; gap: 10px;
+        padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px;
+    }
+    .meta-row:last-child { border-bottom: none; }
+    .meta-row .meta-lbl { font-weight: 700; color: #0f2744; min-width: 120px; }
+    .meta-row .meta-val { color: #475569; }
+</style>
+{% endblock %}
 
-        .header h1 {
-            margin: 0;
-        }
+{% block sidebar_extra %}
+<a href="{% url 'location_dashboard' %}"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
+<a href="{% url 'location_sales' %}"><i class="fa-solid fa-chart-line"></i> SALES</a>
+<a href="{% url 'location_reports' %}"><i class="fa-solid fa-file-invoice-dollar"></i> REPORTS</a>
+<a href="{% url 'location_feedback' %}"><i class="fa-solid fa-comment-dots"></i> FEEDBACK</a>
+<a href="{% url 'location_settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
+<a href="{% url 'location_about' %}" class="active"><i class="fa-solid fa-circle-info"></i> ABOUT</a>
+<a href="{% url 'location_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> LOGOUT</a>
+{% endblock %}
 
-        .logout-link {
-            margin-top: auto;
-            padding: 1rem 1.5rem;
-            background-color: #dc3545;
-            color: white !important;
-            text-align: center;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .logout-link:hover {
-            background-color: #c82333;
-        }
-
-        .about-content {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .about-content h3 {
-            margin-bottom: 1rem;
-        }
-
-        .about-content p {
-            line-height: 1.6;
-        }
-    </style>
-</head>
-
-<body>
-
-    <div class="sidebar">
-        <img src="{% static 'images/icon.png' %}" alt="System Logo"
-            style="width: 200px; height: auto; align-self: center; margin-bottom: 20px;">
-        <a href="{% url 'location_dashboard' %}">DASHBOARD</a>
-        <a href="{% url 'location_sales' %}">SALES</a>
-        <a href="{% url 'location_reports' %}">REPORTS</a>
-        <a href="{% url 'location_feedback' %}">FEEDBACK</a>
-        <a href="{% url 'location_settings' %}">SETTINGS</a>
-        <a href="{% url 'location_about' %}" class="active">ABOUT</a>
-        <a href="{% url 'location_login' %}" class="logout-link">LOGOUT</a>
+{% block content %}
+<div class="content">
+    <div class="page-title">
+        <i class="fa-solid fa-circle-info" style="color:#0d5c46;"></i>
+        About
     </div>
-    <div class="content">
-        <div class="header">
-            <h1>About</h1>
-        </div>
 
-        <div class="about-content">
-            <h3>About the Location Management System</h3>
-            <p>This system is designed to manage locations, sales, reports, and feedback for dealers and clients. It
-                provides a user-friendly interface for location terminals to handle daily operations efficiently.</p>
-            <p><strong>Version:</strong> 1.0.0</p>
-            <p><strong>Developed by:</strong> Your Company Name</p>
-            <p>For more information, contact support at support@example.com.</p>
+    <div class="about-card">
+        <h3>
+            <i class="fa-solid fa-building" style="color:#4ecfa8;"></i>
+            Location Management System
+        </h3>
+
+        <p>
+            This system is designed to manage locations, sales, reports, and feedback for dealers and clients.
+            It provides a user-friendly interface for location terminals to handle daily operations efficiently.
+        </p>
+
+        <div class="meta-row">
+            <span class="meta-lbl"><i class="fa-solid fa-code-branch" style="color:#4ecfa8;margin-right:6px;"></i>Version</span>
+            <span class="meta-val">1.0.0</span>
+        </div>
+        <div class="meta-row">
+            <span class="meta-lbl"><i class="fa-solid fa-building" style="color:#4ecfa8;margin-right:6px;"></i>Platform</span>
+            <span class="meta-val">ConnectZw Remittance Platform</span>
+        </div>
+        <div class="meta-row">
+            <span class="meta-lbl"><i class="fa-solid fa-envelope" style="color:#4ecfa8;margin-right:6px;"></i>Support</span>
+            <span class="meta-val">support@connectzw.com</span>
         </div>
     </div>
-</body>
-
-</html>
+</div>
+{% endblock %}

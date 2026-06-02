@@ -1,143 +1,114 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Location Dashboard</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-            margin: 0;
-            display: flex;
-            height: 100vh;
-        }
+{% block title %}Location Dashboard{% endblock %}
+{% block shell_class %}wide{% endblock %}
 
-        .sidebar {
-            width: 220px;
-            background-color: #fff;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            padding-top: 1rem;
-        }
+{% block head_extra %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .content { flex: 1; width: 100%; min-width: 0; padding: 32px; box-sizing: border-box; }
 
-        .sidebar h2 {
-            text-align: center;
-            margin-bottom: 2rem;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #333;
-        }
+    .page-title {
+        font-size: 20px; font-weight: 700; color: #0f2744;
+        margin-bottom: 24px; display: flex; align-items: center; gap: 10px;
+    }
 
-        .sidebar a {
-            color: #333;
-            padding: 1rem 1.5rem;
-            text-decoration: none;
-            font-size: 1rem;
-            transition: background-color 0.3s ease;
-        }
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.25rem;
+    }
 
-        .sidebar a:hover,
-        .sidebar a.active {
-            background-color: #007bff;
-            color: white;
-        }
+    .info-card {
+        background: #fff;
+        border: 1px solid #edf1f5;
+        border-radius: 12px;
+        padding: 22px 24px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
 
-        .content {
-            flex-grow: 1;
-            padding: 2rem;
-        }
+    .info-card h3 {
+        font-size: 13px; font-weight: 700; color: #7a92ab;
+        letter-spacing: 0.8px; text-transform: uppercase;
+        margin: 0 0 14px 0; padding-bottom: 10px;
+        border-bottom: 1px solid #edf1f5;
+        display: flex; align-items: center; gap: 8px;
+    }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #ddd;
-            margin-bottom: 2rem;
-        }
+    .info-row {
+        display: flex; justify-content: space-between;
+        padding: 7px 0; border-bottom: 1px solid #f8fafc;
+        font-size: 14px;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-row .lbl { color: #7a92ab; font-weight: 500; }
+    .info-row .val { color: #0f2744; font-weight: 600; text-align: right; }
 
-        .header h1 {
-            margin: 0;
-        }
+    .status-badge {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700;
+    }
+    .status-active { background: #d4f5e9; color: #0d5c46; }
+    .status-inactive { background: #fde8e8; color: #7b1d1d; }
+</style>
+{% endblock %}
 
-        .logout-link {
-            margin-top: auto;
-            padding: 1rem 1.5rem;
-            background-color: #dc3545;
-            color: white !important;
-            text-align: center;
-            text-decoration: none;
-            font-weight: bold;
-        }
+{% block sidebar_extra %}
+<a href="{% url 'location_dashboard' %}" class="active"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
+<a href="{% url 'location_sales' %}"><i class="fa-solid fa-chart-line"></i> SALES</a>
+<a href="{% url 'location_reports' %}"><i class="fa-solid fa-file-invoice-dollar"></i> REPORTS</a>
+<a href="{% url 'location_feedback' %}"><i class="fa-solid fa-comment-dots"></i> FEEDBACK</a>
+<a href="{% url 'location_settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
+<a href="{% url 'location_about' %}"><i class="fa-solid fa-circle-info"></i> ABOUT</a>
+<a href="{% url 'location_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> LOGOUT</a>
+{% endblock %}
 
-        .logout-link:hover {
-            background-color: #c82333;
-        }
-
-        .info-box {
-            background-color: white;
-            padding: 1.0rem;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            margin: 0.5rem 0;
-        }
-
-        .info-row p {
-            flex: 1;
-            margin: 0;
-        }
-    </style>
-</head>
-
-<body>
-
-    <div class="sidebar">
-        <img src="{% static 'images/icon.png' %}" alt="System Logo"
-            style="width: 200px; height: auto; align-self: center; margin-bottom: 20px;">
-
-        <a href="{% url 'location_dashboard' %}" class="active"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
-        <a href="{% url 'location_sales' %}"><i class="fa-solid fa-chart-line"></i> SALES</a>
-        <a href="{% url 'location_reports' %}"><i class="fa-solid fa-file-invoice-dollar"></i> REPORTS</a>
-        <a href="{% url 'location_feedback' %}"><i class="fa-solid fa-comment-dots"></i> FEEDBACK</a>
-        <a href="{% url 'location_settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
-        <a href="{% url 'location_about' %}"><i class="fa-solid fa-circle-info"></i> ABOUT</a>
-        <a href="{% url 'location_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i>
-            LOGOUT</a>
+{% block content %}
+<div class="content">
+    <div class="page-title">
+        <i class="fa-solid fa-tachometer-alt" style="color:#0d5c46;"></i>
+        Welcome, {{ request.session.location_username }}
     </div>
-    <div class="content">
-        <div class="header">
-            <h1>Welcome, {{ request.session.location_username }}</h1>
-        </div>
 
-        <div class="info-box">
-            <h3>Location Information</h3>
+    <div class="info-grid">
+        <div class="info-card">
+            <h3><i class="fa-solid fa-location-dot"></i> Location Details</h3>
             <div class="info-row">
-                <p><strong>Location Name:</strong> {{ location.location_name }}</p>
-                <p><strong>Email:</strong> {{ location.email_address }}</p>
+                <span class="lbl">Name</span>
+                <span class="val">{{ location.location_name }}</span>
             </div>
             <div class="info-row">
-                <p><strong>City:</strong> {{ location.city }}</p>
-                <p><strong>Province:</strong> {{ location.province }}</p>
+                <span class="lbl">City</span>
+                <span class="val">{{ location.city }}</span>
             </div>
             <div class="info-row">
-                <p><strong>Category:</strong> {{ location.category }}</p>
-                <p><strong>Status:</strong> {% if location.is_active %}Active{% else %}Inactive{% endif %}</p>
+                <span class="lbl">Province</span>
+                <span class="val">{{ location.province }}</span>
+            </div>
+            <div class="info-row">
+                <span class="lbl">Category</span>
+                <span class="val">{{ location.category }}</span>
             </div>
         </div>
 
-        <!-- Additional content can be added here -->
-
+        <div class="info-card">
+            <h3><i class="fa-solid fa-circle-info"></i> Account Info</h3>
+            <div class="info-row">
+                <span class="lbl">Email</span>
+                <span class="val">{{ location.email_address }}</span>
+            </div>
+            <div class="info-row">
+                <span class="lbl">Status</span>
+                <span class="val">
+                    {% if location.is_active %}
+                    <span class="status-badge status-active"><i class="fa-solid fa-circle"></i> Active</span>
+                    {% else %}
+                    <span class="status-badge status-inactive"><i class="fa-solid fa-circle"></i> Inactive</span>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
     </div>
-</body>
-
-</html>
+</div>
+{% endblock %}

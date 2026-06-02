@@ -1,193 +1,96 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Location - Sales</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-            margin: 0;
-            display: flex;
-            height: 100vh;
-        }
+{% block title %}Sales — {{ location.location_name }}{% endblock %}
+{% block shell_class %}wide{% endblock %}
 
-        .sidebar {
-            width: 220px;
-            background-color: #fff;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            padding-top: 1rem;
-        }
+{% block head_extra %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .content { flex: 1; width: 100%; min-width: 0; padding: 32px; box-sizing: border-box; }
 
-        .sidebar h2 {
-            text-align: center;
-            margin-bottom: 2rem;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #333;
-        }
+    .page-header {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+    }
+    .page-title { font-size: 20px; font-weight: 700; color: #0f2744; display: flex; align-items: center; gap: 10px; }
 
-        .sidebar a {
-            color: #333;
-            padding: 1rem 1.5rem;
-            text-decoration: none;
-            font-size: 1rem;
-            transition: background-color 0.3s ease;
-        }
+    .search-wrap { display: flex; gap: 8px; }
+    .search-wrap input {
+        padding: 8px 13px; border: 1.5px solid #dde3ec; border-radius: 8px;
+        font-size: 13px; color: #0f2744; outline: none; width: 220px;
+        transition: border-color 0.15s;
+    }
+    .search-wrap input:focus { border-color: #4ecfa8; }
+    .search-wrap button {
+        padding: 8px 16px; background: #0d5c46; color: #fff;
+        border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
+        cursor: pointer; transition: background 0.2s;
+    }
+    .search-wrap button:hover { background: #0a4736; }
 
-        .sidebar a:hover,
-        .sidebar a.active {
-            background-color: #007bff;
-            color: white;
-        }
+    .table-card {
+        background: #fff; border: 1px solid #edf1f5;
+        border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        overflow: hidden;
+    }
 
-        .content {
-            flex-grow: 1;
-            padding: 2rem;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 1200px;
-            margin-top: 2rem;
-            margin-bottom: 2rem;
-            margin-left: 2rem;
-        }
+    .sales-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .sales-table th {
+        background: #f8fafc; color: #475569; font-weight: 700;
+        font-size: 11px; letter-spacing: 0.7px; text-transform: uppercase;
+        padding: 14px 16px; border-bottom: 2px solid #edf1f5; text-align: left;
+    }
+    .sales-table td { padding: 14px 16px; color: #1e293b; border-bottom: 1px solid #f1f5f9; }
+    .sales-table tr:last-child td { border-bottom: none; }
+    .sales-table tr:hover td { background: #fafcff; }
 
-        .logout-link {
-            margin-top: auto;
-            padding: 1rem 1.5rem;
-            background-color: #dc3545;
-            color: white !important;
-            text-align: center;
-            text-decoration: none;
-            font-weight: bold;
-        }
+    .no-data { text-align: center; padding: 40px; color: #7a92ab; font-size: 14px; }
 
-        .logout-link:hover {
-            background-color: #c82333;
-        }
+    .badge {
+        display: inline-block; background: #d4f5e9; color: #0d5c46;
+        border: 1px solid #a8e6cf; padding: 2px 8px; border-radius: 10px;
+        font-size: 11px; font-weight: 700; margin-left: 5px;
+    }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 0;
-            border-bottom: 1px solid #ddd;
-            margin-bottom: 2rem;
-        }
+    .type-pill {
+        display: inline-block; padding: 3px 10px; border-radius: 20px;
+        font-size: 12px; font-weight: 600; text-transform: capitalize;
+    }
+    .type-purchase  { background: #e8f4ff; color: #0f2744; }
+    .type-redemption { background: #d4f5e9; color: #0d5c46; }
+    .type-deposit   { background: #fff8e1; color: #7b5e00; }
+</style>
+{% endblock %}
 
-        .header h2 {
-            margin: 0;
-            color: #333;
-        }
+{% block sidebar_extra %}
+<a href="{% url 'location_dashboard' %}"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
+<a href="{% url 'location_sales' %}" class="active"><i class="fa-solid fa-chart-line"></i> SALES</a>
+<a href="{% url 'location_reports' %}"><i class="fa-solid fa-file-invoice-dollar"></i> REPORTS</a>
+<a href="{% url 'location_feedback' %}"><i class="fa-solid fa-comment-dots"></i> FEEDBACK</a>
+<a href="{% url 'location_settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
+<a href="{% url 'location_about' %}"><i class="fa-solid fa-circle-info"></i> ABOUT</a>
+<a href="{% url 'location_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> LOGOUT</a>
+{% endblock %}
 
-        .search-container {
-            display: flex;
-            align-items: center;
-        }
-
-        .search-container input {
-            padding: 0.5rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-right: 0.5rem;
-            width: 250px;
-        }
-
-        .search-container button {
-            padding: 0.5rem 1rem;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .search-container button:hover {
-            background-color: #0056b3;
-        }
-
-        h2.content-title {
-            margin-bottom: 1.5rem;
-        }
-
-        p {
-            margin-bottom: 1rem;
-        }
-
-        .sales-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-        }
-
-        .sales-table th,
-        .sales-table td {
-            padding: 0.75rem;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .sales-table th {
-            background-color: #f8f9fa;
-            font-weight: bold;
-        }
-
-        .sales-table tr:hover {
-            background-color: #f5f5f5;
-        }
-
-        .no-sales {
-            text-align: center;
-            padding: 2rem;
-            color: #666;
-        }
-
-        .badge {
-            background-color: #28a745;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.8em;
-            margin-left: 5px;
-        }
-    </style>
-</head>
-
-<body>
-
-    <div class="sidebar">
-        <img src="{% static 'images/icon.png' %}" alt="System Logo"
-            style="width: 200px; height: auto; align-self: center; margin-bottom: 20px;">
-
-        <a href="{% url 'location_dashboard' %}" class="active"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
-        <a href="{% url 'location_sales' %}"><i class="fa-solid fa-chart-line"></i> SALES</a>
-        <a href="{% url 'location_reports' %}"><i class="fa-solid fa-file-invoice-dollar"></i> REPORTS</a>
-        <a href="{% url 'location_feedback' %}"><i class="fa-solid fa-comment-dots"></i> FEEDBACK</a>
-        <a href="{% url 'location_settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
-        <a href="{% url 'location_about' %}"><i class="fa-solid fa-circle-info"></i> ABOUT</a>
-        <a href="{% url 'location_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i>
-            LOGOUT</a>
-    </div>
-    <div class="content">
-        <div class="header">
-            <h2>Sales for Location: {{ location.location_name }}</h2>
-            <div class="search-container">
-                <input type="text" placeholder="Search sales..." id="searchInput">
-                <button type="button" onclick="searchSales()">Search</button>
-            </div>
+{% block content %}
+<div class="content">
+    <div class="page-header">
+        <div class="page-title">
+            <i class="fa-solid fa-chart-line" style="color:#0d5c46;"></i>
+            Sales — {{ location.location_name }}
         </div>
+        <div class="search-wrap">
+            <input type="text" id="searchInput" placeholder="Search sales…">
+            <button onclick="searchSales()"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+        </div>
+    </div>
 
+    <div class="table-card">
         <table class="sales-table">
             <thead>
                 <tr>
-                    <th>Transaction Type</th>
+                    <th>Type</th>
                     <th>Amount</th>
                     <th>Client</th>
                     <th>POS</th>
@@ -199,80 +102,58 @@
                 {% if transactions %}
                 {% for transaction in transactions %}
                 <tr>
-                    <td>{{ transaction.transaction_type }}</td>
+                    <td>
+                        <span class="type-pill type-{{ transaction.transaction_type }}">
+                            {{ transaction.transaction_type }}
+                        </span>
+                    </td>
                     <td>${{ transaction.amount }}</td>
                     <td>{{ transaction.client.username }}</td>
                     <td>
                         {% if transaction.redemption_pos and transaction.redemption_pos.location.id == location.id %}
-                        {{ transaction.redemption_pos.pos_name }} <span class="badge">Redemption</span>
+                            {{ transaction.redemption_pos.pos_name }}<span class="badge">Redemption</span>
                         {% elif transaction.pos %}
-                        {{ transaction.pos.pos_name }}
+                            {{ transaction.pos.pos_name }}
                         {% else %}
-                        N/A
+                            <span style="color:#b0bec5;">N/A</span>
                         {% endif %}
                     </td>
                     <td>
                         {% if transaction.redemption_pos and transaction.redemption_pos.location.id == location.id %}
-                        {% if transaction.redemption_pos.user %}
-                        {{ transaction.redemption_pos.user.firstname }} {{ transaction.redemption_pos.user.lastname }}
-                        {% else %}
-                        N/A
-                        {% endif %}
+                            {% if transaction.redemption_pos.user %}
+                                {{ transaction.redemption_pos.user.firstname }} {{ transaction.redemption_pos.user.lastname }}
+                            {% else %}<span style="color:#b0bec5;">N/A</span>{% endif %}
                         {% elif transaction.pos and transaction.pos.user %}
-                        {{ transaction.pos.user.firstname }} {{ transaction.pos.user.lastname }}
-                        {% else %}
-                        N/A
-                        {% endif %}
+                            {{ transaction.pos.user.firstname }} {{ transaction.pos.user.lastname }}
+                        {% else %}<span style="color:#b0bec5;">N/A</span>{% endif %}
                     </td>
                     <td>
                         {% if transaction.redemption_pos and transaction.redemption_pos.location.id == location.id %}
-                        {{ transaction.redemption_timestamp|date:"Y-m-d H:i" }}
+                            {{ transaction.redemption_timestamp|date:"Y-m-d H:i" }}
                         {% else %}
-                        {{ transaction.timestamp|date:"Y-m-d H:i" }}
+                            {{ transaction.timestamp|date:"Y-m-d H:i" }}
                         {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
                 {% else %}
-                <tr>
-                    <td colspan="6" class="no-sales">
-                        No sales found for this location ({{ location.location_name }})
-                    </td>
-                </tr>
+                <tr><td colspan="6" class="no-data">No sales found for {{ location.location_name }}</td></tr>
                 {% endif %}
             </tbody>
         </table>
     </div>
+</div>
+{% endblock %}
 
-    <script>
-        function searchSales() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const tableBody = document.getElementById('salesTableBody');
-            const rows = tableBody.getElementsByTagName('tr');
-
-            for (let i = 0; i < rows.length; i++) {
-                const row = rows[i];
-                const cells = row.getElementsByTagName('td');
-                let found = false;
-
-                for (let j = 0; j < cells.length; j++) {
-                    if (cells[j] && cells[j].textContent.toLowerCase().includes(searchTerm)) {
-                        found = true;
-                        break;
-                    }
-                }
-
-                row.style.display = searchTerm === '' || found ? '' : 'none';
-            }
-        }
-
-        // Add event listener for Enter key in search input
-        document.getElementById('searchInput').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                searchSales();
-            }
+{% block body_extra %}
+<script>
+    function searchSales() {
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        document.querySelectorAll('#salesTableBody tr').forEach(row => {
+            const match = Array.from(row.querySelectorAll('td')).some(td => td.textContent.toLowerCase().includes(term));
+            row.style.display = (!term || match) ? '' : 'none';
         });
-    </script>
-</body>
-
-</html>
+    }
+    document.getElementById('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') searchSales(); });
+</script>
+{% endblock %}

@@ -1,334 +1,334 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Location Settings</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-            margin: 0;
-            display: flex;
-            height: 100vh;
-        }
+{% block title %}Settings{% endblock %}
+{% block shell_class %}wide{% endblock %}
 
-        .sidebar {
-            width: 220px;
-            background-color: #fff;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            padding-top: 1rem;
-        }
+{% block head_extra %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .content { flex: 1; width: 100%; min-width: 0; padding: 32px; box-sizing: border-box; }
 
-        .sidebar h2 {
-            text-align: center;
-            margin-bottom: 2rem;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #333;
-        }
+    .page-title {
+        font-size: 20px; font-weight: 700; color: #0f2744;
+        margin-bottom: 24px; display: flex; align-items: center; gap: 10px;
+    }
 
-        .sidebar a {
-            color: #333;
-            padding: 1rem 1.5rem;
-            text-decoration: none;
-            font-size: 1rem;
-            transition: background-color 0.3s ease;
-        }
+    .alert {
+        padding: 12px 16px; border-radius: 8px; margin-bottom: 18px;
+        font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px;
+    }
+    .alert-success { background: #d4f5e9; color: #0d5c46; border: 1px solid #a8e6cf; }
+    .alert-error   { background: #fde8e8; color: #7b1d1d; border: 1px solid #f5c6c6; }
 
-        .sidebar a:hover,
-        .sidebar a.active {
-            background-color: #007bff;
-            color: white;
-        }
+    /* ── Profile info card ── */
+    .info-card {
+        background: #fff; border: 1px solid #edf1f5; border-radius: 12px;
+        padding: 22px 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        margin-bottom: 20px; max-width: 720px;
+    }
+    .info-card h3 {
+        font-size: 14px; font-weight: 700; color: #0f2744;
+        margin: 0 0 16px 0; padding-bottom: 12px; border-bottom: 1px solid #edf1f5;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .info-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+    .info-row {
+        display: flex; flex-direction: column;
+        padding: 8px 0; border-bottom: 1px solid #f8fafc; font-size: 14px;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-row .lbl { font-size: 11px; font-weight: 700; color: #7a92ab; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+    .info-row .val { color: #0f2744; font-weight: 600; }
 
-        .content {
-            flex-grow: 1;
-            padding: 2rem;
-        }
+    /* ── Action buttons ── */
+    .action-tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tab-btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 10px 20px; border: 1.5px solid #dde3ec; border-radius: 8px;
+        font-size: 13px; font-weight: 700; cursor: pointer;
+        background: #f8fafc; color: #0f2744; transition: all 0.15s;
+    }
+    .tab-btn:hover, .tab-btn.active {
+        background: #0d5c46; color: #fff; border-color: #0d5c46;
+    }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #ddd;
-            margin-bottom: 2rem;
-        }
+    /* ── Section panels ── */
+    .section-panel {
+        display: none; background: #fff; border: 1px solid #edf1f5;
+        border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        max-width: 720px; margin-bottom: 20px;
+    }
+    .section-panel.show { display: block; }
+    .section-panel h3 {
+        font-size: 15px; font-weight: 700; color: #0f2744;
+        margin: 0 0 20px 0; padding-bottom: 12px; border-bottom: 1px solid #edf1f5;
+        display: flex; align-items: center; gap: 8px;
+    }
 
-        .header h1 {
-            margin: 0;
-        }
+    /* ── Form fields ── */
+    .field-row { margin-bottom: 16px; }
+    .field-label {
+        display: block; font-size: 12px; font-weight: 700;
+        color: #475569; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 6px;
+    }
+    .form-input, .form-select {
+        width: 100%; padding: 10px 13px; border: 1.5px solid #dde3ec;
+        border-radius: 8px; font-size: 14px; color: #0f2744; outline: none;
+        box-sizing: border-box; transition: border-color 0.15s, box-shadow 0.15s;
+        background: #fff; font-family: inherit;
+    }
+    .form-input:focus, .form-select:focus {
+        border-color: #4ecfa8; box-shadow: 0 0 0 3px rgba(78,207,168,0.12);
+    }
+    .form-select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23475569' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: right 13px center; padding-right: 34px;
+    }
 
-        .logout-link {
-            margin-top: auto;
-            padding: 1rem 1.5rem;
-            background-color: #dc3545;
-            color: white !important;
-            text-align: center;
-            text-decoration: none;
-            font-weight: bold;
-        }
+    .submit-btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 11px 24px; background: #0d5c46; color: #fff;
+        border: none; border-radius: 8px; font-size: 14px; font-weight: 700;
+        cursor: pointer; transition: background 0.2s; margin-top: 6px;
+    }
+    .submit-btn:hover { background: #0a4736; }
 
-        .logout-link:hover {
-            background-color: #c82333;
-        }
+    /* ── Staff / POS tables ── */
+    .side-by-side { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .mini-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .mini-table th {
+        background: #f8fafc; color: #475569; font-weight: 700;
+        font-size: 11px; letter-spacing: 0.7px; text-transform: uppercase;
+        padding: 10px 12px; border-bottom: 2px solid #edf1f5; text-align: left;
+    }
+    .mini-table td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; color: #1e293b; }
+    .mini-table tr:last-child td { border-bottom: none; }
+    .mini-table tr:hover td { background: #fafcff; }
 
-        .settings-content {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
+    .pos-badge {
+        display: inline-block; background: #edf6f2; color: #0d5c46;
+        border: 1px solid #b2e8d4; border-radius: 10px;
+        padding: 2px 8px; font-size: 11px; font-weight: 700; margin-bottom: 2px;
+    }
 
-        .profile-section {
-            margin-bottom: 2rem;
-        }
+    .assign-form { display: flex; gap: 6px; align-items: center; }
+    .assign-select {
+        padding: 5px 8px; border: 1.5px solid #dde3ec; border-radius: 6px;
+        font-size: 12px; outline: none; color: #0f2744;
+    }
+    .assign-btn {
+        padding: 5px 10px; background: #0d5c46; color: #fff;
+        border: none; border-radius: 6px; font-size: 12px; font-weight: 600;
+        cursor: pointer; transition: background 0.15s;
+    }
+    .assign-btn:hover { background: #0a4736; }
 
-        .profile-section h3 {
-            margin-bottom: 1rem;
-        }
+    .empty-cell { color: #b0bec5; font-size: 13px; }
 
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            margin: 0.5rem 0;
-        }
+    @media (max-width: 700px) {
+        .info-grid-2 { grid-template-columns: 1fr; }
+        .side-by-side { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
 
-        .info-row p {
-            flex: 1;
-            margin: 0;
-        }
+{% block sidebar_extra %}
+<a href="{% url 'location_dashboard' %}"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
+<a href="{% url 'location_sales' %}"><i class="fa-solid fa-chart-line"></i> SALES</a>
+<a href="{% url 'location_reports' %}"><i class="fa-solid fa-file-invoice-dollar"></i> REPORTS</a>
+<a href="{% url 'location_feedback' %}"><i class="fa-solid fa-comment-dots"></i> FEEDBACK</a>
+<a href="{% url 'location_settings' %}" class="active"><i class="fa-solid fa-gear"></i> SETTINGS</a>
+<a href="{% url 'location_about' %}"><i class="fa-solid fa-circle-info"></i> ABOUT</a>
+<a href="{% url 'location_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> LOGOUT</a>
+{% endblock %}
 
-        .button-group {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-        }
-
-        .btn {
-            padding: 1rem 2rem;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .btn:hover {
-            background-color: #218838;
-        }
-
-        .btn-secondary {
-            background-color: #007bff;
-        }
-
-        .btn-secondary:hover {
-            background-color: #0056b3;
-        }
-    </style>
-</head>
-
-<body>
-
-    <div class="sidebar">
-        <img src="{% static 'images/icon.png' %}" alt="System Logo"
-            style="width: 200px; height: auto; align-self: center; margin-bottom: 20px;">
-
-        <a href="{% url 'location_dashboard' %}" class="active"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
-        <a href="{% url 'location_sales' %}"><i class="fa-solid fa-chart-line"></i> SALES</a>
-        <a href="{% url 'location_reports' %}"><i class="fa-solid fa-file-invoice-dollar"></i> REPORTS</a>
-        <a href="{% url 'location_feedback' %}"><i class="fa-solid fa-comment-dots"></i> FEEDBACK</a>
-        <a href="{% url 'location_settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
-        <a href="{% url 'location_about' %}"><i class="fa-solid fa-circle-info"></i> ABOUT</a>
-        <a href="{% url 'location_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i>
-            LOGOUT</a>
+{% block content %}
+<div class="content">
+    <div class="page-title">
+        <i class="fa-solid fa-gear" style="color:#0d5c46;"></i>
+        Settings
     </div>
-    <div class="content">
-        <div class="header">
-            <h1>Settings</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            <i class="fa-solid {% if 'success' in message.tags %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}"></i>
+            {{ message }}
         </div>
+        {% endfor %}
+    {% endif %}
 
-        {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-            <li{% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message.message }}</li>
-                {% endfor %}
-        </ul>
-        {% endif %}
-
-        <div class="settings-content">
-            <div class="profile-section">
-                <h3>Location Profile</h3>
-                <div class="info-row">
-                    <p><strong>Location Name:</strong> {{ location.location_name }}</p>
-                    <p><strong>Email:</strong> {{ location.email_address }}</p>
-                </div>
-                <div class="info-row">
-                    <p><strong>City:</strong> {{ location.city }}</p>
-                    <p><strong>Province:</strong> {{ location.province }}</p>
-                </div>
-                <div class="info-row">
-                    <p><strong>Category:</strong> {{ location.category }}</p>
-                    <p><strong>Status:</strong> {% if location.is_active %}Active{% else %}Inactive{% endif %}</p>
-                </div>
+    <!-- Profile info -->
+    <div class="info-card">
+        <h3><i class="fa-solid fa-location-dot" style="color:#4ecfa8;"></i> Location Profile</h3>
+        <div class="info-grid-2">
+            <div class="info-row">
+                <span class="lbl">Location Name</span>
+                <span class="val">{{ location.location_name }}</span>
             </div>
-
-            <div class="button-group">
-                <button class="btn btn-secondary" onclick="toggleSection('user-form-section')">Add User</button>
-                <button class="btn btn-secondary" onclick="toggleSection('pos-form-section')">Add POS</button>
-                <button class="btn" onclick="toggleSection('staff-list-section')">Staff & POS List</button>
+            <div class="info-row">
+                <span class="lbl">Email</span>
+                <span class="val">{{ location.email_address }}</span>
             </div>
-
-            <!-- Add User Form -->
-            <div id="user-form-section"
-                style="display: none; margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1rem;">
-                <h3>Add New Staff Member</h3>
-                <form method="POST" action="{% url 'add_location_user' %}">
-                    {% csrf_token %}
-                    {% for field in user_form %}
-                    <div style="margin-bottom: 1rem;">
-                        <label style="display: block; font-weight: bold;">{{ field.label }}</label>
-                        {{ field }}
-                    </div>
-                    {% endfor %}
-                    <button type="submit" class="btn">Create User</button>
-                </form>
+            <div class="info-row">
+                <span class="lbl">City</span>
+                <span class="val">{{ location.city }}</span>
             </div>
-
-            <!-- Add POS Form -->
-            <div id="pos-form-section"
-                style="display: none; margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1rem;">
-                <h3>Add New POS Terminal</h3>
-                <form method="POST" action="{% url 'add_location_pos' %}">
-                    {% csrf_token %}
-                    {% for field in pos_form %}
-                    <div style="margin-bottom: 1rem;">
-                        <label style="display: block; font-weight: bold;">{{ field.label }}</label>
-                        {{ field }}
-                    </div>
-                    {% endfor %}
-                    <button type="submit" class="btn">Create POS</button>
-                </form>
+            <div class="info-row">
+                <span class="lbl">Province</span>
+                <span class="val">{{ location.province }}</span>
             </div>
+            <div class="info-row">
+                <span class="lbl">Category</span>
+                <span class="val">{{ location.category }}</span>
+            </div>
+            <div class="info-row">
+                <span class="lbl">Status</span>
+                <span class="val">{% if location.is_active %}Active{% else %}Inactive{% endif %}</span>
+            </div>
+        </div>
+    </div>
 
-            <!-- Staff & POS List -->
-            <div id="staff-list-section"
-                style="display: none; margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1rem;">
-                <div style="display: flex; gap: 2rem;">
-                    <div style="flex: 1;">
-                        <h3>Staff List</h3>
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <thead>
-                                <tr style="background: #f8f9fa;">
-                                    <th style="padding: 0.5rem; text-align: left; border-bottom: 1px solid #ddd;">Name
-                                    </th>
-                                    <th style="padding: 0.5rem; text-align: left; border-bottom: 1px solid #ddd;">Role
-                                    </th>
-                                    <th style="padding: 0.5rem; text-align: left; border-bottom: 1px solid #ddd;">
-                                        Username</th>
-                                    <th style="padding: 0.5rem; text-align: left; border-bottom: 1px solid #ddd;">
-                                        Assigned POS</th>
-                                    <th style="padding: 0.5rem; text-align: left; border-bottom: 1px solid #ddd;">Assign
-                                        New POS</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for user in users %}
-                                <tr>
-                                    <td style="padding: 0.5rem; border-bottom: 1px solid #ddd;">{{ user.firstname }} {{
-                                        user.lastname }}</td>
-                                    <td style="padding: 0.5rem; border-bottom: 1px solid #ddd;">{{ user.role }}</td>
-                                    <td style="padding: 0.5rem; border-bottom: 1px solid #ddd;">{{ user.username }}</td>
-                                    <td style="padding: 0.5rem; border-bottom: 1px solid #ddd;">
-                                        {% for pos in user.pos_devices.all %}
-                                        <span
-                                            style="display: block; font-size: 0.9em; background: #e9ecef; padding: 2px 6px; border-radius: 4px; margin-bottom: 2px;">
-                                            {{ pos.pos_name }} ({{ pos.pos_code }})
-                                        </span>
-                                        {% empty %}
-                                        <span style="color: #999;">None</span>
+    <!-- Action tabs -->
+    <div class="action-tabs">
+        <button class="tab-btn" onclick="showPanel('user-panel', this)">
+            <i class="fa-solid fa-user-plus"></i> Add Staff
+        </button>
+        <button class="tab-btn" onclick="showPanel('pos-panel', this)">
+            <i class="fa-solid fa-cash-register"></i> Add POS
+        </button>
+        <button class="tab-btn" onclick="showPanel('list-panel', this)">
+            <i class="fa-solid fa-list"></i> Staff &amp; POS List
+        </button>
+    </div>
+
+    <!-- Add Staff panel -->
+    <div id="user-panel" class="section-panel">
+        <h3><i class="fa-solid fa-user-plus" style="color:#4ecfa8;"></i> Add New Staff Member</h3>
+        <form method="POST" action="{% url 'add_location_user' %}">
+            {% csrf_token %}
+            {% for field in user_form %}
+            <div class="field-row">
+                <label class="field-label">{{ field.label }}</label>
+                {{ field }}
+            </div>
+            {% endfor %}
+            <button type="submit" class="submit-btn">
+                <i class="fa-solid fa-plus"></i> Create User
+            </button>
+        </form>
+    </div>
+
+    <!-- Add POS panel -->
+    <div id="pos-panel" class="section-panel">
+        <h3><i class="fa-solid fa-cash-register" style="color:#4ecfa8;"></i> Add New POS Terminal</h3>
+        <form method="POST" action="{% url 'add_location_pos' %}">
+            {% csrf_token %}
+            {% for field in pos_form %}
+            <div class="field-row">
+                <label class="field-label">{{ field.label }}</label>
+                {{ field }}
+            </div>
+            {% endfor %}
+            <button type="submit" class="submit-btn">
+                <i class="fa-solid fa-plus"></i> Create POS
+            </button>
+        </form>
+    </div>
+
+    <!-- Staff & POS list panel -->
+    <div id="list-panel" class="section-panel">
+        <h3><i class="fa-solid fa-list" style="color:#4ecfa8;"></i> Staff &amp; POS List</h3>
+        <div class="side-by-side">
+            <div>
+                <p style="font-size:13px;font-weight:700;color:#0f2744;margin:0 0 10px 0;">Staff Members</p>
+                <table class="mini-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Username</th>
+                            <th>Role</th>
+                            <th>POS</th>
+                            <th>Assign POS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user.firstname }} {{ user.lastname }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.role }}</td>
+                            <td>
+                                {% for pos in user.pos_devices.all %}
+                                <span class="pos-badge">{{ pos.pos_name }}</span><br>
+                                {% empty %}
+                                <span class="empty-cell">None</span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% if available_pos %}
+                                <form method="POST" action="{% url 'assign_location_pos' %}" class="assign-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="user_id" value="{{ user.id }}">
+                                    <select name="pos_id" class="assign-select">
+                                        <option value="" disabled selected>Select</option>
+                                        {% for pos in available_pos %}
+                                        <option value="{{ pos.id }}">{{ pos.pos_name }}</option>
                                         {% endfor %}
-                                    </td>
-                                    <td style="padding: 0.5rem; border-bottom: 1px solid #ddd;">
-                                        {% if available_pos %}
-                                        <form method="POST" action="{% url 'assign_location_pos' %}"
-                                            style="display: flex; gap: 0.5rem;">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="user_id" value="{{ user.id }}">
-                                            <select name="pos_id"
-                                                style="padding: 0.3rem; border: 1px solid #ccc; border-radius: 4px;">
-                                                <option value="" disabled selected>Select POS</option>
-                                                {% for pos in available_pos %}
-                                                <option value="{{ pos.id }}">{{ pos.pos_name }}</option>
-                                                {% endfor %}
-                                            </select>
-                                            <button type="submit"
-                                                style="padding: 0.3rem 0.8rem; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Assign</button>
-                                        </form>
-                                        {% else %}
-                                        <span style="color: #999; font-size: 0.9em;">No available POS</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="5" style="padding: 0.5rem;">No staff found.</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div style="flex: 1;">
-                        <h3>POS Terminals</h3>
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <thead>
-                                <tr style="background: #f8f9fa;">
-                                    <th style="padding: 0.5rem; text-align: left; border-bottom: 1px solid #ddd;">POS
-                                        Name</th>
-                                    <th style="padding: 0.5rem; text-align: left; border-bottom: 1px solid #ddd;">POS
-                                        Code</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for pos in pos_devices %}
-                                <tr>
-                                    <td style="padding: 0.5rem; border-bottom: 1px solid #ddd;">{{ pos.pos_name }}</td>
-                                    <td style="padding: 0.5rem; border-bottom: 1px solid #ddd;">{{ pos.pos_code }}</td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="2" style="padding: 0.5rem;">No POS devices found.</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                                    </select>
+                                    <button type="submit" class="assign-btn">Assign</button>
+                                </form>
+                                {% else %}
+                                <span class="empty-cell">No POS available</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" class="empty-cell" style="padding:16px;">No staff found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
 
+            <div>
+                <p style="font-size:13px;font-weight:700;color:#0f2744;margin:0 0 10px 0;">POS Terminals</p>
+                <table class="mini-table">
+                    <thead>
+                        <tr>
+                            <th>POS Name</th>
+                            <th>POS Code</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pos in pos_devices %}
+                        <tr>
+                            <td>{{ pos.pos_name }}</td>
+                            <td>{{ pos.pos_code }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="2" class="empty-cell" style="padding:16px;">No POS devices found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
-
-        <script>
-            function toggleSection(sectionId) {
-                // Hide all sections first
-                document.getElementById('user-form-section').style.display = 'none';
-                document.getElementById('pos-form-section').style.display = 'none';
-                document.getElementById('staff-list-section').style.display = 'none';
-
-                // Show the requested section
-                document.getElementById(sectionId).style.display = 'block';
-            }
-        </script>
     </div>
-</body>
+</div>
+{% endblock %}
 
-</html>
+{% block body_extra %}
+<script>
+    function showPanel(id, btn) {
+        document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('show'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        const panel = document.getElementById(id);
+        if (panel) {
+            const isAlreadyOpen = panel.dataset.open === '1';
+            if (isAlreadyOpen) { panel.dataset.open = '0'; btn.classList.remove('active'); }
+            else { panel.classList.add('show'); panel.dataset.open = '1'; btn.classList.add('active'); }
+        }
+    }
+</script>
+{% endblock %}
