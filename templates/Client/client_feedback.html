@@ -1,241 +1,261 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Feedback</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-            margin: 0;
-            display: flex;
-            height: 100vh;
-        }
+{% block title %}Feedback{% endblock %}
+{% block shell_class %}wide{% endblock %}
 
-        .sidebar {
-            width: 220px;
-            background-color: #fff;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            padding-top: 1rem;
-        }
+{% block head_extra %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .content {
+        flex: 1;
+        width: 100%;
+        min-width: 0;
+        padding: 32px;
+        box-sizing: border-box;
+    }
 
-        .sidebar h2 {
-            text-align: center;
-            margin-bottom: 2rem;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #333;
-        }
+    .page-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #0f2744;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
 
-        .sidebar a {
-            color: #333;
-            padding: 1rem 1.5rem;
-            text-decoration: none;
-            font-size: 1rem;
-            transition: background-color 0.3s ease;
-        }
+    .form-card {
+        background: #fff;
+        border: 1px solid #edf1f5;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        padding: 28px 32px;
+        max-width: 560px;
+    }
 
-        .sidebar a:hover,
-        .sidebar a.active {
-            background-color: #007bff;
-            color: white;
-        }
+    .form-card h3 {
+        font-size: 15px;
+        font-weight: 700;
+        color: #0f2744;
+        margin: 0 0 22px 0;
+        padding-bottom: 14px;
+        border-bottom: 1px solid #edf1f5;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+    }
 
-        .content {
-            flex-grow: 1;
-            padding: 2rem;
-        }
+    .field-row {
+        margin-bottom: 18px;
+    }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #ddd;
-            margin-bottom: 2rem;
-        }
+    .field-label {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        color: #475569;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        margin-bottom: 7px;
+    }
 
-        .header h1 {
-            margin: 0;
-        }
+    .form-input,
+    .form-select,
+    .form-textarea {
+        width: 100%;
+        padding: 10px 13px;
+        border: 1.5px solid #dde3ec;
+        border-radius: 8px;
+        font-size: 14px;
+        color: #0f2744;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color 0.15s, box-shadow 0.15s;
+        background: #fff;
+        font-family: inherit;
+    }
 
-        .logout-link {
-            margin-top: auto;
-            padding: 1rem 1.5rem;
-            background-color: #dc3545;
-            color: white !important;
-            text-align: center;
-            text-decoration: none;
-            font-weight: bold;
-        }
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+        border-color: #4ecfa8;
+        box-shadow: 0 0 0 3px rgba(78,207,168,0.12);
+    }
 
-        .logout-link:hover {
-            background-color: #c82333;
-        }
+    .form-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23475569' d='M1 1l5 5 5-5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 13px center; padding-right: 34px; }
 
-        .feedback-content {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
+    .form-textarea {
+        resize: vertical;
+        min-height: 110px;
+    }
 
-        .feedback-content h3 {
-            margin-bottom: 1rem;
-        }
+    .form-row-half {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
 
-        .form-group {
-            margin-bottom: 1rem;
-        }
+    .field-error {
+        font-size: 12px;
+        color: #dc3545;
+        margin-top: 5px;
+    }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: bold;
-        }
+    .btn-row {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        margin-top: 6px;
+    }
 
-        .form-group textarea {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 1rem;
-            resize: vertical;
-        }
+    .submit-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 28px;
+        background: #0d5c46;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .submit-btn:hover { background: #0a4736; }
 
-        .button-group {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-start;
-        }
+    .cancel-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
+        background: #f0f4f8;
+        color: #0f2744;
+        border: 1px solid #dde3ec;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background 0.15s;
+    }
+    .cancel-btn:hover { background: #e2e8f0; }
 
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 4px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
+    .alert {
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 18px;
+        font-size: 14px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .alert-success { background: #d4f5e9; color: #0d5c46; border: 1px solid #a8e6cf; }
+    .alert-error   { background: #fde8e8; color: #7b1d1d; border: 1px solid #f5c6c6; }
+    .alert-info    { background: #e8f4ff; color: #0f2744; border: 1px solid #bee3f8; }
 
-        .btn-primary {
-            background-color: #007bff;
-            color: white;
-        }
+    @media (max-width: 600px) {
+        .form-row-half { grid-template-columns: 1fr; }
+        .form-card { padding: 20px 16px; }
+    }
+</style>
+{% endblock %}
 
-        .btn-primary:hover {
-            background-color: #0056b3;
-        }
+{% block sidebar_extra %}
+<a href="{% url 'client_dashboard' %}"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
+<a href="{% url 'client_account' %}"><i class="fa-solid fa-user"></i> ACCOUNT</a>
+<a href="{% url 'client_purchases' %}"><i class="fa-solid fa-shopping-bag"></i> PURCHASES</a>
+<a href="{% url 'client_history' %}"><i class="fa-solid fa-clock-rotate-left"></i> HISTORY</a>
+<a href="{% url 'client_settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
+<a href="{% url 'client_topup' %}"><i class="fa-solid fa-wallet"></i> TOPUP ACCOUNT</a>
+<a href="{% url 'client_feedback' %}" class="active"><i class="fa-solid fa-comment-dots"></i> FEEDBACK</a>
+<a href="{% url 'client_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+{% endblock %}
 
-        .btn-secondary {
-            background-color: #6c757d;
-            color: white;
-        }
+{% block content %}
+<div class="content">
 
-        .btn-secondary:hover {
-            background-color: #545b62;
-        }
-
-        .messages {
-            list-style: none;
-            padding: 0;
-            margin-bottom: 1rem;
-        }
-
-        .messages li {
-            padding: 0.5rem;
-            border-radius: 4px;
-            margin-bottom: 0.5rem;
-        }
-
-        .messages .success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .messages .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-    </style>
-</head>
-
-<body>
-
-    <div class="sidebar">
-        <img src="{% static 'images/icon.png' %}" alt="System Logo"
-            style="width: 200px; height: auto; align-self: center; margin-bottom: 20px;">
-
-        <a href="{% url 'client_dashboard' %}" class="active"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
-        <a href="{% url 'client_account' %}"><i class="fa-solid fa-user"></i> ACCOUNT</a>
-        <a href="{% url 'client_purchases' %}"><i class="fa-solid fa-shopping-bag"></i> PURCHASES</a>
-        <a href="{% url 'client_history' %}"><i class="fa-solid fa-clock-rotate-left"></i> HISTORY</a>
-        <a href="{% url 'client_settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
-        <a href="{% url 'client_topup' %}"><i class="fa-solid fa-wallet"></i> TOPUP ACCOUNT</a>
-        <a href="{% url 'client_feedback' %}"><i class="fa-solid fa-comment-dots"></i> FEEDBACK</a>
-        <a href="{% url 'client_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
-
+    <div class="page-title">
+        <i class="fa-solid fa-comment-dots" style="color:#0d5c46;"></i>
+        Feedback
     </div>
-    <div class="content">
-        <div class="header">
-            <h1>FEEDBACK</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            <i class="fa-solid {% if 'success' in message.tags %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}"></i>
+            {{ message }}
         </div>
+        {% endfor %}
+    {% endif %}
 
-        {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-            <li{% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message.message }}</li>
-                {% endfor %}
-        </ul>
-        {% endif %}
+    <div class="form-card">
+        <h3>
+            <i class="fa-solid fa-pen-to-square" style="color:#4ecfa8;"></i>
+            Submit Your Feedback
+        </h3>
 
-        <div class="feedback-content">
-            <h3>Submit Your Feedback</h3>
-            <form method="post">
-                {% csrf_token %}
-                <div class="form-group">
-                    <label for="{{ form.location.id_for_label }}">Location:</label>
-                    {{ form.location }}
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-row-half">
+                <div class="field-row">
+                    <label class="field-label" for="{{ form.location.id_for_label }}">Location</label>
+                    <select class="form-select" id="{{ form.location.id_for_label }}" name="{{ form.location.html_name }}">
+                        {% for val, label in form.location.field.choices %}
+                        <option value="{{ val }}" {% if form.location.value == val|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
                     {% if form.location.errors %}
-                    <div class="error">{{ form.location.errors }}</div>
+                    <div class="field-error">{{ form.location.errors|join:", " }}</div>
                     {% endif %}
                 </div>
-                <div class="form-group">
-                    <label for="{{ form.feedback_type.id_for_label }}">Feedback Type:</label>
-                    {{ form.feedback_type }}
-                    {% if form.feedback_type.errors %}
-                    <div class="error">{{ form.feedback_type.errors }}</div>
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.subject.id_for_label }}">Subject:</label>
-                    {{ form.subject }}
-                    {% if form.subject.errors %}
-                    <div class="error">{{ form.subject.errors }}</div>
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.message.id_for_label }}">Feedback:</label>
-                    {{ form.message }}
-                    {% if form.message.errors %}
-                    <div class="error">{{ form.message.errors }}</div>
-                    {% endif %}
-                </div>
-                <div class="button-group">
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                    <a href="{% url 'client_dashboard' %}" class="btn btn-secondary">Cancel</a>
-                </div>
-            </form>
-        </div>
-    </div>
-</body>
 
-</html>
+                <div class="field-row">
+                    <label class="field-label" for="{{ form.feedback_type.id_for_label }}">Type</label>
+                    <select class="form-select" id="{{ form.feedback_type.id_for_label }}" name="{{ form.feedback_type.html_name }}">
+                        {% for val, label in form.feedback_type.field.choices %}
+                        <option value="{{ val }}" {% if form.feedback_type.value == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if form.feedback_type.errors %}
+                    <div class="field-error">{{ form.feedback_type.errors|join:", " }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="field-row">
+                <label class="field-label" for="{{ form.subject.id_for_label }}">Subject</label>
+                <input class="form-input" type="text" id="{{ form.subject.id_for_label }}"
+                       name="{{ form.subject.html_name }}" value="{{ form.subject.value|default:'' }}"
+                       placeholder="Brief summary of your feedback">
+                {% if form.subject.errors %}
+                <div class="field-error">{{ form.subject.errors|join:", " }}</div>
+                {% endif %}
+            </div>
+
+            <div class="field-row">
+                <label class="field-label" for="{{ form.message.id_for_label }}">Message</label>
+                <textarea class="form-textarea" id="{{ form.message.id_for_label }}"
+                          name="{{ form.message.html_name }}"
+                          placeholder="Tell us more…">{{ form.message.value|default:'' }}</textarea>
+                {% if form.message.errors %}
+                <div class="field-error">{{ form.message.errors|join:", " }}</div>
+                {% endif %}
+            </div>
+
+            <div class="btn-row">
+                <button type="submit" class="submit-btn">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    Submit Feedback
+                </button>
+                <a href="{% url 'client_dashboard' %}" class="cancel-btn">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

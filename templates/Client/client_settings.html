@@ -1,301 +1,196 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Client Settings</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: hsla(80, 27%, 98%, 1.00);
-            margin: 0;
-            height: 100vh;
-            display: flex;
-        }
+{% block title %}Settings{% endblock %}
+{% block shell_class %}wide{% endblock %}
 
-        .sidebar {
-            width: 220px;
-            background-color: hsla(80, 27%, 98%, 1.00);
-            color: hsla(80, 27%, 98%, 1.00);
-            display: flex;
-            flex-direction: column;
-            padding-top: 1rem;
-            position: fixed;
-            height: 100vh;
-            color: #333;
-        }
+{% block head_extra %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .content {
+        flex: 1;
+        width: 100%;
+        min-width: 0;
+        padding: 32px;
+        box-sizing: border-box;
+    }
 
-        .sidebar h2 {
-            text-align: center;
-            margin-bottom: 2rem;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #333;
-            font-family: Algerian;
-        }
+    .page-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #0f2744;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
 
-        .sidebar a {
-            color: #333;
-            padding: 1rem 1.5rem;
-            text-decoration: none;
-            font-size: 1rem;
-            transition: background-color 0.3s ease;
-        }
+    .form-card {
+        background: #fff;
+        border: 1px solid #edf1f5;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        padding: 28px 32px;
+        max-width: 560px;
+    }
 
-        .sidebar a:hover {
-            background-color: #495057;
-        }
+    .form-card h3 {
+        font-size: 15px;
+        font-weight: 700;
+        color: #0f2744;
+        margin: 0 0 22px 0;
+        padding-bottom: 14px;
+        border-bottom: 1px solid #edf1f5;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+    }
 
-        .sidebar a.active {
-            background-color: #007bff;
-        }
+    .field-row {
+        margin-bottom: 18px;
+    }
 
-        .content {
-            margin-left: 220px;
-            padding: 2rem;
-            flex-grow: 1;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 900px;
-            margin-top: 2rem;
-            margin-bottom: 2rem;
-        }
+    .field-label {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        color: #475569;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        margin-bottom: 7px;
+    }
 
-        .logout-link {
-            margin-top: auto;
-            padding: 1rem 1.5rem;
-            background-color: #dc3545;
-            color: white;
-            text-align: center;
-            text-decoration: none;
-            font-weight: bold;
-            border-top: 1px solid #495057;
-        }
+    .form-input {
+        width: 100%;
+        padding: 10px 13px;
+        border: 1.5px solid #dde3ec;
+        border-radius: 8px;
+        font-size: 14px;
+        color: #0f2744;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color 0.15s, box-shadow 0.15s;
+        background: #fff;
+    }
 
-        .logout-link:hover {
-            background-color: #c82333;
-        }
+    .form-input:focus {
+        border-color: #4ecfa8;
+        box-shadow: 0 0 0 3px rgba(78,207,168,0.12);
+    }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 0;
-            border-bottom: 1px solid #ddd;
-            margin-bottom: 2rem;
-        }
+    .form-row-half {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
 
-        .search-container {
-            display: flex;
-            align-items: center;
-        }
+    .save-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 28px;
+        background: #0d5c46;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s;
+        margin-top: 6px;
+    }
 
-        .search-container input {
-            padding: 0.5rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-right: 0.5rem;
-        }
+    .save-btn:hover { background: #0a4736; }
 
-        .search-container button {
-            padding: 0.5rem 1rem;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
+    .alert {
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 18px;
+        font-size: 14px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .alert-success { background: #d4f5e9; color: #0d5c46; border: 1px solid #a8e6cf; }
+    .alert-error   { background: #fde8e8; color: #7b1d1d; border: 1px solid #f5c6c6; }
+    .alert-info    { background: #e8f4ff; color: #0f2744; border: 1px solid #bee3f8; }
 
-        .search-container button:hover {
-            background-color: #0056b3;
-        }
+    @media (max-width: 600px) {
+        .form-row-half { grid-template-columns: 1fr; }
+        .form-card { padding: 20px 16px; }
+    }
+</style>
+{% endblock %}
 
-        .profile-section {
-            margin-bottom: 2rem;
-        }
+{% block sidebar_extra %}
+<a href="{% url 'client_dashboard' %}"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
+<a href="{% url 'client_account' %}"><i class="fa-solid fa-user"></i> ACCOUNT</a>
+<a href="{% url 'client_purchases' %}"><i class="fa-solid fa-shopping-bag"></i> PURCHASES</a>
+<a href="{% url 'client_history' %}"><i class="fa-solid fa-clock-rotate-left"></i> HISTORY</a>
+<a href="{% url 'client_settings' %}" class="active"><i class="fa-solid fa-gear"></i> SETTINGS</a>
+<a href="{% url 'client_topup' %}"><i class="fa-solid fa-wallet"></i> TOPUP ACCOUNT</a>
+<a href="{% url 'client_feedback' %}"><i class="fa-solid fa-comment-dots"></i> FEEDBACK</a>
+<a href="{% url 'client_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+{% endblock %}
 
-        .profile-section h3 {
-            margin-bottom: 1rem;
-            color: #333;
-        }
+{% block content %}
+<div class="content">
 
-        .profile-form {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .profile-form label {
-            margin-bottom: 0.5rem;
-            font-weight: bold;
-        }
-
-        .profile-form input {
-            padding: 0.5rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-bottom: 1rem;
-        }
-
-        .profile-form button {
-            padding: 0.75rem;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-
-        .profile-form button:hover {
-            background-color: #218838;
-        }
-
-        .messages {
-            margin-bottom: 1rem;
-        }
-
-        .messages .alert {
-            padding: 0.75rem;
-            border-radius: 4px;
-            margin-bottom: 1rem;
-        }
-
-        .messages .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        /* Toast Popup Styling */
-        .toast {
-            visibility: hidden;
-            min-width: 250px;
-            background-color: #28a745;
-            color: #fff;
-            text-align: center;
-            border-radius: 8px;
-            padding: 16px;
-            position: fixed;
-            z-index: 1000;
-            left: 50%;
-            bottom: 30px;
-            transform: translateX(-50%);
-            font-size: 1.1rem;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            opacity: 0;
-            transition: opacity 0.5s, visibility 0.5s, bottom 0.5s;
-        }
-
-        .toast.show {
-            visibility: visible;
-            opacity: 1;
-            bottom: 50px;
-        }
-    </style>
-</head>
-
-<body>
-
-    <div class="sidebar">
-        <img src="{% static 'images/icon.png' %}" alt="System Logo"
-            style="width: 200px; height: auto; align-self: center; margin-bottom: 20px;">
-
-        <a href="{% url 'client_dashboard' %}" class="active"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
-        <a href="{% url 'client_account' %}"><i class="fa-solid fa-user"></i> ACCOUNT</a>
-        <a href="{% url 'client_purchases' %}"><i class="fa-solid fa-shopping-bag"></i> PURCHASES</a>
-        <a href="{% url 'client_history' %}"><i class="fa-solid fa-clock-rotate-left"></i> HISTORY</a>
-        <a href="{% url 'client_settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
-        <a href="{% url 'client_topup' %}"><i class="fa-solid fa-wallet"></i> TOPUP ACCOUNT</a>
-        <a href="{% url 'client_feedback' %}"><i class="fa-solid fa-comment-dots"></i> FEEDBACK</a>
-        <a href="{% url 'client_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    <div class="page-title">
+        <i class="fa-solid fa-gear" style="color:#0d5c46;"></i>
+        Settings
     </div>
-    <div class="content">
-        <div class="header">
-            <div class="search-container">
-                <input type="text" placeholder="Search...">
-                <button type="submit">Search</button>
-            </div>
-            <a href="{% url 'client_reset_password' %}" class="reset-password">Reset Password</a>
+
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            <i class="fa-solid {% if 'success' in message.tags %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}"></i>
+            {{ message }}
         </div>
-        <div id="datetime" style="position: fixed; bottom: 10px; right: 10px; font-size: 1em; color: #333;"></div>
+        {% endfor %}
+    {% endif %}
 
-        <div class="profile-section">
-            <h3>Client Profile</h3>
-            {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-                {% endfor %}
+    <div class="form-card">
+        <h3>
+            <i class="fa-solid fa-user-pen" style="color:#4ecfa8;"></i>
+            Update Profile
+        </h3>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-row-half">
+                <div class="field-row">
+                    <label class="field-label" for="firstname">First Name</label>
+                    <input class="form-input" type="text" id="firstname" name="firstname"
+                           value="{{ client.firstname }}" required>
+                </div>
+                <div class="field-row">
+                    <label class="field-label" for="lastname">Last Name</label>
+                    <input class="form-input" type="text" id="lastname" name="lastname"
+                           value="{{ client.lastname }}" required>
+                </div>
             </div>
-            {% endif %}
-            <form method="post" class="profile-form">
-                {% csrf_token %}
-                <label for="firstname">First Name:</label>
-                <input type="text" id="firstname" name="firstname" value="{{ client.firstname }}" required>
 
-                <label for="lastname">Last Name:</label>
-                <input type="text" id="lastname" name="lastname" value="{{ client.lastname }}" required>
+            <div class="field-row">
+                <label class="field-label" for="phone_number">Phone Number</label>
+                <input class="form-input" type="tel" id="phone_number" name="phone_number"
+                       value="{{ client.phone_number }}" required>
+            </div>
 
-                <label for="phone_number">Phone Number:</label>
-                <input type="text" id="phone_number" name="phone_number" value="{{ client.phone_number }}" required>
+            <div class="field-row">
+                <label class="field-label" for="email_address">Email Address</label>
+                <input class="form-input" type="email" id="email_address" name="email_address"
+                       value="{{ client.email_address }}" required>
+            </div>
 
-                <label for="email_address">Email Address:</label>
-                <input type="email" id="email_address" name="email_address" value="{{ client.email_address }}" required>
-
-                <button type="submit">Update Profile</button>
-            </form>
-        </div>
+            <button type="submit" class="save-btn">
+                <i class="fa-solid fa-floppy-disk"></i>
+                Save Changes
+            </button>
+        </form>
     </div>
-    <div style="position: fixed; top: 10px; left: 10px; font-size: 1.5em; color: #333;">
-        Welcome, {{ username }}
-    </div>
-    <script id="django-messages" type="application/json">
-        [
-            {% for message in messages %}
-            {
-                "tags": "{{ message.tags|default:''|escapejs }}",
-                "message": "{{ message.message|default:''|escapejs }}"
-            }{% if not forloop.last %},{% endif %}
-            {% endfor %}
-        ]
-    </script>
-    <script>
-        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-        function updateDateTime() {
-            const now = new Date();
-            const day = days[now.getDay()];
-            const date = now.getDate();
-            const month = months[now.getMonth()];
-            const year = now.getFullYear();
-            const time = now.toLocaleTimeString('en-GB');
-            document.getElementById('datetime').textContent = `${day}, ${date} ${month} ${year} ${time}`;
-        }
-
-        setInterval(updateDateTime, 1000);
-        updateDateTime();
-
-        function showToast() {
-            var x = document.getElementById("toast");
-            x.className = "toast show";
-            setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            const messagesData = JSON.parse(document.getElementById('django-messages').textContent);
-            messagesData.forEach(function (msg) {
-                if (msg.tags.includes('success') && msg.message.includes('Password changed successfully')) {
-                    showToast();
-                }
-            });
-        });
-    </script>
-    <div id="toast" class="toast">Password changed successfully</div>
-</body>
-
-</html>
+</div>
+{% endblock %}
