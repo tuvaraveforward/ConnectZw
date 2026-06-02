@@ -17,51 +17,75 @@
     }
 
     .categories-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr) !important;
-        gap: 1.5rem;
-        align-items: stretch;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem 2rem;
+        align-items: flex-start;
         width: 100%;
     }
 
     .category-container {
         text-align: center;
-        min-width: 0;
-        padding: 1.25rem 1rem;
-        border: 1px solid #edf1f5;
-        border-radius: 10px;
-        background: #fff;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        transition: box-shadow 0.18s, transform 0.18s;
+        flex: 0 0 auto;
+        width: 110px;
+        padding: 0;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        transition: transform 0.18s;
     }
 
     .category-container:hover {
-        box-shadow: 0 6px 18px rgba(0,0,0,0.09);
-        transform: translateY(-2px);
+        transform: translateY(-3px);
     }
 
+    .category-circle-wrap {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        overflow: hidden;
+        margin: 0 auto 10px auto;
+        border: 3px solid #e0e8f0;
+        background: #f4f6f9;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .category-container:hover .category-circle-wrap {
+        border-color: #4ecfa8;
+        box-shadow: 0 4px 16px rgba(78,207,168,0.25);
+    }
 
     .category-top-image {
         width: 100%;
-        height: 140px;
-        border-radius: 8px;
+        height: 100%;
         object-fit: cover;
         display: block;
-        margin: 0 auto 12px auto;
-        background: #f4f6f9;
-        font-size: 13px;
+    }
+
+    .category-no-image {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #aab;
+        font-size: 11px;
     }
 
     .category-button {
         display: block;
-        padding: 0.5rem 0;
+        padding: 0;
         color: #0f2744;
         font-weight: 600;
-        font-size: 15px;
+        font-size: 13px;
         text-decoration: none;
         transition: color 0.2s;
+        line-height: 1.3;
     }
-    
+
     .category-container:hover .category-button {
         color: #4ecfa8;
     }
@@ -320,6 +344,237 @@
         transition: background 0.2s;
     }
     .basket-checkout-btn:hover { background: #0a4736; }
+
+    /* ── Chat floating button ── */
+    .chat-floating-btn {
+        position: fixed;
+        bottom: 28px;
+        left: 28px;
+        background: #0f2744;
+        color: #fff;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.35rem;
+        cursor: pointer;
+        z-index: 1000;
+        box-shadow: 0 4px 16px rgba(15,39,68,.4);
+        transition: background 0.2s, transform 0.15s;
+        border: none;
+    }
+    .chat-floating-btn:hover { background: #1a3d6e; transform: scale(1.07); }
+    .chat-unread-dot {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        width: 12px;
+        height: 12px;
+        background: #4ecfa8;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        display: none;
+    }
+    .chat-unread-dot.show { display: block; }
+
+    /* ── Chat panel ── */
+    .chat-panel {
+        position: fixed;
+        bottom: 96px;
+        left: 28px;
+        width: 340px;
+        max-width: calc(100vw - 56px);
+        height: 480px;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0,0,0,.18);
+        display: flex;
+        flex-direction: column;
+        z-index: 1003;
+        overflow: hidden;
+        transform: scale(0.85) translateY(30px);
+        opacity: 0;
+        pointer-events: none;
+        transform-origin: bottom left;
+        transition: transform 0.22s cubic-bezier(.4,0,.2,1), opacity 0.22s;
+    }
+    .chat-panel.open {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    /* ── Chat header ── */
+    .chat-header {
+        background: #0f2744;
+        color: #fff;
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
+    }
+    .chat-header-avatar {
+        width: 36px;
+        height: 36px;
+        background: #4ecfa8;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+    .chat-header-info { flex: 1; }
+    .chat-header-title { font-weight: 700; font-size: 14px; }
+    .chat-header-status { font-size: 11px; color: #4ecfa8; margin-top: 1px; }
+    .chat-close-btn {
+        background: none;
+        border: none;
+        color: #a4b8cc;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: color 0.15s;
+        line-height: 1;
+    }
+    .chat-close-btn:hover { color: #fff; }
+
+    /* ── Chat messages ── */
+    .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 14px 14px 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        scroll-behavior: smooth;
+    }
+    .chat-bubble-wrap {
+        display: flex;
+        align-items: flex-end;
+        gap: 6px;
+    }
+    .chat-bubble-wrap.user { flex-direction: row-reverse; }
+    .chat-bubble {
+        max-width: 78%;
+        padding: 9px 13px;
+        border-radius: 14px;
+        font-size: 13px;
+        line-height: 1.5;
+        word-break: break-word;
+    }
+    .chat-bubble.bot {
+        background: #f0f4f8;
+        color: #0f2744;
+        border-bottom-left-radius: 4px;
+    }
+    .chat-bubble.user {
+        background: #0f2744;
+        color: #fff;
+        border-bottom-right-radius: 4px;
+    }
+    .chat-avatar-sm {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: #4ecfa8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        flex-shrink: 0;
+        color: #fff;
+    }
+
+    /* ── Typing indicator ── */
+    .typing-indicator {
+        display: none;
+        align-items: flex-end;
+        gap: 6px;
+    }
+    .typing-indicator.show { display: flex; }
+    .typing-dots {
+        background: #f0f4f8;
+        border-radius: 14px;
+        border-bottom-left-radius: 4px;
+        padding: 10px 14px;
+        display: flex;
+        gap: 4px;
+        align-items: center;
+    }
+    .typing-dots span {
+        width: 7px;
+        height: 7px;
+        background: #a0b0c0;
+        border-radius: 50%;
+        animation: typingBounce 1.2s infinite;
+    }
+    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typingBounce {
+        0%, 60%, 100% { transform: translateY(0); }
+        30% { transform: translateY(-5px); }
+    }
+
+    /* ── Quick chips ── */
+    .chat-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 4px 14px 10px;
+        flex-shrink: 0;
+    }
+    .chat-chip {
+        background: #edf6f2;
+        color: #0d5c46;
+        border: 1px solid #b2e8d4;
+        border-radius: 20px;
+        padding: 5px 11px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s;
+        white-space: nowrap;
+    }
+    .chat-chip:hover { background: #c8f0e2; border-color: #4ecfa8; }
+
+    /* ── Input row ── */
+    .chat-input-row {
+        display: flex;
+        gap: 8px;
+        padding: 10px 12px;
+        border-top: 1px solid #edf1f5;
+        background: #fafbfc;
+        flex-shrink: 0;
+    }
+    .chat-input {
+        flex: 1;
+        border: 1px solid #dde3ec;
+        border-radius: 20px;
+        padding: 8px 14px;
+        font-size: 13px;
+        outline: none;
+        transition: border-color 0.15s;
+    }
+    .chat-input:focus { border-color: #4ecfa8; }
+    .chat-send-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #0f2744;
+        color: #fff;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background 0.15s;
+        flex-shrink: 0;
+    }
+    .chat-send-btn:hover { background: #1a3d6e; }
 </style>
 {% endblock %}
 
@@ -357,14 +612,16 @@
         <div class="categories-grid">
             {% for category in categories %}
             <div class="category-container">
-                <a href="{% url 'client_products' category=category.name %}">
-                    {% if category.image %}
-                        <img src="{% static category.image %}" alt="{{ category.name }}" class="category-top-image">
-                    {% else %}
-                        <div class="category-top-image" style="display:flex;align-items:center;justify-content:center;color:#888;">No Image</div>
-                    {% endif %}
+                <a href="{% url 'client_products' category=category.name %}" style="text-decoration:none;">
+                    <div class="category-circle-wrap">
+                        {% if category.image %}
+                            <img src="{% static category.image %}" alt="{{ category.name }}" class="category-top-image">
+                        {% else %}
+                            <div class="category-no-image">No Image</div>
+                        {% endif %}
+                    </div>
+                    <span class="category-button">{{ category.name }}</span>
                 </a>
-                <a href="{% url 'client_products' category=category.name %}" class="category-button" style="display:block;text-decoration:none;">{{ category.name }}</a>
             </div>
             {% empty %}
             <p>No categories available</p>
@@ -379,6 +636,47 @@
 
 <!-- datetime clock -->
 <div id="datetime" style="position: fixed; bottom: 14px; right: 100px; font-size: .82em; color: #aaa; z-index: 999;"></div>
+
+<!-- ── Chat floating button ── -->
+<button class="chat-floating-btn" id="chat-btn" onclick="toggleChat()" title="Shopping Assistant">
+    <i class="fa-solid fa-comment-dots"></i>
+    <span class="chat-unread-dot" id="chat-unread-dot"></span>
+</button>
+
+<!-- ── Chat panel ── -->
+<div class="chat-panel" id="chat-panel">
+    <div class="chat-header">
+        <div class="chat-header-avatar">🤖</div>
+        <div class="chat-header-info">
+            <div class="chat-header-title">Shopping Assistant</div>
+            <div class="chat-header-status">● Online</div>
+        </div>
+        <button class="chat-close-btn" onclick="toggleChat()" title="Close">✕</button>
+    </div>
+
+    <div class="chat-messages" id="chat-messages">
+        <div class="typing-indicator" id="typing-indicator">
+            <div class="chat-avatar-sm">🤖</div>
+            <div class="typing-dots">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-chips" id="chat-chips">
+        <span class="chat-chip" onclick="sendChip('Where can I find a product?')">🔍 Find a product</span>
+        <span class="chat-chip" onclick="sendChip('Nearest redemption location')">📍 Nearest location</span>
+        <span class="chat-chip" onclick="sendChip('Contact helpdesk')">📞 Helpdesk</span>
+    </div>
+
+    <div class="chat-input-row">
+        <input class="chat-input" id="chat-input" type="text" placeholder="Ask me anything…"
+               onkeydown="if(event.key==='Enter') sendMessage()">
+        <button class="chat-send-btn" onclick="sendMessage()" title="Send">
+            <i class="fa-solid fa-paper-plane"></i>
+        </button>
+    </div>
+</div>
 
 <!-- Basket floating icon -->
 <div class="basket-floating-icon" id="basket-icon" onclick="toggleBasket()">
@@ -396,30 +694,14 @@
         <button class="basket-close-btn" onclick="toggleBasket()" title="Close">✕</button>
     </div>
 
-    <div class="basket-drawer-body">
-        {% if basket_items %}
-            {% for item in basket_items %}
-            <div class="basket-item" id="item-{{ item.id }}">
-                <div>
-                    <div class="basket-item-name">{{ item.product.name }}</div>
-                    <div class="basket-item-price">${{ item.product.price }} each</div>
-                </div>
-                <div class="basket-item-controls">
-                    <input type="number" min="1" value="{{ item.quantity }}"
-                        onchange="updateBasketItem('{{ item.id }}', this.value)">
-                    <button class="basket-remove-btn" onclick="removeBasketItem('{{ item.id }}')">✕</button>
-                </div>
-            </div>
-            {% endfor %}
-        {% else %}
-            <p class="basket-empty-msg">🛒<br>Your basket is empty.</p>
-        {% endif %}
+    <div class="basket-drawer-body" id="basket-drawer-body">
+        <p class="basket-empty-msg" id="basket-loading-msg" style="display:none;">Loading...</p>
     </div>
 
     <div class="basket-drawer-footer">
         <div class="basket-total-row">
             <span>Total</span>
-            <span>${{ basket_total|default:0 }}</span>
+            <span id="basket-total-display">$0</span>
         </div>
         <button class="basket-checkout-btn" onclick="checkout()">Proceed to Checkout →</button>
     </div>
@@ -434,6 +716,38 @@
     function getCookie(name) { let cookieValue = null; if (document.cookie && document.cookie !== '') { const cookies = document.cookie.split(';'); for (let i = 0; i < cookies.length; i++) { const cookie = cookies[i].trim(); if (cookie.substring(0, name.length + 1) === (name + '=')) { cookieValue = decodeURIComponent(cookie.substring(name.length + 1)); break } } } return cookieValue }
     const csrftoken = getCookie('csrftoken');
 
+    function renderBasket(data) {
+        const body = document.getElementById('basket-drawer-body');
+        const totalEl = document.getElementById('basket-total-display');
+        document.getElementById('basket-count').textContent = data.count;
+        totalEl.textContent = '$' + data.total;
+        if (data.items.length === 0) {
+            body.innerHTML = '<p class="basket-empty-msg">🛒<br>Your basket is empty.</p>';
+            return;
+        }
+        body.innerHTML = data.items.map(item => `
+            <div class="basket-item" id="item-${item.id}">
+                <div>
+                    <div class="basket-item-name">${item.name}</div>
+                    <div class="basket-item-price">$${item.price} each</div>
+                </div>
+                <div class="basket-item-controls">
+                    <input type="number" min="1" value="${item.quantity}"
+                        onchange="updateBasketItem('${item.id}', this.value)">
+                    <button class="basket-remove-btn" onclick="removeBasketItem('${item.id}')">✕</button>
+                </div>
+            </div>`).join('');
+    }
+
+    function loadBasket() {
+        const body = document.getElementById('basket-drawer-body');
+        body.innerHTML = '<p class="basket-empty-msg">Loading...</p>';
+        fetch('/Client/get-basket/')
+            .then(r => r.json())
+            .then(d => { if (d.status === 'success') renderBasket(d); })
+            .catch(() => { body.innerHTML = '<p class="basket-empty-msg">Could not load basket.</p>'; });
+    }
+
     function toggleBasket() {
         const drawer   = document.getElementById('basket-drawer');
         const backdrop = document.getElementById('basket-backdrop');
@@ -441,10 +755,125 @@
         drawer.classList.toggle('open', !isOpen);
         backdrop.classList.toggle('open', !isOpen);
         document.body.style.overflow = isOpen ? '' : 'hidden';
+        if (!isOpen) loadBasket();
     }
 
-    function updateBasketItem(itemId, quantity) { fetch(`/Client/update-basket-item/${itemId}/`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken }, body: JSON.stringify({ quantity }) }).then(r => r.json()).then(d => { if (d.status === 'success') { location.reload() } else { alert('Error: ' + d.message) } }) }
-    function removeBasketItem(itemId) { if (!confirm('Remove this item?')) return; fetch(`/Client/remove-basket-item/${itemId}/`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken }, body: JSON.stringify({}) }).then(r => r.json()).then(d => { if (d.status === 'success') { location.reload() } else { alert('Error: ' + d.message) } }) }
-    function checkout() { if (!confirm('Proceed to checkout with the items in your basket?')) return; fetch('/Client/checkout/', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken }, body: JSON.stringify({}) }).then(r => r.json()).then(d => { if (d.status === 'success') { alert('Purchase successful!'); location.reload() } else { alert('Error: ' + d.message) } }) }
+    function updateBasketItem(itemId, quantity) {
+        fetch(`/Client/update-basket-item/${itemId}/`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken }, body: JSON.stringify({ quantity }) })
+            .then(r => r.json()).then(d => { if (d.status === 'success') loadBasket(); else alert('Error: ' + d.message); });
+    }
+    function removeBasketItem(itemId) {
+        if (!confirm('Remove this item?')) return;
+        fetch(`/Client/remove-basket-item/${itemId}/`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken }, body: JSON.stringify({}) })
+            .then(r => r.json()).then(d => { if (d.status === 'success') loadBasket(); else alert('Error: ' + d.message); });
+    }
+    function checkout() {
+        if (!confirm('Proceed to checkout with the items in your basket?')) return;
+        fetch('/Client/checkout/', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken }, body: JSON.stringify({}) })
+            .then(r => r.json()).then(d => { if (d.status === 'success') { alert('Purchase successful!'); loadBasket(); } else { alert('Error: ' + d.message); } });
+    }
+
+    // ── Chat agent ─────────────────────────────────────────────────────────────
+    let chatOpened = false;
+
+    function toggleChat() {
+        const panel = document.getElementById('chat-panel');
+        const dot   = document.getElementById('chat-unread-dot');
+        const isOpen = panel.classList.contains('open');
+        panel.classList.toggle('open', !isOpen);
+        dot.classList.remove('show');
+        if (!isOpen && !chatOpened) {
+            chatOpened = true;
+            loadWelcome();
+        }
+    }
+
+    function loadWelcome() {
+        showTyping();
+        fetch('/Client/chat/')
+            .then(r => r.json())
+            .then(d => {
+                hideTyping();
+                const name = d.name || '';
+                const greeting = name
+                    ? `Hello, <strong>${name}</strong>! 👋 I'm your shopping assistant.<br>I can help you with:<br>• <strong>Finding a product</strong> — e.g. 'Where can I find cement?'<br>• <strong>Nearest redemption location</strong> — e.g. 'Location in Harare'<br>• <strong>Helpdesk contact</strong> — just ask 'Contact'`
+                    : `Hello! 👋 I'm your shopping assistant.<br>Ask me about products, locations, or contact details.`;
+                appendBotMessage(greeting);
+            })
+            .catch(() => { hideTyping(); appendBotMessage("Hi! How can I help you today?"); });
+    }
+
+    function sendChip(text) {
+        document.getElementById('chat-chips').style.display = 'none';
+        appendUserMessage(text);
+        dispatchMessage(text);
+    }
+
+    function sendMessage() {
+        const input = document.getElementById('chat-input');
+        const text = input.value.trim();
+        if (!text) return;
+        input.value = '';
+        document.getElementById('chat-chips').style.display = 'none';
+        appendUserMessage(text);
+        dispatchMessage(text);
+    }
+
+    function dispatchMessage(text) {
+        showTyping();
+        fetch('/Client/chat/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+            body: JSON.stringify({ message: text }),
+        })
+        .then(r => r.json())
+        .then(d => {
+            hideTyping();
+            if (d.status === 'success') appendBotMessage(d.reply);
+            else appendBotMessage("Sorry, something went wrong. Please try again.");
+        })
+        .catch(() => { hideTyping(); appendBotMessage("Network error. Please try again."); });
+    }
+
+    function appendUserMessage(text) {
+        const msgs = document.getElementById('chat-messages');
+        const div = document.createElement('div');
+        div.className = 'chat-bubble-wrap user';
+        div.innerHTML = `<div class="chat-bubble user">${escapeHtml(text)}</div>`;
+        msgs.insertBefore(div, document.getElementById('typing-indicator'));
+        scrollChat();
+    }
+
+    function appendBotMessage(html) {
+        const msgs = document.getElementById('chat-messages');
+        const dot  = document.getElementById('chat-unread-dot');
+        const panel = document.getElementById('chat-panel');
+        const div = document.createElement('div');
+        div.className = 'chat-bubble-wrap bot';
+        div.innerHTML = `<div class="chat-avatar-sm">🤖</div><div class="chat-bubble bot">${html}</div>`;
+        msgs.insertBefore(div, document.getElementById('typing-indicator'));
+        scrollChat();
+        if (!panel.classList.contains('open')) dot.classList.add('show');
+    }
+
+    function showTyping() {
+        document.getElementById('typing-indicator').classList.add('show');
+        scrollChat();
+    }
+    function hideTyping() {
+        document.getElementById('typing-indicator').classList.remove('show');
+    }
+    function scrollChat() {
+        const msgs = document.getElementById('chat-messages');
+        msgs.scrollTop = msgs.scrollHeight;
+    }
+    function escapeHtml(str) {
+        return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // Show unread dot after 3 s to draw attention on first load
+    setTimeout(() => {
+        if (!chatOpened) document.getElementById('chat-unread-dot').classList.add('show');
+    }, 3000);
 </script>
 {% endblock %}

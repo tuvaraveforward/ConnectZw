@@ -1,300 +1,421 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Topup Account</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: hsla(80, 27%, 98%, 1.00);
-            margin: 0;
-            height: 100vh;
-            display: flex;
-        }
+{% block title %}Top Up Account{% endblock %}
+{% block shell_class %}wide{% endblock %}
 
-        .sidebar {
-            width: 220px;
-            background-color: hsla(80, 27%, 98%, 1.00);
-            color: hsla(80, 27%, 98%, 1.00);
-            display: flex;
-            flex-direction: column;
-            padding-top: 1rem;
-            position: fixed;
-            height: 100vh;
-            color: #333;
-        }
+{% block head_extra %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .content { flex: 1; padding: 32px; max-width: 580px; }
 
-        .sidebar h2 {
-            text-align: center;
-            margin-bottom: 2rem;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #333;
-            font-family: Algerian;
-        }
+    .page-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #0f2744;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
 
-        .sidebar a {
-            color: #333;
-            padding: 1rem 1.5rem;
-            text-decoration: none;
-            font-size: 1rem;
-            transition: background-color 0.3s ease;
-        }
+    /* ── Messages ── */
+    .alert {
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 18px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+    .alert-success { background: #d4f5e9; color: #0d5c46; border: 1px solid #a8e6cf; }
+    .alert-error   { background: #fde8e8; color: #7b1d1d; border: 1px solid #f5c6c6; }
+    .alert-info    { background: #e8f4ff; color: #0f2744; border: 1px solid #bee3f8; }
 
-        .sidebar a:hover {
-            background-color: #495057;
-        }
+    /* ── Amount field ── */
+    .field-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #4a5568;
+        margin-bottom: 6px;
+        display: block;
+    }
+    .amount-wrap {
+        position: relative;
+        margin-bottom: 28px;
+    }
+    .amount-prefix {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-weight: 700;
+        color: #0d5c46;
+        font-size: 16px;
+    }
+    .amount-input {
+        width: 100%;
+        padding: 13px 14px 13px 32px;
+        border: 1.5px solid #dde3ec;
+        border-radius: 10px;
+        font-size: 20px;
+        font-weight: 600;
+        color: #0f2744;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color 0.15s;
+    }
+    .amount-input:focus { border-color: #4ecfa8; }
 
-        .sidebar a.active {
-            background-color: #007bff;
-        }
+    /* ── Method cards ── */
+    .method-label { font-size: 13px; font-weight: 600; color: #4a5568; margin-bottom: 12px; display: block; }
+    .method-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 28px;
+    }
+    .method-card {
+        border: 2px solid #dde3ec;
+        border-radius: 12px;
+        padding: 16px 10px 12px;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+        user-select: none;
+        position: relative;
+    }
+    .method-card:hover { border-color: #4ecfa8; box-shadow: 0 2px 8px rgba(78,207,168,.15); }
+    .method-card.active { border-color: #0d5c46; background: #f0faf6; box-shadow: 0 2px 10px rgba(13,92,70,.12); }
+    .method-card input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
+    .method-icon { font-size: 26px; margin-bottom: 6px; display: block; }
+    .method-name { font-size: 12px; font-weight: 700; color: #0f2744; }
+    .method-card.active .method-name { color: #0d5c46; }
 
-        .content {
-            margin-left: 220px;
-            padding: 2rem;
-            flex-grow: 1;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            margin-top: 2rem;
-            margin-bottom: 2rem;
-        }
+    /* ── Dynamic detail fields ── */
+    .payment-details { display: none; }
+    .payment-details.show { display: block; animation: fadeIn 0.2s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-        .logout-link {
-            margin-top: auto;
-            padding: 1rem 1.5rem;
-            background-color: #dc3545;
-            color: white;
-            text-align: center;
-            text-decoration: none;
-            font-weight: bold;
-            border-top: 1px solid #495057;
-        }
+    .detail-card {
+        background: #f8fafc;
+        border: 1.5px solid #dde3ec;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 24px;
+    }
+    .detail-card-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 16px;
+        font-weight: 700;
+        font-size: 14px;
+        color: #0f2744;
+    }
 
-        .logout-link:hover {
-            background-color: #c82333;
-        }
+    .field-row { margin-bottom: 14px; }
+    .field-row:last-child { margin-bottom: 0; }
+    .field-row-half { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 0;
-            border-bottom: 1px solid #ddd;
-            margin-bottom: 2rem;
-        }
+    .form-input {
+        width: 100%;
+        padding: 10px 13px;
+        border: 1.5px solid #dde3ec;
+        border-radius: 8px;
+        font-size: 14px;
+        color: #0f2744;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color 0.15s;
+        background: #fff;
+    }
+    .form-input:focus { border-color: #4ecfa8; }
+    .form-input::placeholder { color: #aab; }
 
-        .search-container {
-            display: flex;
-            align-items: center;
-        }
+    /* ── Card number with icon ── */
+    .card-input-wrap { position: relative; }
+    .card-input-wrap .card-icon {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 18px;
+        color: #bcc;
+    }
 
-        .search-container input {
-            padding: 0.5rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-right: 0.5rem;
-        }
+    /* ── Ecocash colour accent ── */
+    .eco-accent { border-color: #4ecfa8 !important; }
 
-        .search-container button {
-            padding: 0.5rem 1rem;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
+    /* ── Submit button ── */
+    .pay-btn {
+        width: 100%;
+        padding: 14px;
+        background: #0d5c46;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    .pay-btn:hover { background: #0a4736; }
+    .pay-btn:disabled { background: #a0b8b0; cursor: not-allowed; }
 
-        .search-container button:hover {
-            background-color: #0056b3;
-        }
+    /* ── Processing overlay ── */
+    .processing-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,.55);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 18px;
+    }
+    .processing-overlay.show { display: flex; }
+    .processing-box {
+        background: #fff;
+        border-radius: 16px;
+        padding: 36px 40px;
+        text-align: center;
+        max-width: 280px;
+        width: 90vw;
+    }
+    .spinner {
+        width: 48px;
+        height: 48px;
+        border: 4px solid #edf1f5;
+        border-top-color: #0d5c46;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .processing-title { font-weight: 700; font-size: 16px; color: #0f2744; margin-bottom: 6px; }
+    .processing-sub { font-size: 13px; color: #7a92ab; }
+</style>
+{% endblock %}
 
-        .topup-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
+{% block sidebar_extra %}
+<a href="{% url 'client_dashboard' %}"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
+<a href="{% url 'client_account' %}"><i class="fa-solid fa-user"></i> ACCOUNT</a>
+<a href="{% url 'client_purchases' %}"><i class="fa-solid fa-shopping-bag"></i> PURCHASES</a>
+<a href="{% url 'client_history' %}"><i class="fa-solid fa-clock-rotate-left"></i> HISTORY</a>
+<a href="{% url 'client_settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
+<a href="{% url 'client_topup' %}" class="active"><i class="fa-solid fa-wallet"></i> TOPUP ACCOUNT</a>
+<a href="{% url 'client_feedback' %}"><i class="fa-solid fa-comment-dots"></i> FEEDBACK</a>
+<a href="{% url 'client_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+{% endblock %}
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-group label {
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-
-        .form-group input,
-        .form-group select {
-            padding: 0.75rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 1rem;
-        }
-
-        .payment-methods {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .payment-method {
-            display: flex;
-            align-items: center;
-            padding: 1rem;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: border-color 0.3s ease;
-        }
-
-        .payment-method:hover {
-            border-color: #007bff;
-        }
-
-        .payment-method.selected {
-            border-color: #007bff;
-            background-color: #f8f9fa;
-        }
-
-        .payment-method input[type="radio"] {
-            margin-right: 0.5rem;
-        }
-
-        .submit-btn {
-            padding: 1rem;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            margin-top: 1rem;
-        }
-
-        .submit-btn:hover {
-            background-color: #218838;
-        }
-
-        .messages {
-            margin-bottom: 1rem;
-        }
-
-        .alert {
-            padding: 0.75rem;
-            border-radius: 4px;
-            margin-bottom: 1rem;
-        }
-
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .alert-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-    </style>
-</head>
-
-<body>
-
-    <div class="sidebar">
-        <img src="{% static 'images/icon.png' %}" alt="System Logo"
-            style="width: 200px; height: auto; align-self: center; margin-bottom: 20px;">
-
-        <a href="{% url 'client_dashboard' %}" class="active"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
-        <a href="{% url 'client_account' %}"><i class="fa-solid fa-user"></i> ACCOUNT</a>
-        <a href="{% url 'client_purchases' %}"><i class="fa-solid fa-shopping-bag"></i> PURCHASES</a>
-        <a href="{% url 'client_history' %}"><i class="fa-solid fa-clock-rotate-left"></i> HISTORY</a>
-        <a href="{% url 'client_settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
-        <a href="{% url 'client_topup' %}"><i class="fa-solid fa-wallet"></i> TOPUP ACCOUNT</a>
-        <a href="{% url 'client_feedback' %}"><i class="fa-solid fa-comment-dots"></i> FEEDBACK</a> 
-        <a href="{% url 'client_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+{% block content %}
+<div class="content">
+    <div class="page-title">
+        <i class="fa-solid fa-wallet" style="color:#0d5c46;"></i>
+        Top Up Your Account
     </div>
-    <div class="content">
-        <div class="header">
-            <div class="search-container">
-                <input type="text" placeholder="Search...">
-                <button type="submit">Search</button>
-            </div>
-            <a href="#" class="reset-password">Reset Password</a>
-        </div>
-        <div id="datetime" style="position: fixed; bottom: 10px; right: 10px; font-size: 1em; color: #333;"></div>
 
-        <h2>Topup Your Account</h2>
-        {% if messages %}
-        <div class="messages">
-            {% for message in messages %}
-            <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}">
-                {{ message }}
-            </div>
-            {% endfor %}
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" id="topup-form">
+        {% csrf_token %}
+
+        <!-- Amount -->
+        <label class="field-label" for="amount">Amount (USD)</label>
+        <div class="amount-wrap">
+            <span class="amount-prefix">$</span>
+            <input class="amount-input" type="number" id="amount" name="amount"
+                   min="1" step="0.01" placeholder="0.00" required>
         </div>
-        {% endif %}
-        <form method="post" class="topup-form">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="amount">Amount ($)</label>
-                <input type="number" id="amount" name="amount" min="1" step="0.01" required>
-            </div>
-            <div class="form-group">
-                <label>Payment Method</label>
-                <div class="payment-methods">
-                    <label class="payment-method selected">
-                        <input type="radio" name="payment_method" value="paynow" checked required>
-                            <img src="{% static 'images/paynow_logo.svg' %}"
-                             alt="Paynow" style="height:36px; margin-right:10px; vertical-align:middle;"
-                             onerror="this.style.display='none'">
-                        <span>Paynow</span>
-                    </label>
+
+        <!-- Payment method selector -->
+        <span class="method-label">Select Payment Method</span>
+        <div class="method-grid">
+            <label class="method-card" id="card-ecocash" onclick="selectMethod('ecocash')">
+                <input type="radio" name="payment_method" value="ecocash" id="pm-ecocash">
+                <span class="method-icon">📱</span>
+                <span class="method-name">Ecocash</span>
+            </label>
+            <label class="method-card" id="card-credit_card" onclick="selectMethod('credit_card')">
+                <input type="radio" name="payment_method" value="credit_card" id="pm-credit">
+                <span class="method-icon">💳</span>
+                <span class="method-name">Credit Card</span>
+            </label>
+            <label class="method-card" id="card-mastercard" onclick="selectMethod('mastercard')">
+                <input type="radio" name="payment_method" value="mastercard" id="pm-master">
+                <span class="method-icon">🟠</span>
+                <span class="method-name">MasterCard</span>
+            </label>
+        </div>
+
+        <!-- Ecocash fields -->
+        <div class="payment-details" id="details-ecocash">
+            <div class="detail-card eco-accent">
+                <div class="detail-card-header">
+                    <span style="font-size:20px;">📱</span> Ecocash Payment
+                </div>
+                <div class="field-row">
+                    <label class="field-label" for="ecocash_phone">Ecocash Phone Number</label>
+                    <input class="form-input" type="tel" id="ecocash_phone" name="ecocash_phone"
+                           placeholder="+263 7X XXX XXXX" maxlength="15">
+                </div>
+                <div style="font-size:12px;color:#7a92ab;margin-top:8px;">
+                    <i class="fa-solid fa-circle-info"></i>
+                    A USSD prompt will be simulated on your phone to confirm payment.
                 </div>
             </div>
-            <button type="submit" class="submit-btn">Topup Account</button>
-        </form>
+        </div>
+
+        <!-- Credit Card fields -->
+        <div class="payment-details" id="details-credit_card">
+            <div class="detail-card">
+                <div class="detail-card-header">
+                    <span style="font-size:20px;">💳</span> Credit Card Details
+                </div>
+                <div class="field-row">
+                    <label class="field-label" for="card_number_credit">Card Number</label>
+                    <div class="card-input-wrap">
+                        <input class="form-input" type="text" id="card_number_credit" name="card_number"
+                               placeholder="1234 5678 9012 3456" maxlength="19">
+                        <span class="card-icon"><i class="fa-regular fa-credit-card"></i></span>
+                    </div>
+                </div>
+                <div class="field-row">
+                    <label class="field-label" for="cardholder_credit">Cardholder Name</label>
+                    <input class="form-input" type="text" id="cardholder_credit" name="cardholder"
+                           placeholder="Name as on card">
+                </div>
+                <div class="field-row-half">
+                    <div>
+                        <label class="field-label" for="expiry_credit">Expiry Date</label>
+                        <input class="form-input" type="text" id="expiry_credit" name="expiry"
+                               placeholder="MM/YY" maxlength="5">
+                    </div>
+                    <div>
+                        <label class="field-label" for="cvv_credit">CVV</label>
+                        <input class="form-input" type="password" id="cvv_credit" name="cvv"
+                               placeholder="•••" maxlength="4">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MasterCard fields -->
+        <div class="payment-details" id="details-mastercard">
+            <div class="detail-card" style="border-color:#eb5c00;">
+                <div class="detail-card-header">
+                    <span style="font-size:20px;">🟠</span> MasterCard Details
+                </div>
+                <div class="field-row">
+                    <label class="field-label" for="card_number_master">Card Number</label>
+                    <div class="card-input-wrap">
+                        <input class="form-input" type="text" id="card_number_master" name="card_number"
+                               placeholder="5XXX XXXX XXXX XXXX" maxlength="19">
+                        <span class="card-icon" style="color:#eb5c00;">⬤⬤</span>
+                    </div>
+                </div>
+                <div class="field-row">
+                    <label class="field-label" for="cardholder_master">Cardholder Name</label>
+                    <input class="form-input" type="text" id="cardholder_master" name="cardholder"
+                           placeholder="Name as on card">
+                </div>
+                <div class="field-row-half">
+                    <div>
+                        <label class="field-label" for="expiry_master">Expiry Date</label>
+                        <input class="form-input" type="text" id="expiry_master" name="expiry"
+                               placeholder="MM/YY" maxlength="5">
+                    </div>
+                    <div>
+                        <label class="field-label" for="cvv_master">CVV</label>
+                        <input class="form-input" type="password" id="cvv_master" name="cvv"
+                               placeholder="•••" maxlength="4">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="pay-btn" id="pay-btn" disabled>
+            <i class="fa-solid fa-lock"></i>
+            <span id="pay-btn-text">Select a payment method</span>
+        </button>
+    </form>
+</div>
+
+<!-- Processing overlay -->
+<div class="processing-overlay" id="processing-overlay">
+    <div class="processing-box">
+        <div class="spinner"></div>
+        <div class="processing-title">Processing Payment…</div>
+        <div class="processing-sub" id="processing-sub">Connecting to payment network</div>
     </div>
-    <div style="position: fixed; top: 10px; left: 10px; font-size: 1.5em; color: #333;">
-        Welcome, {{ username }}
-    </div>
-    <script>
-        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+</div>
+{% endblock %}
 
-        function updateDateTime() {
-            const now = new Date();
-            const day = days[now.getDay()];
-            const date = now.getDate();
-            const month = months[now.getMonth()];
-            const year = now.getFullYear();
-            const time = now.toLocaleTimeString('en-GB');
-            document.getElementById('datetime').textContent = `${day}, ${date} ${month} ${year} ${time}`;
-        }
+{% block body_extra %}
+<script>
+    let selectedMethod = null;
 
-        setInterval(updateDateTime, 1000);
-        updateDateTime();
-
-        // Add selected class to payment method
-        document.querySelectorAll('.payment-method input[type="radio"]').forEach(radio => {
-            radio.addEventListener('change', function () {
-                document.querySelectorAll('.payment-method').forEach(method => {
-                    method.classList.remove('selected');
-                });
-                if (this.checked) {
-                    this.parentElement.classList.add('selected');
-                }
-            });
+    function selectMethod(method) {
+        // Deactivate all cards
+        ['ecocash', 'credit_card', 'mastercard'].forEach(m => {
+            document.getElementById('card-' + m).classList.remove('active');
+            document.getElementById('details-' + m).classList.remove('show');
         });
-    </script>
-</body>
 
-</html>
+        // Activate chosen
+        document.getElementById('card-' + method).classList.add('active');
+        document.getElementById('details-' + method).classList.add('show');
+        document.getElementById('pm-' + {ecocash:'ecocash', credit_card:'credit', mastercard:'master'}[method]).checked = true;
+        selectedMethod = method;
+
+        const labels = { ecocash: 'Pay with Ecocash', credit_card: 'Pay with Credit Card', mastercard: 'Pay with MasterCard' };
+        document.getElementById('pay-btn-text').textContent = labels[method];
+        document.getElementById('pay-btn').disabled = false;
+    }
+
+    // Card number formatting
+    function formatCardNumber(input) {
+        let val = input.value.replace(/\D/g, '').substring(0, 16);
+        input.value = val.replace(/(.{4})/g, '$1 ').trim();
+    }
+    ['card_number_credit', 'card_number_master'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', () => formatCardNumber(el));
+    });
+
+    // Expiry formatting MM/YY
+    function formatExpiry(input) {
+        let val = input.value.replace(/\D/g, '').substring(0, 4);
+        if (val.length >= 3) val = val.substring(0, 2) + '/' + val.substring(2);
+        input.value = val;
+    }
+    ['expiry_credit', 'expiry_master'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', () => formatExpiry(el));
+    });
+
+    // Show processing overlay on submit
+    document.getElementById('topup-form').addEventListener('submit', function(e) {
+        const amount = document.getElementById('amount').value;
+        if (!selectedMethod || !amount) return;
+
+        const subs = {
+            ecocash: 'Sending USSD prompt to your phone…',
+            credit_card: 'Authorising your credit card…',
+            mastercard: 'Authorising your MasterCard…',
+        };
+        document.getElementById('processing-sub').textContent = subs[selectedMethod] || 'Please wait…';
+        document.getElementById('processing-overlay').classList.add('show');
+        document.getElementById('pay-btn').disabled = true;
+    });
+</script>
+{% endblock %}

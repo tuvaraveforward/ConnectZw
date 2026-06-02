@@ -25,9 +25,6 @@ from django.urls import reverse
 from django.http import HttpResponse, JsonResponse
 import json
 from decimal import Decimal
-from paynow import Paynow
-from django.views.decorators.csrf import csrf_exempt
-import time
 import os
 
 TX_HAS_IS_CONFIRMED = any(f.name == 'is_confirmed' for f in Transaction._meta.get_fields())
@@ -183,14 +180,9 @@ def client_dashboard(request):
             'top_products_by_category': top_products_by_category,
         }
 
-        # Basket Context
+        # Basket Context (only count needed; contents loaded via AJAX on demand)
         basket, created = Basket.objects.get_or_create(client=client)
-        basket_items = basket.items.select_related('product').all()
-        basket_total = basket.get_total()
-        
-        context['basket_items'] = basket_items
-        context['basket_total'] = basket_total
-        context['basket_count'] = basket_items.count()
+        context['basket_count'] = basket.items.count()
 
         # AI Recommendation
         try:
@@ -289,151 +281,77 @@ def client_topup(request):
     username = request.session.get('client_username')
     try:
         client = Client.objects.get(username=username)
-        if request.method == 'POST':
-            amount = request.POST.get('amount')
-            payment_method = request.POST.get('payment_method')
-            if amount and payment_method:
-                # Fraud Check
-                fraud_payload = {
-                    "transaction_id": f"TOPUP-{client.id}-{timezone.now().timestamp()}",
-                    "user_id": str(client.id),
-                    "amount": float(amount),
-                    "merchant_mcc": "0000",
-                    "merchant_name": payment_method,
-                    "is_online": True
-                }
-                fraud_result = check_fraud(fraud_payload)
-                if fraud_result.get("decision") == "BLOCKED":
-                    messages.error(request, 'Transaction blocked due to suspicious activity.')
-                    return redirect('client_dashboard')
-
-                # If using Paynow, initiate the external payment flow
-                if payment_method.lower() in ['paynow', 'paynow_gateway', 'paynow_payment']:
-                    try:
-                        # Create a pending transaction record so we can reconcile later
-                        reference = f"TOPUP-{client.id}-{int(time.time())}"
-                        tx_kwargs = {
-                            'transaction_type': 'deposit',
-                            'amount': Decimal(str(amount)),
-                            'client': client,
-                            'category': 'Topup',
-                            'description': f'PENDING PAYNOW REF:{reference}',
-                        }
-                        if TX_HAS_IS_CONFIRMED:
-                            tx_kwargs['is_confirmed'] = False
-                        if TX_HAS_EXTERNAL_REFERENCE:
-                            tx_kwargs['external_reference'] = reference
-                        Transaction.objects.create(
-                            **tx_kwargs
-                        )
-
-                        # Build Paynow payment
-                        return_url = request.build_absolute_uri(reverse('paynow_return'))
-                        result_url = request.build_absolute_uri(reverse('paynow_result'))
-                        paynow = Paynow(settings.PAYNOW_INTEGRATION_ID, settings.PAYNOW_INTEGRATION_KEY, return_url, result_url)
-                        payment = paynow.create_payment(reference, client.email_address or client.username)
-                        payment.add('Account Topup', float(amount))
-                        init_response = paynow.send(payment)
-
-                        if hasattr(init_response, 'has_redirect') and init_response.has_redirect:
-                            return redirect(init_response.redirect_url)
-                        else:
-                            messages.error(request, 'Failed to initiate Paynow payment. Please try another method.')
-                            return redirect('client_topup')
-                    except Exception as e:
-                        print(f"Error initiating Paynow payment: {e}")
-                        messages.error(request, 'Payment initialization failed. Please try again.')
-                        return redirect('client_topup')
-
-                # Fallback: record deposit immediately for non-Paynow methods
-                Transaction.objects.create(
-                    transaction_type='deposit',
-                    amount=amount,
-                    client=client,
-                    category='Topup',
-                    description=f'Topup via {payment_method}'
-                )
-                send_deposit_confirmation_email(client, amount, payment_method)
-                messages.success(request, f'Account topped up with ${amount} via {payment_method}.')
-                return redirect('client_dashboard')
-            else:
-                messages.error(request, 'Please provide amount and select payment method.')
-        context = {
-            'username': username
-        }
-        return render(request, 'Client/client_topup.html', context)
     except Client.DoesNotExist:
         return redirect('client_login')
 
+    if request.method == 'POST':
+        amount_raw = request.POST.get('amount', '').strip()
+        payment_method = request.POST.get('payment_method', '').strip()
 
-def paynow_return(request):
-    """User-facing return URL after completing Paynow payment."""
-    # Simple acknowledgement; actual reconciliation happens via result (IPN)
-    messages.info(request, 'Thank you. Your payment is being processed. You will receive confirmation shortly.')
-    return redirect('client_dashboard')
+        if not amount_raw or not payment_method:
+            messages.error(request, 'Please provide an amount and select a payment method.')
+            return redirect('client_topup')
 
-
-@csrf_exempt
-def paynow_result(request):
-    """Endpoint for Paynow to POST transaction status updates (result_url).
-    Paynow will POST fields including `status`, `reference`, `amount`, `paynowreference`.
-    We match the `reference` to pending Transaction records and mark them confirmed when paid.
-    """
-    try:
-        data = request.POST.dict() if request.method == 'POST' else {}
-        status = data.get('status', '').lower()
-        reference = data.get('reference', '')
-        amount = data.get('amount')
-        paynow_ref = data.get('paynowreference', '')
-
-        # Only handle paid notifications
-        if not reference:
-            return HttpResponse('No reference provided', status=400)
-
-        # Extract client id from reference if possible (format TOPUP-<client_id>-...)
-        client_obj = None
         try:
-            parts = reference.split('-')
-            if len(parts) >= 2:
-                client_id = int(parts[1])
-                from Client.models import Client as ClientModel
-                client_obj = ClientModel.objects.filter(id=client_id).first()
+            amount = Decimal(amount_raw)
+            if amount <= 0:
+                raise ValueError
         except Exception:
-            client_obj = None
+            messages.error(request, 'Please enter a valid amount.')
+            return redirect('client_topup')
 
-        # Find pending transactions with this reference (match external_reference or description)
-        from django.db.models import Q
-        pending_qs = Transaction.objects.filter(transaction_type='deposit')
-        if TX_HAS_IS_CONFIRMED:
-            pending_qs = pending_qs.filter(is_confirmed=False)
-        if TX_HAS_EXTERNAL_REFERENCE:
-            pending_qs = pending_qs.filter(Q(external_reference=reference) | Q(description__icontains=reference))
+        # Fraud check
+        fraud_result = check_fraud({
+            "transaction_id": f"TOPUP-{client.id}-{timezone.now().timestamp()}",
+            "user_id": str(client.id),
+            "amount": float(amount),
+            "merchant_name": payment_method,
+            "is_online": True,
+        })
+        if fraud_result.get("decision") == "BLOCKED":
+            messages.error(request, 'Transaction blocked due to suspicious activity.')
+            return redirect('client_dashboard')
+
+        # Method-specific validation
+        if payment_method == 'ecocash':
+            phone = request.POST.get('ecocash_phone', '').strip()
+            if not phone:
+                messages.error(request, 'Please enter your Ecocash phone number.')
+                return redirect('client_topup')
+            description = f'Ecocash topup from {phone}'
+
+        elif payment_method in ('credit_card', 'mastercard'):
+            card_number = request.POST.get('card_number', '').replace(' ', '')
+            cardholder = request.POST.get('cardholder', '').strip()
+            expiry = request.POST.get('expiry', '').strip()
+            cvv = request.POST.get('cvv', '').strip()
+            if not all([card_number, cardholder, expiry, cvv]):
+                messages.error(request, 'Please fill in all card details.')
+                return redirect('client_topup')
+            label = 'Credit Card' if payment_method == 'credit_card' else 'MasterCard'
+            masked = '**** **** **** ' + card_number[-4:] if len(card_number) >= 4 else '****'
+            description = f'{label} topup ({masked})'
         else:
-            pending_qs = pending_qs.filter(description__icontains=reference)
+            messages.error(request, 'Invalid payment method selected.')
+            return redirect('client_topup')
 
-        if status == 'paid':
-            for tx in pending_qs:
-                tx.description = f'Paynow confirmed: {paynow_ref} ({reference})'
-                if TX_HAS_IS_CONFIRMED:
-                    tx.is_confirmed = True
-                if TX_HAS_EXTERNAL_REFERENCE:
-                    tx.external_reference = paynow_ref or reference
-                tx.save()
-                try:
-                    # send confirmation email to user
-                    if tx.client:
-                        send_deposit_confirmation_email(tx.client, tx.amount, 'Paynow')
-                except Exception as e:
-                    print(f"Failed to send deposit confirmation email: {e}")
+        # Record the simulated (instantly confirmed) transaction
+        tx_kwargs = {
+            'transaction_type': 'deposit',
+            'amount': amount,
+            'client': client,
+            'category': 'Topup',
+            'description': description,
+        }
+        if TX_HAS_IS_CONFIRMED:
+            tx_kwargs['is_confirmed'] = True
+        Transaction.objects.create(**tx_kwargs)
 
-            return HttpResponse('OK')
+        send_deposit_confirmation_email(client, amount, payment_method.replace('_', ' ').title())
+        messages.success(request, f'Payment of ${amount} via {payment_method.replace("_", " ").title()} was successful!')
+        return redirect('client_dashboard')
 
-        # For other statuses, log and ack
-        print(f"Paynow result received: status={status}, reference={reference}, amount={amount}")
-        return HttpResponse('IGNORED')
-    except Exception as e:
-        print(f"Error processing Paynow result: {e}")
-        return HttpResponse('ERROR', status=500)
+    return render(request, 'Client/client_topup.html', {'username': username})
 
 def client_history(request):
     if not request.session.get('client_logged_in'):
@@ -582,6 +500,22 @@ def remove_basket_item(request, item_id):
             })
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+def get_basket(request):
+    if not request.session.get('client_logged_in'):
+        return JsonResponse({'status': 'error', 'message': 'Not logged in'}, status=403)
+    client = Client.objects.get(username=request.session.get('client_username'))
+    basket, _ = Basket.objects.get_or_create(client=client)
+    items = basket.items.select_related('product').all()
+    return JsonResponse({
+        'status': 'success',
+        'items': [
+            {'id': item.id, 'name': item.product.name, 'price': str(item.product.price), 'quantity': item.quantity}
+            for item in items
+        ],
+        'total': str(basket.get_total()),
+        'count': items.count(),
+    })
 
 def checkout(request):
     if not request.session.get('client_logged_in'):
@@ -869,15 +803,31 @@ def client_feedback(request):
 
 
 def client_chat(request):
+    if not request.session.get('client_logged_in'):
+        return JsonResponse({'status': 'error', 'message': 'Not logged in'}, status=403)
+
+    username = request.session.get('client_username')
+    try:
+        client_obj = Client.objects.get(username=username)
+        client_name = client_obj.firstname
+    except Client.DoesNotExist:
+        client_name = username
+
+    if request.method == 'GET':
+        return JsonResponse({'status': 'success', 'name': client_name})
+
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            message = data.get('message', '')
-            response_text = get_chat_response(message)
+            message = data.get('message', '').strip()
+            if not message:
+                return JsonResponse({'status': 'error', 'message': 'Empty message'}, status=400)
+            response_text = get_chat_response(message, client_name=client_name)
             return JsonResponse({'status': 'success', 'reply': response_text})
         except Exception as e:
-             return JsonResponse({'status': 'error', 'message': str(e)})
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 
 def client_products(request, category):
