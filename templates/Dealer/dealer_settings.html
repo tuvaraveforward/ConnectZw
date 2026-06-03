@@ -7,27 +7,101 @@
 {% block head_extra %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-.content{max-width:900px}
-.form-container{background-color:#f8f9fa;padding:2rem;border-radius:8px;margin-bottom:2rem}
-.form-container h3{margin-bottom:1rem}
-.form-group{margin-bottom:1rem}
-.form-group label{display:block;margin-bottom:.5rem;font-weight:700}
-.form-group input[type="text"],.form-group input[type="number"],.form-group input[type="file"]{width:100%;padding:.5rem;border:1px solid #ccc;border-radius:4px;box-sizing:border-box}
-.btn-submit{padding:.75rem 1.5rem;background-color:#007bff;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:1rem}
-.btn-submit:hover{background-color:#0056b3}
-.products-list{margin-top:2rem}
-.products-list h3{margin-bottom:1rem}
-.product-item{display:flex;align-items:center;padding:1rem;border:1px solid #ddd;border-radius:8px;margin-bottom:1rem;background-color:#fff}
-.product-image{width:50px;height:50px;object-fit:contain;border-radius:4px;margin-right:.75rem}
-.product-details{flex-grow:1}
-.product-details h4{margin:0 0 .5rem 0}
-.product-details p{margin:0;color:#666}
-.product-actions{margin-left:10px;position:relative}
-.action-btn{background:transparent;border:none;cursor:pointer;font-size:1.1rem}
-.dropdown-content{display:none;position:absolute;right:0;background:#e0e0e0;border:1px solid #bbb;padding:5px;border-radius:4px;z-index:50;min-width:140px}
-.dropdown-content a,.dropdown-content button{display:block;padding:6px 10px;text-decoration:none;color:#333;background:transparent;border:none;text-align:left;width:100%;cursor:pointer}
-.dropdown-content a:hover,.dropdown-content button:hover{background:#cfcfcf}
-.dealer-nav{display:flex;flex-direction:column;gap:6px;min-height:0;overflow-y:auto}
+    .content { flex: 1; width: 100%; min-width: 0; padding: 32px; box-sizing: border-box; }
+
+    .page-title {
+        font-size: 20px; font-weight: 700; color: #0f2744;
+        margin-bottom: 24px; display: flex; align-items: center; gap: 10px;
+    }
+
+    /* ── Add product form card ── */
+    .form-card {
+        background: #fff; border: 1px solid #edf1f5;
+        border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        padding: 28px 32px; max-width: 540px; margin-bottom: 28px;
+    }
+
+    .form-card h3 {
+        font-size: 15px; font-weight: 700; color: #0f2744;
+        margin: 0 0 22px 0; padding-bottom: 14px; border-bottom: 1px solid #edf1f5;
+        display: flex; align-items: center; gap: 9px;
+    }
+
+    .field-row { margin-bottom: 16px; }
+    .field-label {
+        display: block; font-size: 12px; font-weight: 700;
+        color: #475569; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 7px;
+    }
+    .form-input {
+        width: 100%; padding: 10px 13px; border: 1.5px solid #dde3ec;
+        border-radius: 8px; font-size: 14px; color: #0f2744; outline: none;
+        box-sizing: border-box; transition: border-color 0.15s, box-shadow 0.15s; background: #fff;
+    }
+    .form-input:focus { border-color: #4ecfa8; box-shadow: 0 0 0 3px rgba(78,207,168,0.12); }
+
+    .submit-btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 12px 24px; background: #0d5c46; color: #fff;
+        border: none; border-radius: 8px; font-size: 14px; font-weight: 700;
+        cursor: pointer; transition: background 0.2s; margin-top: 4px;
+    }
+    .submit-btn:hover { background: #0a4736; }
+
+    /* ── Products list ── */
+    .products-section h3 {
+        font-size: 15px; font-weight: 700; color: #0f2744;
+        margin: 0 0 16px 0; display: flex; align-items: center; gap: 9px;
+    }
+
+    .product-item {
+        display: flex; align-items: center; gap: 14px;
+        padding: 14px 18px; background: #fff;
+        border: 1px solid #edf1f5; border-radius: 10px;
+        margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        transition: box-shadow 0.15s;
+    }
+    .product-item:hover { box-shadow: 0 3px 12px rgba(0,0,0,0.08); }
+
+    .product-image {
+        width: 52px; height: 52px; object-fit: contain;
+        border-radius: 8px; flex-shrink: 0; border: 1px solid #edf1f5; background: #f8fafc;
+    }
+    .product-image-placeholder {
+        width: 52px; height: 52px; border-radius: 8px; flex-shrink: 0;
+        background: #f0f4f8; border: 1px solid #edf1f5;
+        display: flex; align-items: center; justify-content: center;
+        color: #b0bec5; font-size: 18px;
+    }
+
+    .product-details { flex: 1; min-width: 0; }
+    .product-details h4 { margin: 0 0 4px 0; font-size: 14px; font-weight: 700; color: #0f2744; }
+    .product-details p { margin: 0; font-size: 12px; color: #7a92ab; }
+    .product-price { color: #0d5c46 !important; font-weight: 700 !important; }
+
+    /* ── Dropdown menu ── */
+    .product-actions { position: relative; flex-shrink: 0; }
+    .action-btn {
+        background: #f0f4f8; border: 1px solid #dde3ec; border-radius: 7px;
+        cursor: pointer; width: 32px; height: 32px;
+        display: flex; align-items: center; justify-content: center;
+        color: #475569; font-size: 14px; transition: background 0.15s;
+    }
+    .action-btn:hover { background: #e2e8f0; }
+
+    .dropdown-content {
+        display: none; position: absolute; right: 0; top: 38px;
+        background: #fff; border: 1px solid #edf1f5; border-radius: 8px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.1); z-index: 50; min-width: 130px; overflow: hidden;
+    }
+    .dropdown-content a, .dropdown-content button {
+        display: flex; align-items: center; gap: 8px;
+        padding: 9px 14px; text-decoration: none; color: #0f2744;
+        font-size: 13px; font-weight: 600; background: transparent;
+        border: none; width: 100%; text-align: left; cursor: pointer;
+        transition: background 0.12s;
+    }
+    .dropdown-content a:hover { background: #f0f4f8; }
+    .dropdown-content button:hover { background: #fff0f0; color: #dc3545; }
 </style>
 {% endblock %}
 
@@ -52,62 +126,68 @@
         <a href="{% url 'dealer_reset_password' %}" class="reset-password">Reset Password</a>
     </div>
 
-    <h2 class="content-title">Dealer Settings</h2>
+    <div class="page-title">
+        <i class="fa-solid fa-gear" style="color:#0d5c46;"></i>
+        Dealer Settings
+    </div>
 
-    <div class="form-container">
-        <h3>Add New Product</h3>
+    <div class="form-card">
+        <h3><i class="fa-solid fa-plus-circle" style="color:#4ecfa8;"></i> Add New Product</h3>
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <div class="form-group">
-                <label for="id_name">Product Name</label>
-                <input type="text" id="id_name" name="name" placeholder="Enter product name" required>
+            <div class="field-row">
+                <label class="field-label" for="id_name">Product Name</label>
+                <input class="form-input" type="text" id="id_name" name="name" placeholder="Enter product name" required>
             </div>
-            <div class="form-group">
-                <label for="id_price">Price</label>
-                <input type="number" id="id_price" name="price" step="0.01" placeholder="Enter price" required>
+            <div class="field-row">
+                <label class="field-label" for="id_price">Price (USD)</label>
+                <input class="form-input" type="number" id="id_price" name="price" step="0.01" placeholder="0.00" required>
             </div>
-            <div class="form-group">
-                <label for="id_image">Product Image</label>
-                <input type="file" id="id_image" name="image" accept="image/*">
+            <div class="field-row">
+                <label class="field-label" for="id_image">Product Image</label>
+                <input class="form-input" type="file" id="id_image" name="image" accept="image/*">
             </div>
-            <button type="submit" class="btn-submit">Add Product</button>
+            <button type="submit" class="submit-btn">
+                <i class="fa-solid fa-plus"></i> Add Product
+            </button>
         </form>
     </div>
 
-    <div class="products-list">
-        <h3>Your Products</h3>
+    <div class="products-section">
+        <h3><i class="fa-solid fa-box" style="color:#4ecfa8;"></i> Your Products</h3>
         {% if products %}
         {% for product in products %}
         <div class="product-item">
             {% if product.image %}
             <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
             {% else %}
-            <div class="product-image"
-                style="background-color: #ccc; display: flex; align-items: center; justify-content: center;">No Image</div>
+            <div class="product-image-placeholder"><i class="fa-solid fa-image"></i></div>
             {% endif %}
             <div class="product-details">
                 <h4>{{ product.name }}</h4>
-                <p>Price: ${{ product.price }}</p>
-                <p>Category: {{ product.category }}</p>
+                <p class="product-price">${{ product.price }}</p>
+                <p>{{ product.category }}</p>
             </div>
             <div class="product-actions">
-                <div class="dropdown">
-                    <button class="action-btn" onclick="toggleDropdown('dropdown-{{ product.id }}')">
-                        <i class="fa-solid fa-ellipsis-vertical"></i>
-                    </button>
-                    <div id="dropdown-{{ product.id }}" class="dropdown-content">
-                        <a href="{% url 'dealer_product_edit' product.id %}">Edit</a>
-                        <form method="post" action="{% url 'dealer_product_delete' product.id %}" style="margin:0;">
-                            {% csrf_token %}
-                            <button type="submit">Delete</button>
-                        </form>
-                    </div>
+                <button class="action-btn" onclick="toggleDropdown('dropdown-{{ product.id }}')">
+                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                </button>
+                <div id="dropdown-{{ product.id }}" class="dropdown-content">
+                    <a href="{% url 'dealer_product_edit' product.id %}">
+                        <i class="fa-solid fa-pen"></i> Edit
+                    </a>
+                    <form method="post" action="{% url 'dealer_product_delete' product.id %}" style="margin:0;">
+                        {% csrf_token %}
+                        <button type="submit">
+                            <i class="fa-solid fa-trash-can"></i> Delete
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
         {% endfor %}
         {% else %}
-        <p>No products added yet.</p>
+        <p style="color:#7a92ab;font-size:14px;">No products added yet.</p>
         {% endif %}
     </div>
 

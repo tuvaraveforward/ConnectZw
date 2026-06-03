@@ -1,17 +1,94 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Confirm Delete</title>
-</head>
-<body>
-    <h2>Delete Product: {{ product.name }}</h2>
-    <p>Are you sure you want to delete this product?</p>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit">Yes, delete</button>
-        <a href="{% url 'dealer_settings' %}">Cancel</a>
-    </form>
-</body>
-</html>
+
+{% block title %}Delete Product{% endblock %}
+{% block shell_class %}wide{% endblock %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .content { flex: 1; width: 100%; min-width: 0; padding: 32px; box-sizing: border-box; }
+
+    .page-title {
+        font-size: 20px; font-weight: 700; color: #0f2744;
+        margin-bottom: 24px; display: flex; align-items: center; gap: 10px;
+    }
+
+    .confirm-card {
+        background: #fff; border: 1px solid #f5c6c6;
+        border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        padding: 28px 32px; max-width: 460px;
+    }
+
+    .confirm-card h3 {
+        font-size: 15px; font-weight: 700; color: #7b1d1d;
+        margin: 0 0 12px 0; display: flex; align-items: center; gap: 9px;
+    }
+
+    .confirm-card p {
+        font-size: 14px; color: #475569; margin: 0 0 22px 0; line-height: 1.6;
+    }
+
+    .product-name {
+        font-weight: 700; color: #0f2744;
+    }
+
+    .btn-row { display: flex; gap: 12px; align-items: center; }
+
+    .delete-btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 12px 28px; background: #dc3545; color: #fff;
+        border: none; border-radius: 8px; font-size: 14px; font-weight: 700;
+        cursor: pointer; transition: background 0.2s;
+    }
+    .delete-btn:hover { background: #b02a37; }
+
+    .cancel-btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 12px 20px; background: #f0f4f8; color: #0f2744;
+        border: 1px solid #dde3ec; border-radius: 8px; font-size: 14px;
+        font-weight: 600; text-decoration: none; transition: background 0.15s;
+    }
+    .cancel-btn:hover { background: #e2e8f0; }
+</style>
+{% endblock %}
+
+{% block sidebar_extra %}
+<a href="{% url 'dealer_dashboard' %}"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
+<a href="{% url 'dealer_locations' %}"><i class="fa-solid fa-map-location-dot"></i> LOCATIONS</a>
+<a href="{% url 'dealer_sales' %}"><i class="fa-solid fa-chart-line"></i> SALES</a>
+<a href="{% url 'dealer_settings' %}" class="active"><i class="fa-solid fa-gear"></i> SETTINGS</a>
+<a href="{% url 'dealer_reports' %}"><i class="fa-solid fa-file-invoice-dollar"></i> REPORTS</a>
+<a href="{% url 'dealer_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+{% endblock %}
+
+{% block content %}
+<div class="content">
+    <div class="page-title">
+        <i class="fa-solid fa-trash-can" style="color:#dc3545;"></i>
+        Delete Product
+    </div>
+
+    <div class="confirm-card">
+        <h3>
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            Confirm Deletion
+        </h3>
+        <p>
+            Are you sure you want to permanently delete
+            <span class="product-name">{{ product.name }}</span>?
+            This action cannot be undone.
+        </p>
+
+        <div class="btn-row">
+            <form method="post" style="margin:0;">
+                {% csrf_token %}
+                <button type="submit" class="delete-btn">
+                    <i class="fa-solid fa-trash-can"></i> Yes, Delete
+                </button>
+            </form>
+            <a href="{% url 'dealer_settings' %}" class="cancel-btn">Cancel</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,17 +1,108 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Edit Product</title>
-</head>
-<body>
-    <h2>Edit Product: {{ product.name }}</h2>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Save</button>
-        <a href="{% url 'dealer_settings' %}">Cancel</a>
-    </form>
-</body>
-</html>
+
+{% block title %}Edit Product{% endblock %}
+{% block shell_class %}wide{% endblock %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .content { flex: 1; width: 100%; min-width: 0; padding: 32px; box-sizing: border-box; }
+
+    .page-title {
+        font-size: 20px; font-weight: 700; color: #0f2744;
+        margin-bottom: 24px; display: flex; align-items: center; gap: 10px;
+    }
+
+    .form-card {
+        background: #fff; border: 1px solid #edf1f5;
+        border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        padding: 28px 32px; max-width: 540px;
+    }
+
+    .form-card h3 {
+        font-size: 15px; font-weight: 700; color: #0f2744;
+        margin: 0 0 22px 0; padding-bottom: 14px; border-bottom: 1px solid #edf1f5;
+        display: flex; align-items: center; gap: 9px;
+    }
+
+    .field-row { margin-bottom: 18px; }
+
+    .field-label {
+        display: block; font-size: 12px; font-weight: 700;
+        color: #475569; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 7px;
+    }
+
+    .form-input, .form-select {
+        width: 100%; padding: 10px 13px; border: 1.5px solid #dde3ec;
+        border-radius: 8px; font-size: 14px; color: #0f2744; outline: none;
+        box-sizing: border-box; transition: border-color 0.15s, box-shadow 0.15s; background: #fff;
+    }
+    .form-input:focus, .form-select:focus {
+        border-color: #4ecfa8; box-shadow: 0 0 0 3px rgba(78,207,168,0.12);
+    }
+
+    .btn-row { display: flex; gap: 12px; align-items: center; margin-top: 8px; }
+
+    .submit-btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 12px 28px; background: #0d5c46; color: #fff;
+        border: none; border-radius: 8px; font-size: 14px; font-weight: 700;
+        cursor: pointer; transition: background 0.2s;
+    }
+    .submit-btn:hover { background: #0a4736; }
+
+    .cancel-btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 12px 20px; background: #f0f4f8; color: #0f2744;
+        border: 1px solid #dde3ec; border-radius: 8px; font-size: 14px;
+        font-weight: 600; text-decoration: none; transition: background 0.15s;
+    }
+    .cancel-btn:hover { background: #e2e8f0; }
+</style>
+{% endblock %}
+
+{% block sidebar_extra %}
+<a href="{% url 'dealer_dashboard' %}"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
+<a href="{% url 'dealer_locations' %}"><i class="fa-solid fa-map-location-dot"></i> LOCATIONS</a>
+<a href="{% url 'dealer_sales' %}"><i class="fa-solid fa-chart-line"></i> SALES</a>
+<a href="{% url 'dealer_settings' %}" class="active"><i class="fa-solid fa-gear"></i> SETTINGS</a>
+<a href="{% url 'dealer_reports' %}"><i class="fa-solid fa-file-invoice-dollar"></i> REPORTS</a>
+<a href="{% url 'dealer_login' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+{% endblock %}
+
+{% block content %}
+<div class="content">
+    <div class="page-title">
+        <i class="fa-solid fa-pen-to-square" style="color:#0d5c46;"></i>
+        Edit Product
+    </div>
+
+    <div class="form-card">
+        <h3>
+            <i class="fa-solid fa-box" style="color:#4ecfa8;"></i>
+            {{ product.name }}
+        </h3>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="field-row">
+                <label class="field-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <div style="color:#dc3545;font-size:12px;margin-top:4px;">{{ field.errors|join:", " }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <div class="btn-row">
+                <button type="submit" class="submit-btn">
+                    <i class="fa-solid fa-floppy-disk"></i> Save Changes
+                </button>
+                <a href="{% url 'dealer_settings' %}" class="cancel-btn">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
