@@ -1,123 +1,134 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>POS Dashboard</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-            margin: 0;
-            display: flex;
-            height: 100vh;
-        }
+{% block title %}POS Dashboard{% endblock %}
+{% block shell_class %}wide{% endblock %}
 
-        .sidebar {
-            width: 220px;
-            background-color: #fff;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            padding-top: 1rem;
-        }
+{% block head_extra %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .content { flex: 1; width: 100%; min-width: 0; padding: 32px; box-sizing: border-box; }
 
-        .sidebar h2 {
-            text-align: center;
-            margin-bottom: 2rem;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #333;
-        }
+    .page-title {
+        font-size: 20px; font-weight: 700; color: #0f2744;
+        margin-bottom: 24px; display: flex; align-items: center; gap: 10px;
+    }
 
-        .sidebar a {
-            color: #333;
-            padding: 1rem 1.5rem;
-            text-decoration: none;
-            font-size: 1rem;
-            transition: background-color 0.3s ease;
-        }
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1.25rem;
+    }
 
-        .sidebar a:hover,
-        .sidebar a.active {
-            background-color: #007bff;
-            color: white;
-        }
+    .info-card {
+        background: #fff; border: 1px solid #edf1f5;
+        border-radius: 12px; padding: 22px 24px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
 
-        .content {
-            flex-grow: 1;
-            padding: 2rem;
-        }
+    .info-card h3 {
+        font-size: 13px; font-weight: 700; color: #7a92ab;
+        letter-spacing: 0.8px; text-transform: uppercase;
+        margin: 0 0 14px 0; padding-bottom: 10px;
+        border-bottom: 1px solid #edf1f5;
+        display: flex; align-items: center; gap: 8px;
+    }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #ddd;
-            margin-bottom: 2rem;
-        }
+    .info-row {
+        display: flex; justify-content: space-between;
+        padding: 7px 0; border-bottom: 1px solid #f8fafc; font-size: 14px;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-row .lbl { color: #7a92ab; font-weight: 500; }
+    .info-row .val { color: #0f2744; font-weight: 600; }
 
-        .header h1 {
-            margin: 0;
-        }
+    .status-badge {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700;
+    }
+    .status-active   { background: #d4f5e9; color: #0d5c46; }
+    .status-inactive { background: #fde8e8; color: #7b1d1d; }
 
-        .logout-link {
-            margin-top: auto;
-            padding: 1rem 1.5rem;
-            background-color: #dc3545;
-            color: white !important;
-            text-align: center;
-            text-decoration: none;
-            font-weight: bold;
-        }
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 12px; margin-top: 24px;
+    }
 
-        .logout-link:hover {
-            background-color: #c82333;
-        }
+    .action-btn {
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: 10px; padding: 20px 12px;
+        background: #fff; border: 1.5px solid #edf1f5; border-radius: 12px;
+        text-decoration: none; color: #0f2744; font-size: 13px; font-weight: 700;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        transition: border-color 0.15s, box-shadow 0.15s, transform 0.12s;
+    }
+    .action-btn i { font-size: 22px; color: #4ecfa8; }
+    .action-btn:hover {
+        border-color: #4ecfa8; box-shadow: 0 4px 16px rgba(78,207,168,0.15);
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}
 
-        .info-box {
-            background-color: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-    </style>
-</head>
+{% block sidebar_extra %}
+<a href="{% url 'pos_dashboard' %}" class="active"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
+<a href="{% url 'redeem_coupon' %}"><i class="fa-solid fa-ticket"></i> REDEEM COUPON</a>
+<a href="{% url 'pos_check_validity' %}"><i class="fa-solid fa-circle-check"></i> CHECK VALIDITY</a>
+<a href="{% url 'pos_run_report' %}"><i class="fa-solid fa-file-invoice-dollar"></i> RUN REPORT</a>
+<a href="{% url 'pos_report_coupon' %}"><i class="fa-solid fa-flag"></i> REPORT COUPON</a>
+<a href="{% url 'pos_sales' %}"><i class="fa-solid fa-chart-line"></i> LOCATION SALES</a>
+<a href="{% url 'pos_settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
+<a href="{% url 'pos_logout' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> LOGOUT</a>
+{% endblock %}
 
-<body>
-
-    <div class="sidebar">
-        <img src="{% static 'images/icon.png' %}" alt="System Logo"
-            style="width: 200px; height: auto; align-self: center; margin-bottom: 20px;">
-
-        <a href="{% url 'pos_dashboard' %}" class="active"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
-        <a href="{% url 'redeem_coupon' %}"><i class="fa-solid fa-ticket"></i> REDEEM COUPON</a>
-        <a href="{% url 'pos_check_validity' %}"><i class="fa-solid fa-check-circle"></i> CHECK VALIDITY</a>
-        <a href="{% url 'pos_run_report' %}"><i class="fa-solid fa-file-invoice-dollar"></i> RUN REPORT</a>
-        <a href="{% url 'pos_report_coupon' %}"><i class="fa-solid fa-flag"></i> REPORT COUPON</a>
-        <a href="{% url 'pos_sales' %}"><i class="fa-solid fa-chart-line"></i> LOCATION SALES</a>
-        <a href="{% url 'pos_settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
-        <a href="{% url 'pos_logout' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> LOGOUT</a>
+{% block content %}
+<div class="content">
+    <div class="page-title">
+        <i class="fa-solid fa-tachometer-alt" style="color:#0d5c46;"></i>
+        Welcome, {{ request.session.pos_user_username }}
     </div>
-    <div class="content">
-        <div class="header">
-            <h1>Welcome, {{ request.session.pos_user_username }}</h1>
+
+    <div class="info-grid">
+        <div class="info-card">
+            <h3><i class="fa-solid fa-cash-register"></i> POS Device</h3>
+            <div class="info-row">
+                <span class="lbl">POS Name</span>
+                <span class="val">{{ pos.pos_name }}</span>
+            </div>
+            <div class="info-row">
+                <span class="lbl">Location</span>
+                <span class="val">{{ pos.location.location_name }}</span>
+            </div>
+            <div class="info-row">
+                <span class="lbl">Status</span>
+                <span class="val">
+                    {% if pos.is_active %}
+                    <span class="status-badge status-active"><i class="fa-solid fa-circle"></i> Active</span>
+                    {% else %}
+                    <span class="status-badge status-inactive"><i class="fa-solid fa-circle"></i> Inactive</span>
+                    {% endif %}
+                </span>
+            </div>
         </div>
-
-        <div class="info-box">
-            <h3>POS Device Information</h3>
-            <p><strong>POS Name:</strong> {{ pos.pos_name }}</p>
-            <p><strong>Location:</strong> {{ pos.location.location_name }}</p>
-            <p><strong>Status:</strong> {% if pos.is_active %}Active{% else %}Inactive{% endif %}</p>
-        </div>
-
-        <!-- Content for Redeem, Check, Reports etc. will go here in the future -->
-
     </div>
-</body>
 
-</html>
+    <div class="quick-actions">
+        <a href="{% url 'redeem_coupon' %}" class="action-btn">
+            <i class="fa-solid fa-ticket"></i> Redeem Coupon
+        </a>
+        <a href="{% url 'pos_check_validity' %}" class="action-btn">
+            <i class="fa-solid fa-circle-check"></i> Check Validity
+        </a>
+        <a href="{% url 'pos_run_report' %}" class="action-btn">
+            <i class="fa-solid fa-file-invoice-dollar"></i> Run Report
+        </a>
+        <a href="{% url 'pos_report_coupon' %}" class="action-btn">
+            <i class="fa-solid fa-flag"></i> Report Coupon
+        </a>
+        <a href="{% url 'pos_sales' %}" class="action-btn">
+            <i class="fa-solid fa-chart-line"></i> Location Sales
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,99 +1,129 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Run Report</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
+{% block title %}Run Report{% endblock %}
+{% block shell_class %}wide{% endblock %}
 
-        .form-container {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 400px;
-        }
+{% block head_extra %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .content { flex: 1; width: 100%; min-width: 0; padding: 32px; box-sizing: border-box; }
 
-        h2 {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
+    .page-title {
+        font-size: 20px; font-weight: 700; color: #0f2744;
+        margin-bottom: 24px; display: flex; align-items: center; gap: 10px;
+    }
 
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: bold;
-        }
+    .form-card {
+        background: #fff; border: 1px solid #edf1f5;
+        border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        padding: 28px 32px; max-width: 540px;
+    }
 
-        input[type="date"],
-        input[type="time"] {
-            width: 100%;
-            padding: 0.5rem;
-            margin-bottom: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
+    .form-card h3 {
+        font-size: 15px; font-weight: 700; color: #0f2744;
+        margin: 0 0 22px 0; padding-bottom: 14px; border-bottom: 1px solid #edf1f5;
+        display: flex; align-items: center; gap: 9px;
+    }
 
-        button {
-            width: 100%;
-            padding: 0.7rem;
-            background-color: #007bff;
-            border: none;
-            color: white;
-            font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
-        }
+    .form-row-half { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .field-row { margin-bottom: 16px; }
 
-        button:hover {
-            background-color: #0056b3;
-        }
-    </style>
-</head>
+    .field-label {
+        display: block; font-size: 12px; font-weight: 700;
+        color: #475569; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 7px;
+    }
 
-<body>
-    <img src="{% static 'images/icon.png' %}" alt="System Logo"
-        style="position: absolute; top: 10px; left: 10px; width: 200px; height: auto; z-index: 1000;">
-    <div class="form-container">
-        <h2>Run Report</h2>
-        {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-            <li{% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message.message }}</li>
-                {% endfor %}
-        </ul>
-        {% endif %}
+    .form-input {
+        width: 100%; padding: 10px 13px; border: 1.5px solid #dde3ec;
+        border-radius: 8px; font-size: 14px; color: #0f2744; outline: none;
+        box-sizing: border-box; transition: border-color 0.15s, box-shadow 0.15s; background: #fff;
+    }
+    .form-input:focus { border-color: #4ecfa8; box-shadow: 0 0 0 3px rgba(78,207,168,0.12); }
+
+    .submit-btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 12px 28px; background: #0d5c46; color: #fff;
+        border: none; border-radius: 8px; font-size: 14px; font-weight: 700;
+        cursor: pointer; transition: background 0.2s; margin-top: 6px;
+    }
+    .submit-btn:hover { background: #0a4736; }
+
+    .alert {
+        padding: 12px 16px; border-radius: 8px; margin-bottom: 18px;
+        font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px;
+    }
+    .alert-success { background: #d4f5e9; color: #0d5c46; border: 1px solid #a8e6cf; }
+    .alert-error   { background: #fde8e8; color: #7b1d1d; border: 1px solid #f5c6c6; }
+
+    @media (max-width: 500px) { .form-row-half { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block sidebar_extra %}
+<a href="{% url 'pos_dashboard' %}"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
+<a href="{% url 'redeem_coupon' %}"><i class="fa-solid fa-ticket"></i> REDEEM COUPON</a>
+<a href="{% url 'pos_check_validity' %}"><i class="fa-solid fa-circle-check"></i> CHECK VALIDITY</a>
+<a href="{% url 'pos_run_report' %}" class="active"><i class="fa-solid fa-file-invoice-dollar"></i> RUN REPORT</a>
+<a href="{% url 'pos_report_coupon' %}"><i class="fa-solid fa-flag"></i> REPORT COUPON</a>
+<a href="{% url 'pos_sales' %}"><i class="fa-solid fa-chart-line"></i> LOCATION SALES</a>
+<a href="{% url 'pos_settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
+<a href="{% url 'pos_logout' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> LOGOUT</a>
+{% endblock %}
+
+{% block content %}
+<div class="content">
+    <div class="page-title">
+        <i class="fa-solid fa-file-invoice-dollar" style="color:#0d5c46;"></i>
+        Run Report
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            <i class="fa-solid {% if 'success' in message.tags %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="form-card">
+        <h3><i class="fa-solid fa-paper-plane" style="color:#4ecfa8;"></i> Generate &amp; Send Report</h3>
         <form method="POST" action="">
             {% csrf_token %}
-            <label for="start_date">Start Date</label>
-            <input type="date" id="start_date" name="start_date" required />
 
-            <label for="start_time">Start Time</label>
-            <input type="time" id="start_time" name="start_time" required />
+            <div class="form-row-half">
+                <div class="field-row">
+                    <label class="field-label" for="start_date">Start Date</label>
+                    <input class="form-input" type="date" id="start_date" name="start_date" required>
+                </div>
+                <div class="field-row">
+                    <label class="field-label" for="start_time">Start Time</label>
+                    <input class="form-input" type="time" id="start_time" name="start_time" required>
+                </div>
+            </div>
 
-            <label for="end_date">End Date</label>
-            <input type="date" id="end_date" name="end_date" required />
+            <div class="form-row-half">
+                <div class="field-row">
+                    <label class="field-label" for="end_date">End Date</label>
+                    <input class="form-input" type="date" id="end_date" name="end_date" required>
+                </div>
+                <div class="field-row">
+                    <label class="field-label" for="end_time">End Time</label>
+                    <input class="form-input" type="time" id="end_time" name="end_time" required>
+                </div>
+            </div>
 
-            <label for="end_time">End Time</label>
-            <input type="time" id="end_time" name="end_time" required />
+            <div class="field-row">
+                <label class="field-label" for="email">Send Report To (Email)</label>
+                <input class="form-input" type="email" id="email" name="email"
+                       placeholder="recipient@example.com" required>
+            </div>
 
-            <label for="email">Email Address</label>
-            <input type="email" id="email" name="email" required />
-
-            <button type="submit" class="submit-button">Generate and Send Report</button>
+            <button type="submit" class="submit-btn">
+                <i class="fa-solid fa-paper-plane"></i> Generate and Send Report
+            </button>
         </form>
     </div>
-</body>
-
-</html>
+</div>
+{% endblock %}

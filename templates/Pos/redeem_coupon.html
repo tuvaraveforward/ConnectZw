@@ -1,156 +1,215 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Redeem Coupon</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
+{% block title %}Redeem Coupon{% endblock %}
+{% block shell_class %}wide{% endblock %}
 
-        .form-container {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 400px;
-        }
+{% block head_extra %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .content { flex: 1; width: 100%; min-width: 0; padding: 32px; box-sizing: border-box; }
 
-        h2 {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
+    .page-title {
+        font-size: 20px; font-weight: 700; color: #0f2744;
+        margin-bottom: 24px; display: flex; align-items: center; gap: 10px;
+    }
 
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: bold;
-        }
+    .form-card {
+        background: #fff; border: 1px solid #edf1f5;
+        border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        padding: 28px 32px; max-width: 600px; margin-bottom: 24px;
+    }
 
-        input[type="text"],
-        input[type="tel"] {
-            width: 100%;
-            padding: 0.5rem;
-            margin-bottom: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
+    .form-card h3 {
+        font-size: 15px; font-weight: 700; color: #0f2744;
+        margin: 0 0 22px 0; padding-bottom: 14px; border-bottom: 1px solid #edf1f5;
+        display: flex; align-items: center; gap: 9px;
+    }
 
-        button {
-            width: 100%;
-            padding: 0.7rem;
-            background-color: #007bff;
-            border: none;
-            color: white;
-            font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
-        }
+    .form-row-half { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .field-row { margin-bottom: 16px; }
 
-        button:hover {
-            background-color: #0056b3;
-        }
-    </style>
-</head>
+    .field-label {
+        display: block; font-size: 12px; font-weight: 700;
+        color: #475569; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 7px;
+    }
 
-<body>
-    <img src="{% static 'images/icon.png' %}" alt="System Logo"
-        style="position: absolute; top: 10px; left: 10px; width: 200px; height: auto; z-index: 1000;">
-    <div class="form-container">
-        <h2>Redeem Coupon</h2>
-        {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-            <li{% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message.message }}</li>
-                {% endfor %}
-        </ul>
-        {% endif %}
+    .form-input {
+        width: 100%; padding: 10px 13px; border: 1.5px solid #dde3ec;
+        border-radius: 8px; font-size: 14px; color: #0f2744; outline: none;
+        box-sizing: border-box; transition: border-color 0.15s, box-shadow 0.15s; background: #fff;
+    }
+    .form-input:focus { border-color: #4ecfa8; box-shadow: 0 0 0 3px rgba(78,207,168,0.12); }
+
+    .submit-btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 12px 28px; background: #0d5c46; color: #fff;
+        border: none; border-radius: 8px; font-size: 14px; font-weight: 700;
+        cursor: pointer; transition: background 0.2s; margin-top: 6px;
+    }
+    .submit-btn:hover { background: #0a4736; }
+    .submit-btn.danger { background: #dc3545; }
+    .submit-btn.danger:hover { background: #b02a37; }
+
+    .cancel-btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 12px 20px; background: #f0f4f8; color: #0f2744;
+        border: 1px solid #dde3ec; border-radius: 8px; font-size: 14px;
+        font-weight: 600; text-decoration: none; transition: background 0.15s;
+    }
+    .cancel-btn:hover { background: #e2e8f0; }
+
+    .btn-row { display: flex; gap: 12px; align-items: center; margin-top: 8px; }
+
+    .alert {
+        padding: 12px 16px; border-radius: 8px; margin-bottom: 18px;
+        font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px;
+    }
+    .alert-success { background: #d4f5e9; color: #0d5c46; border: 1px solid #a8e6cf; }
+    .alert-error   { background: #fde8e8; color: #7b1d1d; border: 1px solid #f5c6c6; }
+    .alert-warning { background: #fff8e1; color: #7b5e00; border: 1px solid #ffe082; }
+
+    /* Basket table */
+    .basket-card {
+        background: #fff; border: 1px solid #edf1f5;
+        border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        padding: 28px 32px; max-width: 600px;
+    }
+    .basket-card h3 {
+        font-size: 15px; font-weight: 700; color: #0f2744;
+        margin: 0 0 18px 0; padding-bottom: 14px; border-bottom: 1px solid #edf1f5;
+        display: flex; align-items: center; gap: 9px;
+    }
+    .basket-table { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 20px; }
+    .basket-table th {
+        background: #f8fafc; color: #475569; font-weight: 700;
+        font-size: 11px; letter-spacing: 0.7px; text-transform: uppercase;
+        padding: 12px 14px; border-bottom: 2px solid #edf1f5; text-align: left;
+    }
+    .basket-table td { padding: 12px 14px; border-bottom: 1px solid #f1f5f9; color: #1e293b; }
+    .basket-table tr:last-child td { border-bottom: none; }
+
+    @media (max-width: 600px) { .form-row-half { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block sidebar_extra %}
+<a href="{% url 'pos_dashboard' %}"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
+<a href="{% url 'redeem_coupon' %}" class="active"><i class="fa-solid fa-ticket"></i> REDEEM COUPON</a>
+<a href="{% url 'pos_check_validity' %}"><i class="fa-solid fa-circle-check"></i> CHECK VALIDITY</a>
+<a href="{% url 'pos_run_report' %}"><i class="fa-solid fa-file-invoice-dollar"></i> RUN REPORT</a>
+<a href="{% url 'pos_report_coupon' %}"><i class="fa-solid fa-flag"></i> REPORT COUPON</a>
+<a href="{% url 'pos_sales' %}"><i class="fa-solid fa-chart-line"></i> LOCATION SALES</a>
+<a href="{% url 'pos_settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
+<a href="{% url 'pos_logout' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> LOGOUT</a>
+{% endblock %}
+
+{% block content %}
+<div class="content">
+    <div class="page-title">
+        <i class="fa-solid fa-ticket" style="color:#0d5c46;"></i>
+        Redeem Coupon
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            <i class="fa-solid {% if 'success' in message.tags %}fa-circle-check{% elif 'error' in message.tags %}fa-circle-exclamation{% else %}fa-triangle-exclamation{% endif %}"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="form-card">
+        <h3><i class="fa-solid fa-magnifying-glass" style="color:#4ecfa8;"></i> Verify Coupon</h3>
         <form method="POST" action="">
             {% csrf_token %}
-            <label for="coupon_id">Coupon ID</label>
-            <input type="text" id="coupon_id" name="coupon_id" value="{{ request.POST.coupon_id }}" required />
 
-            <label for="serial_number">Serial Number</label>
-            <input type="text" id="Serial_number" name="Serial_number" value="{{ request.POST.Serial_number }}"
-                required />
-
-            <!-- Only show these if not just verifying? The user didn't say when to show these. 
-                 The prompt implies: "check ... if verified ... display products". 
-                 The form fields for name/phone seem to be for the ACT of redeeming? 
-                 I will leave them but maybe pre-fill or only require them for the final step?
-                 The user just said "redeem coupon form to verify...".
-                 I will keep the fields as they were part of the original form. 
-            -->
-
-            <label for="redeemer_name">Name of the Redeemer</label>
-            <input type="text" id="redeemer_name" name="redeemer_name" value="{{ request.POST.redeemer_name }}"
-                required />
-
-            <label for="account_holder_name">Name of the Account Holder</label>
-            <input type="text" id="account_holder_name" name="account_holder_name"
-                value="{{ request.POST.account_holder_name }}" required />
-
-            <label for="redeemer_phone">Phone Number of the Redeemer</label>
-            <input type="tel" id="redeemer_phone" name="redeemer_phone" value="{{ request.POST.redeemer_phone }}"
-                required />
-
-            <label for="account_holder_phone">Phone Number of the Account Holder</label>
-            <input type="tel" id="account_holder_phone" name="account_holder_phone"
-                value="{{ request.POST.account_holder_phone }}" required />
-
-            <label for="redeemer_id">ID of the Redeemer</label>
-            <input type="text" id="redeemer_id" name="redeemer_id" value="{{ request.POST.redeemer_id }}" required />
-
-            <button type="submit" class="submit-button">Verify Coupon</button>
-        </form>
-
-        {% if verified and basket_items %}
-        <div style="margin-top: 2rem; border-top: 1px solid #ccc; padding-top: 1rem;">
-            <h3>Basket Contents</h3>
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr style="background-color: #f8f9fa;">
-                        <th style="padding: 10px; border: 1px solid #dee2e6;">Description (Product & Qty)</th>
-                        <th style="padding: 10px; border: 1px solid #dee2e6;">Category</th>
-                        <th style="padding: 10px; border: 1px solid #dee2e6;">Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in basket_items %}
-                    <tr>
-                        <td style="padding: 10px; border: 1px solid #dee2e6;">{{ item.description }}</td>
-                        <td style="padding: 10px; border: 1px solid #dee2e6;">{{ item.category }}</td>
-                        <td style="padding: 10px; border: 1px solid #dee2e6;">${{ item.amount }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-
-            <div style="margin-top: 20px; display: flex; gap: 10px;">
-                <form method="POST" action="">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="redeem_confirm">
-                    <input type="hidden" name="coupon_id" value="{{ redeemed_coupon_id }}">
-                    <button type="submit" class="submit-button" style="background-color: #28a745;">Redeem
-                        Coupon</button>
-                </form>
-
-                <a href="{% url 'redeem_coupon' %}" style="text-decoration: none;">
-                    <button type="button" class="submit-button" style="background-color: #dc3545;">Cancel</button>
-                </a>
+            <div class="form-row-half">
+                <div class="field-row">
+                    <label class="field-label" for="coupon_id">Coupon ID</label>
+                    <input class="form-input" type="text" id="coupon_id" name="coupon_id"
+                           value="{{ request.POST.coupon_id }}" required>
+                </div>
+                <div class="field-row">
+                    <label class="field-label" for="Serial_number">Serial Number</label>
+                    <input class="form-input" type="text" id="Serial_number" name="Serial_number"
+                           value="{{ request.POST.Serial_number }}" required>
+                </div>
             </div>
-        </div>
-        {% endif %}
-    </div>
-</body>
 
-</html>
+            <div class="form-row-half">
+                <div class="field-row">
+                    <label class="field-label" for="redeemer_name">Redeemer Name</label>
+                    <input class="form-input" type="text" id="redeemer_name" name="redeemer_name"
+                           value="{{ request.POST.redeemer_name }}" required>
+                </div>
+                <div class="field-row">
+                    <label class="field-label" for="account_holder_name">Account Holder Name</label>
+                    <input class="form-input" type="text" id="account_holder_name" name="account_holder_name"
+                           value="{{ request.POST.account_holder_name }}" required>
+                </div>
+            </div>
+
+            <div class="form-row-half">
+                <div class="field-row">
+                    <label class="field-label" for="redeemer_phone">Redeemer Phone</label>
+                    <input class="form-input" type="tel" id="redeemer_phone" name="redeemer_phone"
+                           value="{{ request.POST.redeemer_phone }}" required>
+                </div>
+                <div class="field-row">
+                    <label class="field-label" for="account_holder_phone">Account Holder Phone</label>
+                    <input class="form-input" type="tel" id="account_holder_phone" name="account_holder_phone"
+                           value="{{ request.POST.account_holder_phone }}" required>
+                </div>
+            </div>
+
+            <div class="field-row">
+                <label class="field-label" for="redeemer_id">Redeemer ID Number</label>
+                <input class="form-input" type="text" id="redeemer_id" name="redeemer_id"
+                       value="{{ request.POST.redeemer_id }}" required>
+            </div>
+
+            <button type="submit" class="submit-btn">
+                <i class="fa-solid fa-magnifying-glass"></i> Verify Coupon
+            </button>
+        </form>
+    </div>
+
+    {% if verified and basket_items %}
+    <div class="basket-card">
+        <h3><i class="fa-solid fa-basket-shopping" style="color:#4ecfa8;"></i> Basket Contents</h3>
+        <table class="basket-table">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in basket_items %}
+                <tr>
+                    <td>{{ item.description }}</td>
+                    <td>{{ item.category }}</td>
+                    <td>${{ item.amount }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="btn-row">
+            <form method="POST" action="">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="redeem_confirm">
+                <input type="hidden" name="coupon_id" value="{{ redeemed_coupon_id }}">
+                <button type="submit" class="submit-btn">
+                    <i class="fa-solid fa-check"></i> Redeem Coupon
+                </button>
+            </form>
+            <a href="{% url 'redeem_coupon' %}" class="cancel-btn">Cancel</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

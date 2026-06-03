@@ -1,140 +1,85 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>POS Settings</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-            margin: 0;
-            display: flex;
-            height: 100vh;
-        }
+{% block title %}POS Settings{% endblock %}
+{% block shell_class %}wide{% endblock %}
 
-        .sidebar {
-            width: 220px;
-            background-color: #fff;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            padding-top: 1rem;
-        }
+{% block head_extra %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .content { flex: 1; width: 100%; min-width: 0; padding: 32px; box-sizing: border-box; }
 
-        .sidebar h2 {
-            text-align: center;
-            margin-bottom: 2rem;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #333;
-        }
+    .page-title {
+        font-size: 20px; font-weight: 700; color: #0f2744;
+        margin-bottom: 24px; display: flex; align-items: center; gap: 10px;
+    }
 
-        .sidebar a {
-            color: #333;
-            padding: 1rem 1.5rem;
-            text-decoration: none;
-            font-size: 1rem;
-            transition: background-color 0.3s ease;
-        }
+    .settings-card {
+        background: #fff; border: 1px solid #edf1f5;
+        border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        padding: 28px 32px; max-width: 480px;
+    }
 
-        .sidebar a:hover,
-        .sidebar a.active {
-            background-color: #007bff;
-            color: white;
-        }
+    .settings-card h3 {
+        font-size: 15px; font-weight: 700; color: #0f2744;
+        margin: 0 0 22px 0; padding-bottom: 14px; border-bottom: 1px solid #edf1f5;
+        display: flex; align-items: center; gap: 9px;
+    }
 
-        .content {
-            flex-grow: 1;
-            padding: 2rem;
-        }
+    .settings-card p {
+        font-size: 14px; color: #475569; margin: 0 0 20px 0; line-height: 1.6;
+    }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #ddd;
-            margin-bottom: 2rem;
-        }
+    .action-btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 12px 24px; background: #0d5c46; color: #fff;
+        border: none; border-radius: 8px; font-size: 14px; font-weight: 700;
+        cursor: pointer; text-decoration: none; transition: background 0.2s;
+    }
+    .action-btn:hover { background: #0a4736; }
 
-        .header h1 {
-            margin: 0;
-        }
+    .alert {
+        padding: 12px 16px; border-radius: 8px; margin-bottom: 18px;
+        font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px;
+    }
+    .alert-success { background: #d4f5e9; color: #0d5c46; border: 1px solid #a8e6cf; }
+    .alert-error   { background: #fde8e8; color: #7b1d1d; border: 1px solid #f5c6c6; }
+</style>
+{% endblock %}
 
-        .logout-link {
-            margin-top: auto;
-            padding: 1rem 1.5rem;
-            background-color: #dc3545;
-            color: white !important;
-            text-align: center;
-            text-decoration: none;
-            font-weight: bold;
-        }
+{% block sidebar_extra %}
+<a href="{% url 'pos_dashboard' %}"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
+<a href="{% url 'redeem_coupon' %}"><i class="fa-solid fa-ticket"></i> REDEEM COUPON</a>
+<a href="{% url 'pos_check_validity' %}"><i class="fa-solid fa-circle-check"></i> CHECK VALIDITY</a>
+<a href="{% url 'pos_run_report' %}"><i class="fa-solid fa-file-invoice-dollar"></i> RUN REPORT</a>
+<a href="{% url 'pos_report_coupon' %}"><i class="fa-solid fa-flag"></i> REPORT COUPON</a>
+<a href="{% url 'pos_sales' %}"><i class="fa-solid fa-chart-line"></i> LOCATION SALES</a>
+<a href="{% url 'pos_settings' %}" class="active"><i class="fa-solid fa-gear"></i> SETTINGS</a>
+<a href="{% url 'pos_logout' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> LOGOUT</a>
+{% endblock %}
 
-        .logout-link:hover {
-            background-color: #c82333;
-        }
-
-        .settings-content {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-
-        .reset-password-btn {
-            padding: 1rem 2rem;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .reset-password-btn:hover {
-            background-color: #218838;
-        }
-    </style>
-</head>
-
-<body>
-    
-    <div class="sidebar">
-        <img src="{% static 'images/icon.png' %}" alt="System Logo" style="width: 100px; height: auto; align-self: center; margin-bottom: 20px;">
-        <h2>POS Terminal</h2>
-        <a href="{% url 'pos_dashboard' %}">Dashboard</a>
-        <a href="{% url 'redeem_coupon' %}">Redeem Coupon</a>
-        <a href="{% url 'pos_check_validity' %}">Check Validity</a>
-        <a href="{% url 'pos_run_report' %}">Run Report</a>
-        <a href="{% url 'pos_report_coupon' %}">Report Coupon</a>
-        <a href="{% url 'pos_settings' %}" class="active">Settings</a>
-        <a href="{% url 'pos_login' %}" class="logout-link">Logout</a>
+{% block content %}
+<div class="content">
+    <div class="page-title">
+        <i class="fa-solid fa-gear" style="color:#0d5c46;"></i>
+        Settings
     </div>
-    <div class="content">
-        <div class="header">
-            <h1>Settings</h1>
-        </div>
 
-        {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-            <li{% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message.message }}</li>
-                {% endfor %}
-        </ul>
-        {% endif %}
-
-        <div class="settings-content">
-            <h2>POS Settings</h2>
-            <p>Manage your POS terminal settings here.</p>
-            <button class="reset-password-btn">Reset Password</button>
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            <i class="fa-solid {% if 'success' in message.tags %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}"></i>
+            {{ message }}
         </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="settings-card">
+        <h3><i class="fa-solid fa-sliders" style="color:#4ecfa8;"></i> POS Terminal Settings</h3>
+        <p>Manage your POS terminal settings and account security from here.</p>
+        <button class="action-btn">
+            <i class="fa-solid fa-key"></i> Reset Password
+        </button>
     </div>
-</body>
-
-</html>
+</div>
+{% endblock %}

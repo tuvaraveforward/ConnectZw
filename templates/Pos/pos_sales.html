@@ -1,14 +1,62 @@
-{% extends 'Pos/pos_dashboard.html' %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Location Sales{% endblock %}
+{% block shell_class %}wide{% endblock %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .content { flex: 1; width: 100%; min-width: 0; padding: 32px; box-sizing: border-box; }
+
+    .page-title {
+        font-size: 20px; font-weight: 700; color: #0f2744;
+        margin-bottom: 24px; display: flex; align-items: center; gap: 10px;
+    }
+
+    .table-card {
+        background: #fff; border: 1px solid #edf1f5;
+        border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        overflow: hidden;
+    }
+
+    .sales-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .sales-table th {
+        background: #f8fafc; color: #475569; font-weight: 700;
+        font-size: 11px; letter-spacing: 0.7px; text-transform: uppercase;
+        padding: 14px 16px; border-bottom: 2px solid #edf1f5; text-align: left;
+    }
+    .sales-table td { padding: 14px 16px; color: #1e293b; border-bottom: 1px solid #f1f5f9; }
+    .sales-table tr:last-child td { border-bottom: none; }
+    .sales-table tr:hover td { background: #fafcff; }
+
+    .no-data { text-align: center; padding: 40px; color: #7a92ab; font-size: 14px; }
+
+    .product-list { list-style: none; padding: 0; margin: 0; }
+    .product-list li { font-size: 13px; color: #475569; padding: 1px 0; }
+</style>
+{% endblock %}
+
+{% block sidebar_extra %}
+<a href="{% url 'pos_dashboard' %}"><i class="fa-solid fa-tachometer-alt"></i> DASHBOARD</a>
+<a href="{% url 'redeem_coupon' %}"><i class="fa-solid fa-ticket"></i> REDEEM COUPON</a>
+<a href="{% url 'pos_check_validity' %}"><i class="fa-solid fa-circle-check"></i> CHECK VALIDITY</a>
+<a href="{% url 'pos_run_report' %}"><i class="fa-solid fa-file-invoice-dollar"></i> RUN REPORT</a>
+<a href="{% url 'pos_report_coupon' %}"><i class="fa-solid fa-flag"></i> REPORT COUPON</a>
+<a href="{% url 'pos_sales' %}" class="active"><i class="fa-solid fa-chart-line"></i> LOCATION SALES</a>
+<a href="{% url 'pos_settings' %}"><i class="fa-solid fa-gear"></i> SETTINGS</a>
+<a href="{% url 'pos_logout' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> LOGOUT</a>
+{% endblock %}
 
 {% block content %}
-<div class="main-content">
-    <div class="header">
-        <h1>Location Sales Report</h1>
+<div class="content">
+    <div class="page-title">
+        <i class="fa-solid fa-chart-line" style="color:#0d5c46;"></i>
+        Location Sales — Redeemed Coupons
     </div>
 
-    <div class="recent-orders">
-        <h2>Redeemed Coupons</h2>
-        <table>
+    <div class="table-card">
+        <table class="sales-table">
             <thead>
                 <tr>
                     <th>Coupon ID</th>
@@ -24,7 +72,7 @@
                     <td>{{ sale.serial_number }}</td>
                     <td>{{ sale.time|date:"Y-m-d H:i" }}</td>
                     <td>
-                        <ul style="list-style-type: none; padding: 0; margin: 0;">
+                        <ul class="product-list">
                             {% for product in sale.products %}
                             <li>{{ product }}</li>
                             {% endfor %}
@@ -32,37 +80,10 @@
                     </td>
                 </tr>
                 {% empty %}
-                <tr>
-                    <td colspan="4">No redemptions found for this location.</td>
-                </tr>
+                <tr><td colspan="4" class="no-data">No redemptions found for this location.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
-
-<style>
-    /* Reuse styles from dashboard if possible, or define minimal table styles here */
-    .main-content {
-        margin-top: 2rem;
-    }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 1rem;
-    }
-
-    th,
-    td {
-        padding: 1rem;
-        text-align: left;
-        border-bottom: 1px solid #ddd;
-    }
-
-    th {
-        background-color: #f8f9fa;
-        font-weight: bold;
-    }
-</style>
 {% endblock %}
