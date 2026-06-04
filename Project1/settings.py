@@ -158,7 +158,7 @@ EMAIL_HOST       = 'smtp.gmail.com'
 EMAIL_PORT       = 587
 EMAIL_USE_TLS    = True
 EMAIL_HOST_USER  = 'tuvaravef@gmail.com'
-EMAIL_HOST_PASSWORD = 'your-16-char-app-password'  # replace with Gmail App Password
+EMAIL_HOST_PASSWORD = 'qchyttftwdimnjrq'  # replace with Gmail App Password
 DEFAULT_FROM_EMAIL = 'tuvaravef@gmail.com'
 
 
