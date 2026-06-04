@@ -153,13 +153,14 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 MB
 
-EMAIL_BACKEND    = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST       = 'smtp.gmail.com'
-EMAIL_PORT       = 587
-EMAIL_USE_TLS    = True
-EMAIL_HOST_USER  = 'tuvaravef@gmail.com'
-EMAIL_HOST_PASSWORD = 'qchyttftwdimnjrq'  # replace with Gmail App Password
-DEFAULT_FROM_EMAIL = 'tuvaravef@gmail.com'
+EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST          = 'smtp.gmail.com'
+EMAIL_PORT          = 587
+EMAIL_USE_TLS       = True
+EMAIL_TIMEOUT       = 10  # seconds — fail fast so threads don't hang
+EMAIL_HOST_USER     = 'tuvaravef@gmail.com'
+EMAIL_HOST_PASSWORD = 'qchyttftwdimnjrq'
+DEFAULT_FROM_EMAIL  = 'tuvaravef@gmail.com'
 
 
 # Default primary key field type
