@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'Location',
     'Dealer',
     'Pos',
+    'api',
 ]
 
 MIDDLEWARE = [
@@ -166,3 +167,13 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ── AI Microservice ───────────────────────────────────────────────────────────
+# Set AI_MICROSERVICE_URL to the base URL of the external AI service.
+# When set, ai_services.py forwards calls there instead of running locally.
+# Leave blank to use the built-in rule-based fallback.
+AI_MICROSERVICE_URL = os.environ.get('AI_MICROSERVICE_URL', '')
+
+# Shared secret for X-API-Key authentication on /api/v1/* endpoints.
+# Set this in your environment — never commit the real key to source control.
+AI_API_KEY = os.environ.get('AI_API_KEY', 'connectzw-dev-key-change-in-prod')
